@@ -60,18 +60,18 @@ const BEATS = [
       `<path pathLength="1" stroke-dasharray="1" stroke-dashoffset="${(1 - ease(t / 0.9)).toFixed(3)}" d="M540 900 L520 1100 L560 1250 L530 1450 L550 1700" stroke="${C.cream}" stroke-width="6" fill="none" opacity=".55"/>` +
       (p ? scaleAt(bob(darrowGold(760, 1650, 230, { label: 'GOLD' }), t, 1.5), 760, 1650, 0.9 + 0.1 * back(pt / 0.45), 0.2 + 0.8 * ease(pt / 0.35)) : `<g opacity=".18">${darrowGold(760, 1650, 230, { label: 'GOLD' })}</g>`) },
   { bg: 'none', l1: 'DARROW. 16. HELLDIVER.', l2: 'THE BEST MINER IN LYKOS.', start: 'mars', pop: 'the best',
-    art: (p, t) => mine(t) + at(darrowRed(500, 1680, 280, { label: 'DARROW', drill: true, dphase: t * 4 }), 2.5 * Math.sin(t * 40), 0) +
+    back: t => mine(t), art: (p, t) => at(darrowRed(500, 1680, 280, { label: 'DARROW', drill: true, dphase: t * 4 }), 2.5 * Math.sin(t * 40), 0) +
       Array.from({ length: 6 }, (_, i) => { const u = ((t * 2 + i / 6) % 1); return `<circle cx="${910 + 120 * u * Math.cos(i)}" cy="${1060 - 160 * u + 80 * u * u}" r="${6 * (1 - u)}" fill="#ffd36a" opacity="${(1 - u).toFixed(2)}"/>`; }).join('') },
-  { bg: 'none', l1: 'THE REDS DIG TO SAVE MARS.', start: 'the reds dig',
+  { bg: 'none', l1: 'THE REDS DIG TO SAVE MARS.', start: 'the reds dig', back: t => mine(t),
     art: (p, t) => {
       const u = ease(t / 1.6), val = (0.4 * u).toFixed(1), stall = t > 1.7 ? (Math.floor(t * 3) % 2 ? '…' : '') : '';
-      return mine(t) + [180, 360, 540, 720, 900].map((x, i) => bob(npc(x, 1700 + (i % 2) * 40, 150, '#b3362b', '#a52617', { brow: 'sad' }), t * 1.6, i * 1.3, 10)).join('') +
+      return [180, 360, 540, 720, 900].map((x, i) => bob(npc(x, 1700 + (i % 2) * 40, 150, '#b3362b', '#a52617', { brow: 'sad' }), t * 1.6, i * 1.3, 10)).join('') +
         `<rect x="190" y="800" width="700" height="80" rx="40" fill="#222" stroke="${C.cream}" stroke-width="5"/><rect x="200" y="810" width="${(16 + 22 * u).toFixed(1)}" height="60" rx="12" fill="${C.red}" opacity="${(0.75 + 0.25 * Math.sin(t * 8)).toFixed(2)}"/>` +
         T(540, 770, 'TERRAFORMING PROGRESS', 40) + T(860, 935, 'GOAL: 100%', 30, '#9a8a70') +
         `<text x="540" y="985" text-anchor="middle" font-family="Anton" font-size="72" fill="${C.red}">${val}%${stall}</text>`;
     } },
   { bg: 'space', l1: '', l2: 'MARS WAS SAVED CENTURIES AGO.', start: 'but mars', l2color: 'gold',
-    art: (p, t) => city(t) + `<rect x="0" y="1150" width="1080" height="770" fill="#3a1d12"/>` + [240, 440, 640, 840].map((x, i) => bob(npc(x, 1720, 120, '#b3362b', '#a52617'), t, i)).join('') + T(540, 560, 'THE SURFACE', 44, '#fff', ease((t - 0.6) / 0.4)) + T(540, 1860, 'THE REDS BELOW', 40) },
+    back: () => `<rect x="0" y="997" width="1080" height="923" fill="#3a1d12"/>`, art: (p, t) => city(t) + [240, 440, 640, 840].map((x, i) => bob(npc(x, 1720, 120, '#b3362b', '#a52617'), t, i)).join('') + T(540, 560, 'THE SURFACE', 44, '#fff', ease((t - 0.6) / 0.4)) + T(540, 1860, 'THE REDS BELOW', 40) },
   { bg: 'dark', l1: 'HIS CLAN EARNED THE PRIZE.', l2: 'THE GOLDS GAVE IT AWAY.', start: 'his clan', pop: 'the golds give',
     art: (p, t, pt) => {
       const u = p ? ease(pt / 0.75) : 0, lx = (1 - u) * (1 - u) * 250 + 2 * (1 - u) * u * 540 + u * u * 830, ly = (1 - u) * (1 - u) * 1180 + 2 * (1 - u) * u * 880 + u * u * 1180;
@@ -103,7 +103,7 @@ const BEATS = [
   { bg: 'dark', l1: 'THE SONS OF ARES HAD A PLAN.', l2: 'CARVE HIM INTO A GOLD.', start: 'the sons of', pop: 'carve him', l2color: 'gold',
     art: (p, t) => scaleAt(soaLogo(560, 1150, 1.05, '#b0231f', { spin: t * 4, drip: ease(t / 1.4) }), 560, 1150, 0.85 + 0.15 * back(t / 0.5)) + T(540, 1840, 'THE SONS OF ARES', 50) },
   { bg: 'dark', l1: 'NEW BONES. NEW EYES.', l2: 'GOLD HAIR.', start: 'new bones', pop: 'gold hair', l2color: 'gold',
-    art: (p, t, pt) => p ? `<circle cx="540" cy="1350" r="${460 + 20 * Math.sin(t * 3)}" fill="${C.gold}" opacity="${(0.08 + 0.04 * Math.sin(t * 3)).toFixed(3)}"/>` + scaleAt(darrowGold(540, 1720, 300, { hood: false, mouth: 'flat' }), 540, 1720, back(pt / 0.5)) + `<rect width="1080" height="1920" fill="#fff" opacity="${cl(1 - pt / 0.25).toFixed(2)}"/>` : xray(t) },
+    art: (p, t, pt) => p ? `<circle cx="540" cy="1350" r="${460 + 20 * Math.sin(t * 3)}" fill="${C.gold}" opacity="${(0.08 + 0.04 * Math.sin(t * 3)).toFixed(3)}"/>` + scaleAt(darrowGold(540, 1720, 300, { hood: false, mouth: 'flat' }), 540, 1720, back(pt / 0.5)) + `<rect x="-800" y="-800" width="2700" height="3600" fill="#fff" opacity="${cl(1 - pt / 0.25).toFixed(2)}"/>` : xray(t) },
   { bg: 'parch', l1: 'THE INSTITUTE.', l2: 'WHERE GOLDS LEARN TO RULE.', start: 'he enters', pop: 'where golds',
     art: (p, t) => instituteMap({ overlay: houseFlags(0, t) }) + T(540, 1800, 'THE INSTITUTE', 56, '#2a1d12') },
   { bg: 'parch', l1: 'FIRST NIGHT:', l2: 'KILL A CLASSMATE.', start: 'the first night', pop: 'kill a classmate',
@@ -130,7 +130,7 @@ const BEATS = [
       : olympus(540, 1050 + 14 * Math.sin(t * 2), 1.3) + T(540, 820 + 14 * Math.sin(t * 2), 'OLYMPUS', 48) + [300, 420, 540, 660, 780].map((x, i) => at(darrowGold(x, 1800 - (i % 2) * 40, i === 2 ? 170 : 120, { blade: i === 2 }), 0, 120 * (1 - ease(t / 1.2)) + 6 * Math.sin(t * 8 + i))).join('') },
   { bg: 'dark', l1: 'THE JACKAL TRIED TO BARGAIN.', l2: 'DARROW TOOK HIS HAND.', start: 'the jackal tries', pop: 'darrow takes',
     art: (p, t, pt) => bob(npc(680, 1720, 260, '#d9c27a', '#efe2a8', { iris: '#e0a326', mouth: p ? 'frown' : 'smile', brow: p ? 'sad' : undefined, label: 'THE JACKAL' }), t, 0, p ? 0 : 6) + bob(darrowGold(180, 1740, 190, { blade: true, glow: 0.7 + 0.3 * Math.sin(t * 5) }), t, 2) +
-      (p ? hand(470, 1380 + 180 * easeIn(pt / 0.5), -25 - 120 * ease(pt / 0.5)) + `<rect width="1080" height="1920" fill="#c8312b" opacity="${(0.35 * cl(1 - pt / 0.2)).toFixed(2)}"/>` : '') },
+      (p ? hand(470, 1380 + 180 * easeIn(pt / 0.5), -25 - 120 * ease(pt / 0.5)) + `<rect x="-800" y="-800" width="2700" height="3600" fill="#c8312b" opacity="${(0.35 * cl(1 - pt / 0.2)).toFixed(2)}"/>` : '') },
   { bg: 'parch', l1: 'HE WON THE INSTITUTE.', start: 'darrow wins',
     art: (p, t) => instituteMap({ overlay: houseFlags(Math.min(11, 7 + t / 0.2)) }) },
   { bg: 'dark', l1: 'HIS PRIZE?', l2: 'SERVE THE MAN WHO HANGED EO.', start: 'his prize', pop: 'the man who',

@@ -65,24 +65,26 @@ function darrowRed(x, y, s, o = {}) {
 // Darrow's slingBlade: crescent steel blade, gold guard, wrapped grip, held in a fist.
 let _bId = 0;
 function slingBlade(hx, hy, s, glow = 1) {
-  // Glowing crescent: short straight grip, blade sweeps up and curls over into a moon-shaped hook.
-  const id = 'sb' + (_bId++), W = s * 0.2, cx = s * 0.34, cy = -s * 1.02, R = Math.hypot(cx, -s * 0.36 - cy);
-  const a0 = Math.atan2(-s * 0.36 - cy, 0 - cx), a1 = a0 - Math.PI * 1.55; // sweep counter-clockwise on screen
-  const N = 40, outer = [], inner = [];
+  // Toned-down crescent sickle: compact steel blade on a short wrapped grip, no glow.
+  const id = 'sb' + (_bId++), W = s * 0.11, cx = s * 0.2, cy = -s * 0.72, R = Math.hypot(cx, -s * 0.32 - cy);
+  const a0 = Math.atan2(-s * 0.32 - cy, 0 - cx), a1 = a0 - Math.PI * 1.22;
+  const N = 36, outer = [], inner = [];
   for (let k = 0; k <= N; k++) {
     const u = k / N, a = a0 + (a1 - a0) * u;
-    const w = W * (0.55 * (1 - u) + Math.sin(Math.PI * Math.min(1, u * 1.05)) * 0.85) * (u > 0.92 ? (1 - u) / 0.08 : 1);
+    const w = W * (0.6 * (1 - u) + Math.sin(Math.PI * Math.min(1, u * 1.05)) * 0.8) * (u > 0.9 ? (1 - u) / 0.1 : 1);
     outer.push([cx + Math.cos(a) * R, cy + Math.sin(a) * R]);
     inner.push([cx + Math.cos(a) * (R - Math.max(w, 1)), cy + Math.sin(a) * (R - Math.max(w, 1))]);
   }
-  const d = 'M' + outer.map(p => p.map(v => v.toFixed(1)).join(' ')).join(' L') + ' L' + inner.reverse().map(p => p.map(v => v.toFixed(1)).join(' ')).join(' L') + ' Z';
-  return `<g transform="translate(${hx} ${hy}) rotate(4)">
-    <defs><filter id="${id}" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${s*0.06}"/></filter></defs>
-    <path d="${d}" fill="#fff6e0" opacity="${0.55 * glow}" filter="url(#${id})" transform="scale(1.04)"/>
-    <path d="${d}" fill="#fbf7ee" stroke="${INK}" stroke-width="${s*0.03}" stroke-linejoin="round"/>
-    <rect x="${-s*0.06}" y="${-s*0.38}" width="${s*0.12}" height="${s*0.46}" rx="${s*0.03}" fill="#3a2418" stroke="${INK}" stroke-width="${s*0.03}"/>
-    ${[0,1,2,3].map(k => `<line x1="${-s*0.06}" y1="${-s*0.3 + k*s*0.09}" x2="${s*0.06}" y2="${-s*0.25 + k*s*0.09}" stroke="#6b4a32" stroke-width="${s*0.02}"/>`).join('')}
-    <circle cx="0" cy="${s*0.1}" r="${s*0.055}" fill="#e2a93b" stroke="${INK}" stroke-width="${s*0.025}"/>
+  const f = p => p.map(v => v.toFixed(1)).join(' ');
+  const d = 'M' + outer.map(f).join(' L') + ' L' + inner.slice().reverse().map(f).join(' L') + ' Z';
+  const edge = 'M' + outer.slice(4, N - 4).map(p => f([cx + (p[0] - cx) * 0.985, cy + (p[1] - cy) * 0.985])).join(' L');
+  return `<g transform="translate(${hx} ${hy}) rotate(6)">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e9edf1"/><stop offset=".55" stop-color="#b9c2cb"/><stop offset="1" stop-color="#8d97a2"/></linearGradient></defs>
+    <path d="${d}" fill="url(#${id})" stroke="${INK}" stroke-width="${s*0.028}" stroke-linejoin="round"/>
+    <path d="${edge}" stroke="#ffffff" stroke-width="${s*0.014}" fill="none" stroke-linecap="round" opacity="${(0.55 + 0.25 * (glow - 0.7)).toFixed(2)}"/>
+    <rect x="${-s*0.05}" y="${-s*0.34}" width="${s*0.1}" height="${s*0.42}" rx="${s*0.025}" fill="#3a2418" stroke="${INK}" stroke-width="${s*0.028}"/>
+    ${[0,1,2].map(k => `<line x1="${-s*0.05}" y1="${-s*0.27 + k*s*0.09}" x2="${s*0.05}" y2="${-s*0.23 + k*s*0.09}" stroke="#6b4a32" stroke-width="${s*0.018}"/>`).join('')}
+    <circle cx="0" cy="${s*0.1}" r="${s*0.045}" fill="#b08a3a" stroke="${INK}" stroke-width="${s*0.022}"/>
     <circle cx="0" cy="${-s*0.1}" r="${s*0.13}" fill="${SKIN}" stroke="${INK}" stroke-width="${s*0.035}"/>
   </g>`;
 }

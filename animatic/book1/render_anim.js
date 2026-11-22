@@ -71,7 +71,7 @@ function frame(f) {
   const cap = b.big
     ? `<div class="big" ${slide(t / 0.2)}>${b.l1}</div>`
     : `<div class="cap ${b.outro ? 'outcap' : ''} ${b.bg === 'parch' ? 'pcap' : ''}">${b.l1 ? `<div class="l1" ${slide(i === 0 ? 1 : t / 0.18)}>${b.l1}</div>` : ''}${b.l2 && p ? `<div class="l2" style="color:${l2c}"><span ${slide(pt / 0.18)} class="x">${b.l2}</span></div>` : ''}</div>`;
-  const svg = `<svg viewBox="0 0 1080 1920" width="1080" height="1920">${DEFS}${b.bg === 'space' ? stars(90, T) : ''}${b.art(p, t, pt)}</svg>`;
+  const svg = `<svg viewBox="0 0 1080 1920" width="1080" height="1920">${DEFS}${b.bg === 'space' ? stars(90, T) : ''}${b.back ? b.back(t) : ''}<g transform="translate(540 520) scale(0.75) translate(-540 -520)">${b.art(p, t, pt)}</g></svg>`;
   const outro = b.outro ? `<div class="av" style="opacity:${ease(t / 0.4)};transform:scale(${(0.85 + 0.15 * ease(t / 0.4)).toFixed(3)})"></div><div class="oh">@AVANZO.TV</div><div class="oq" ${slide((t - 0.3) / 0.3)}>${b.q}</div><div class="oa" ${slide((t - 0.5) / 0.3)}>${b.a}</div>` : '';
   return { bg: b.outro ? '#1c1512' : BG[b.bg], zoom, html: svg + (b.outro ? '' : '<div class="grain"></div>') + cap + outro };
 }
