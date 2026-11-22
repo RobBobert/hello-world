@@ -123,34 +123,60 @@ function cassius(x, y, s, o = {}) {
 }
 // Sons of Ares mark in the channel's flat style: Corinthian helmet in profile, spiked sunburst, RISE.
 function soaLogo(cx, cy, s, col = '#b0231f', o = {}) {
-  let spikes = '';
-  const n = 17;
-  for (let i = 0; i < n; i++) {
-    const a = (-175 + i * (225 / (n - 1))) * Math.PI / 180;
-    const len = (i % 2 ? 330 : 430) * (0.92 + 0.08 * Math.sin(i * 2.3)), w = 0.075;
-    spikes += `<path d="M${Math.cos(a - w) * 170} ${Math.sin(a - w) * 170} L${Math.cos(a) * len} ${Math.sin(a) * len} L${Math.cos(a + w) * 170} ${Math.sin(a + w) * 170} Z"/>`;
+  const wt = o.wind ?? 0;
+  // clean sunburst: evenly spaced tapered rays, darker so the helmet + crest read first
+  let rays = '';
+  for (let i = 0; i < 14; i++) {
+    const a = (-180 + i * (200 / 13)) * Math.PI / 180, len = i % 2 ? 330 : 400, w = 0.06;
+    rays += `<path d="M${Math.cos(a - w) * 200} ${Math.sin(a - w) * 200} L${Math.cos(a) * len} ${Math.sin(a) * len} L${Math.cos(a + w) * 200} ${Math.sin(a + w) * 200} Z"/>`;
   }
+  // horsehair crest: strands rooted along the helmet ridge, swept back (to the right) and rippling in the wind
+  const DC = [20, -15], DR = 222, strands = [];
+  const N = 15;
+  for (let k = 0; k < N; k++) {
+    const u = k / (N - 1), a = (-158 + u * 128) * Math.PI / 180;           // ridge from brow to back of skull
+    const bx = DC[0] + Math.cos(a) * (DR - 6), by = DC[1] + Math.sin(a) * (DR - 6);
+    const nx = Math.cos(a), ny = Math.sin(a);
+    const L = 120 + 80 * Math.sin(Math.PI * Math.min(1, u * 1.1)) + 40 * u;  // longer toward the back
+    const sway = Math.sin(wt * 3.2 - u * 4) * 18, sway2 = Math.sin(wt * 4.1 - u * 5 + 1) * 26;
+    const c1x = bx + nx * L * 0.5 + 20, c1y = by + ny * L * 0.5 + sway * 0.3;
+    const c2x = bx + nx * L * 0.75 + 80 + 40 * u, c2y = by + ny * L * 0.6 + 10 + sway;
+    const ex = bx + nx * L * 0.7 + 150 + 70 * u, ey = by + ny * L * 0.45 + 30 + 80 * u + sway2;
+    strands.push([`M${bx.toFixed(1)} ${by.toFixed(1)} C${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${ex.toFixed(1)} ${ey.toFixed(1)}`, 24 - 12 * Math.abs(u - 0.5)]);
+  }
+  const crest = strands.map(([d, w]) => `<path d="${d}" stroke="${INK}" stroke-width="${w + 10}" fill="none" stroke-linecap="round"/>`).join('')
+    + strands.map(([d, w]) => `<path d="${d}" stroke="${col}" stroke-width="${w}" fill="none" stroke-linecap="round"/>`).join('')
+    + strands.filter((_, k) => k % 3 === 1).map(([d, w]) => `<path d="${d}" stroke="#d8473e" stroke-width="${w * 0.25}" fill="none" stroke-linecap="round" opacity=".8"/>`).join('');
   const helmet = `M-190 210 L-205 30 C-205 -150, -70 -240, 60 -235 C190 -228, 250 -120, 240 20 L250 190 Q255 240 300 255 L170 255
     Q140 170 90 150 Q40 140 30 200 L20 250 Z`;
   return `<g transform="translate(${cx} ${cy}) scale(${s})">
-    <g fill="${col}" stroke="${INK}" stroke-width="6" stroke-linejoin="round" transform="translate(40 -20) rotate(${o.spin || 0})">${spikes}</g>
+    <g fill="#7a1512" opacity=".85" transform="translate(30 -10) rotate(${o.spin || 0})">${rays}</g>
+    ${crest}
     <path d="${helmet}" fill="${col}" stroke="${INK}" stroke-width="10" stroke-linejoin="round"/>
-    <path d="M-160 -60 C-110 -190, 120 -210, 190 -60 C210 0, 180 90, 120 140" stroke="#f3e6c8" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <path d="M-150 -40 C-110 -170, 110 -195, 180 -50" stroke="#f3e6c8" stroke-width="14" fill="none" stroke-linecap="round" opacity=".9"/>
     <path d="M-205 15 C-150 -25, -90 -25, -40 5 C-100 30, -160 35, -205 15 Z" fill="#1b1210"/>
-    <path d="M-190 210 L-30 245" stroke="#7a1512" stroke-width="10" opacity=".6"/>
+    <path d="M200 0 C215 60, 205 120, 160 150" stroke="#7a1512" stroke-width="10" fill="none" stroke-linecap="round" opacity=".7"/>
     ${o.rise === false ? '' : `<text x="0" y="470" text-anchor="middle" font-family="Anton" font-size="190" letter-spacing="18" fill="${col}" stroke="${INK}" stroke-width="6" paint-order="stroke">RISE</text>
     ${[[-150,480,55],[-60,482,40],[40,480,70],[150,481,45]].map(([x,y,h]) => `<path d="M${x-6} ${y} h12 v${h*(o.drip ?? 1)} a6 6 0 0 1 -12 0z" fill="${col}"/>`).join('')}`}
   </g>`;
+}
+// Eye patch over the character's RIGHT eye (viewer's left), strap running up across the brow.
+function eyePatch(x, cy, r) {
+  const ex = x - r * 0.36, ey = cy + r * 0.12;
+  return `<path d="M${x - r*1.0} ${cy + r*0.3} L${ex} ${ey} L${x + r*1.0} ${cy - r*0.42}" stroke="${INK}" stroke-width="${r*0.09}" fill="none" stroke-linecap="round"/>
+    <path d="M${ex - r*0.24} ${ey - r*0.14} Q${ex} ${ey - r*0.26} ${ex + r*0.24} ${ey - r*0.14} Q${ex + r*0.26} ${ey + r*0.2} ${ex} ${ey + r*0.26} Q${ex - r*0.26} ${ey + r*0.2} ${ex - r*0.24} ${ey - r*0.14} Z" fill="#141010" stroke="${INK}" stroke-width="${r*0.05}"/>
+    <path d="M${ex - r*0.12} ${ey - r*0.1} q${r*0.1} ${-r*0.06} ${r*0.2} 0" stroke="#4a4444" stroke-width="${r*0.04}" fill="none" stroke-linecap="round"/>`;
 }
 // Darrow carved into a Gold: gold hair + gold eyes, red House Mars cloak, white wolf-pelt hood.
 function darrowGold(x, y, s, o = {}) {
   const r = s * 0.42, cy = y - s * 1.55 - r * 0.78;
   const blade = '';
-  const wolf = o.hood === false ? spikyHair(x, cy, r, '#e8b53a', '#fff0b0') : `
-    ${spikyHair(x, cy, r, '#e8b53a', '#fff0b0')}
+  const HAIR = o.hair || '#e8b53a', HAIR2 = o.hair2 || '#fff0b0', PELT = o.pelt || '#e9e6df';
+  const wolf = o.hood === false ? spikyHair(x, cy, r, HAIR, HAIR2) : `
+    ${spikyHair(x, cy, r, HAIR, HAIR2)}
     <path d="M${x - r*1.3} ${cy + r*0.6} C${x - r*1.5} ${cy - r*1.5}, ${x + r*1.5} ${cy - r*1.5}, ${x + r*1.3} ${cy + r*0.6}
-      L${x + r*1.0} ${cy + r*0.1} C${x + r*0.85} ${cy - r*0.6}, ${x - r*0.85} ${cy - r*0.6}, ${x - r*1.0} ${cy + r*0.1} Z" fill="#e9e6df" stroke="${INK}" stroke-width="${r*0.08}"/>
-    <path d="M${x - r*1.0} ${cy - r*0.65} L${x - r*0.95} ${cy - r*1.75} L${x - r*0.35} ${cy - r*1.15} Z M${x + r*1.0} ${cy - r*0.65} L${x + r*0.95} ${cy - r*1.75} L${x + r*0.35} ${cy - r*1.15} Z" fill="#e9e6df" stroke="${INK}" stroke-width="${r*0.08}" stroke-linejoin="round"/>
+      L${x + r*1.0} ${cy + r*0.1} C${x + r*0.85} ${cy - r*0.6}, ${x - r*0.85} ${cy - r*0.6}, ${x - r*1.0} ${cy + r*0.1} Z" fill="${PELT}" stroke="${INK}" stroke-width="${r*0.08}"/>
+    <path d="M${x - r*1.0} ${cy - r*0.65} L${x - r*0.95} ${cy - r*1.75} L${x - r*0.35} ${cy - r*1.15} Z M${x + r*1.0} ${cy - r*0.65} L${x + r*0.95} ${cy - r*1.75} L${x + r*0.35} ${cy - r*1.15} Z" fill="${PELT}" stroke="${INK}" stroke-width="${r*0.08}" stroke-linejoin="round"/>
     <path d="M${x - r*0.85} ${cy - r*1.0} L${x - r*0.84} ${cy - r*1.45} L${x - r*0.55} ${cy - r*1.12}Z M${x + r*0.85} ${cy - r*1.0} L${x + r*0.84} ${cy - r*1.45} L${x + r*0.55} ${cy - r*1.12}Z" fill="#c9a0a0"/>
     <path d="M${x - r*0.42} ${cy - r*0.95} Q${x} ${cy - r*1.25} ${x + r*0.42} ${cy - r*0.95} L${x + r*0.3} ${cy - r*0.55} Q${x} ${cy - r*0.4} ${x - r*0.3} ${cy - r*0.55} Z" fill="#d6d2c8" stroke="${INK}" stroke-width="${r*0.07}"/>
     <ellipse cx="${x}" cy="${cy - r*0.55}" rx="${r*0.14}" ry="${r*0.09}" fill="${INK}"/>
@@ -158,6 +184,7 @@ function darrowGold(x, y, s, o = {}) {
   return `<g>${blade}${bell(x, y, s, '#b8291f', '#7a160f')}
     <path d="M${x - s*0.3} ${y - s*1.5} Q${x} ${y - s*1.2} ${x + s*0.3} ${y - s*1.5} L${x + s*0.2} ${y - s*1.15} Q${x} ${y - s*1.0} ${x - s*0.2} ${y - s*1.15} Z" fill="#f2efe8" stroke="${INK}" stroke-width="${s*0.03}"/>
     ${head(x, cy, r, { brow: o.brow || 'angry', iris: '#e0a326', mouth: o.mouth })}
+    ${o.patch ? eyePatch(x, cy, r) : ''}
     ${wolf}
     ${o.blade ? slingBlade(x + s*0.62, y - s*0.68, s, o.glow ?? 1) : ''}
     ${o.label ? label(x, y + s*0.38, o.label, o.lc) : ''}</g>`;
