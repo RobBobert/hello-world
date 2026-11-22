@@ -20,7 +20,9 @@ function head(x, cy, r, o = {}) {
     : o.brow === 'sad'
     ? `<path d="M${x - ex - r*0.18} ${eyeY - r*0.2} L${x - ex + r*0.18} ${eyeY - r*0.32} M${x + ex + r*0.18} ${eyeY - r*0.2} L${x + ex - r*0.18} ${eyeY - r*0.32}" stroke="${INK}" stroke-width="${r*0.09}" stroke-linecap="round"/>`
     : `<path d="M${x - ex - r*0.17} ${eyeY - r*0.27} q${r*0.17} ${-r*0.08} ${r*0.34} 0 M${x + ex - r*0.17} ${eyeY - r*0.27} q${r*0.17} ${-r*0.08} ${r*0.34} 0" stroke="${INK}" stroke-width="${r*0.08}" fill="none" stroke-linecap="round"/>`;
-  const mouth = o.mouth === 'smile'
+  const mouth = o.mouth === 'sing'
+    ? `<ellipse cx="${x}" cy="${cy + r*0.52}" rx="${r*(0.13 - 0.03*(o.open||0))}" ry="${r*(0.05 + 0.16*(o.open||0))}" fill="#5a1410" stroke="${INK}" stroke-width="${r*0.06}"/>`
+    : o.mouth === 'smile'
     ? `<path d="M${x - r*0.18} ${cy + r*0.48} q${r*0.18} ${r*0.16} ${r*0.36} 0" stroke="${INK}" stroke-width="${r*0.07}" fill="none" stroke-linecap="round"/>`
     : o.mouth === 'frown'
     ? `<path d="M${x - r*0.16} ${cy + r*0.56} q${r*0.16} ${-r*0.13} ${r*0.32} 0" stroke="${INK}" stroke-width="${r*0.07}" fill="none" stroke-linecap="round"/>`
@@ -57,33 +59,39 @@ function darrowRed(x, y, s, o = {}) {
     <rect x="${x - s*0.08}" y="${y - s*0.64}" width="${s*0.16}" height="${s*0.16}" fill="#c9a24a" stroke="${INK}" stroke-width="${s*0.025}"/>
     ${head(x, cy, r, { brow: o.brow || 'angry', mouth: o.mouth, closed: o.closed })}
     ${spikyHair(x, cy, r, '#a52617', '#d9452e')}
-    ${o.drill ? handDrill(x + s*0.66, y - s*0.7, s*0.85, 32) : ''}
+    ${o.drill ? handDrill(x + s*0.66, y - s*0.7, s*0.85, 32, o.dphase || 0) : ''}
     ${o.label ? label(x, y + s*0.38, o.label, o.lc) : ''}</g>`;
 }
 // Darrow's slingBlade: crescent steel blade, gold guard, wrapped grip, held in a fist.
 let _bId = 0;
-function slingBlade(hx, hy, s) {
-  const id = 'sb' + (_bId++);
-  const outer = `M${-s*0.08} ${-s*0.36} C${s*0.12} ${-s*0.95}, ${s*0.72} ${-s*1.3}, ${s*0.12} ${-s*2.05}`;
-  const inner = `C${s*0.42} ${-s*1.4}, ${-s*0.0} ${-s*1.0}, ${s*0.1} ${-s*0.36} Z`;
-  return `<g transform="translate(${hx} ${hy}) rotate(8)">
-    <defs><linearGradient id="${id}" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#9aa3ad"/><stop offset=".45" stop-color="#f4f7fa"/><stop offset="1" stop-color="#b9c1ca"/></linearGradient></defs>
-    <path d="${outer} ${inner}" fill="url(#${id})" stroke="${INK}" stroke-width="${s*0.035}" stroke-linejoin="round"/>
-    <path d="M${-s*0.02} ${-s*0.45} C${s*0.12} ${-s*0.98}, ${s*0.6} ${-s*1.32}, ${s*0.13} ${-s*1.95}" stroke="#ffffff" stroke-width="${s*0.022}" fill="none" stroke-linecap="round" opacity=".9"/>
-    <path d="M${s*0.05} ${-s*0.48} C${s*0.14} ${-s*0.95}, ${s*0.4} ${-s*1.25}, ${s*0.2} ${-s*1.65}" stroke="#7d8792" stroke-width="${s*0.02}" fill="none" stroke-linecap="round"/>
-    <path d="M${-s*0.2} ${-s*0.36} Q0 ${-s*0.44} ${s*0.2} ${-s*0.36} L${s*0.17} ${-s*0.3} Q0 ${-s*0.35} ${-s*0.17} ${-s*0.3} Z" fill="#e2a93b" stroke="${INK}" stroke-width="${s*0.03}"/>
-    <rect x="${-s*0.055}" y="${-s*0.31}" width="${s*0.11}" height="${s*0.36}" rx="${s*0.03}" fill="#3a2418" stroke="${INK}" stroke-width="${s*0.03}"/>
-    ${[0,1,2,3].map(k => `<line x1="${-s*0.055}" y1="${-s*0.27 + k*s*0.08}" x2="${s*0.055}" y2="${-s*0.23 + k*s*0.08}" stroke="#6b4a32" stroke-width="${s*0.018}"/>`).join('')}
-    <circle cx="0" cy="${s*0.08}" r="${s*0.055}" fill="#e2a93b" stroke="${INK}" stroke-width="${s*0.025}"/>
-    <circle cx="0" cy="${-s*0.12}" r="${s*0.13}" fill="${SKIN}" stroke="${INK}" stroke-width="${s*0.035}"/>
+function slingBlade(hx, hy, s, glow = 1) {
+  // Glowing crescent: short straight grip, blade sweeps up and curls over into a moon-shaped hook.
+  const id = 'sb' + (_bId++), W = s * 0.2, cx = s * 0.34, cy = -s * 1.02, R = Math.hypot(cx, -s * 0.36 - cy);
+  const a0 = Math.atan2(-s * 0.36 - cy, 0 - cx), a1 = a0 - Math.PI * 1.55; // sweep counter-clockwise on screen
+  const N = 40, outer = [], inner = [];
+  for (let k = 0; k <= N; k++) {
+    const u = k / N, a = a0 + (a1 - a0) * u;
+    const w = W * (0.55 * (1 - u) + Math.sin(Math.PI * Math.min(1, u * 1.05)) * 0.85) * (u > 0.92 ? (1 - u) / 0.08 : 1);
+    outer.push([cx + Math.cos(a) * R, cy + Math.sin(a) * R]);
+    inner.push([cx + Math.cos(a) * (R - Math.max(w, 1)), cy + Math.sin(a) * (R - Math.max(w, 1))]);
+  }
+  const d = 'M' + outer.map(p => p.map(v => v.toFixed(1)).join(' ')).join(' L') + ' L' + inner.reverse().map(p => p.map(v => v.toFixed(1)).join(' ')).join(' L') + ' Z';
+  return `<g transform="translate(${hx} ${hy}) rotate(4)">
+    <defs><filter id="${id}" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="${s*0.06}"/></filter></defs>
+    <path d="${d}" fill="#fff6e0" opacity="${0.55 * glow}" filter="url(#${id})" transform="scale(1.04)"/>
+    <path d="${d}" fill="#fbf7ee" stroke="${INK}" stroke-width="${s*0.03}" stroke-linejoin="round"/>
+    <rect x="${-s*0.06}" y="${-s*0.38}" width="${s*0.12}" height="${s*0.46}" rx="${s*0.03}" fill="#3a2418" stroke="${INK}" stroke-width="${s*0.03}"/>
+    ${[0,1,2,3].map(k => `<line x1="${-s*0.06}" y1="${-s*0.3 + k*s*0.09}" x2="${s*0.06}" y2="${-s*0.25 + k*s*0.09}" stroke="#6b4a32" stroke-width="${s*0.02}"/>`).join('')}
+    <circle cx="0" cy="${s*0.1}" r="${s*0.055}" fill="#e2a93b" stroke="${INK}" stroke-width="${s*0.025}"/>
+    <circle cx="0" cy="${-s*0.1}" r="${s*0.13}" fill="${SKIN}" stroke="${INK}" stroke-width="${s*0.035}"/>
   </g>`;
 }
 // Small spiral hand drill (conical bit + short grip) held in a fist.
 let _dId = 0;
-function handDrill(hx, hy, s, rot) {
+function handDrill(hx, hy, s, rot, phase = 0) {
   const id = 'dc' + (_dId++), L = s * 0.75, W = s * 0.34, g = s * 0.3;
   let stripes = '';
-  for (let i = 0; i < 7; i++) { const yy = -g - i * L / 6; stripes += `<path d="M${-W} ${yy} L${W} ${yy - L*0.16}" stroke="#8a6a1c" stroke-width="${s*0.045}"/>`; }
+  for (let i = -1; i < 8; i++) { const yy = -g - (i + (phase % 1)) * L / 6; stripes += `<path d="M${-W} ${yy} L${W} ${yy - L*0.16}" stroke="#8a6a1c" stroke-width="${s*0.045}"/>`; }
   return `<g transform="translate(${hx} ${hy}) rotate(${rot})">
     <defs><clipPath id="${id}"><path d="M${-W/2} ${-g} L${W/2} ${-g} L0 ${-g - L} Z"/></clipPath>
     <linearGradient id="${id}g" x1="0" x2="1"><stop offset="0" stop-color="#fff2b8"/><stop offset=".5" stop-color="#e2a93b"/><stop offset="1" stop-color="#9c6d14"/></linearGradient></defs>
@@ -123,13 +131,13 @@ function soaLogo(cx, cy, s, col = '#b0231f', o = {}) {
   const helmet = `M-190 210 L-205 30 C-205 -150, -70 -240, 60 -235 C190 -228, 250 -120, 240 20 L250 190 Q255 240 300 255 L170 255
     Q140 170 90 150 Q40 140 30 200 L20 250 Z`;
   return `<g transform="translate(${cx} ${cy}) scale(${s})">
-    <g fill="${col}" stroke="${INK}" stroke-width="6" stroke-linejoin="round" transform="translate(40 -20)">${spikes}</g>
+    <g fill="${col}" stroke="${INK}" stroke-width="6" stroke-linejoin="round" transform="translate(40 -20) rotate(${o.spin || 0})">${spikes}</g>
     <path d="${helmet}" fill="${col}" stroke="${INK}" stroke-width="10" stroke-linejoin="round"/>
     <path d="M-160 -60 C-110 -190, 120 -210, 190 -60 C210 0, 180 90, 120 140" stroke="#f3e6c8" stroke-width="16" fill="none" stroke-linecap="round"/>
     <path d="M-205 15 C-150 -25, -90 -25, -40 5 C-100 30, -160 35, -205 15 Z" fill="#1b1210"/>
     <path d="M-190 210 L-30 245" stroke="#7a1512" stroke-width="10" opacity=".6"/>
     ${o.rise === false ? '' : `<text x="0" y="470" text-anchor="middle" font-family="Anton" font-size="190" letter-spacing="18" fill="${col}" stroke="${INK}" stroke-width="6" paint-order="stroke">RISE</text>
-    ${[[-150,480,55],[-60,482,40],[40,480,70],[150,481,45]].map(([x,y,h]) => `<path d="M${x-6} ${y} h12 v${h} a6 6 0 0 1 -12 0z" fill="${col}"/>`).join('')}`}
+    ${[[-150,480,55],[-60,482,40],[40,480,70],[150,481,45]].map(([x,y,h]) => `<path d="M${x-6} ${y} h12 v${h*(o.drip ?? 1)} a6 6 0 0 1 -12 0z" fill="${col}"/>`).join('')}`}
   </g>`;
 }
 // Darrow carved into a Gold: gold hair + gold eyes, red House Mars cloak, white wolf-pelt hood.
@@ -149,7 +157,7 @@ function darrowGold(x, y, s, o = {}) {
     <path d="M${x - s*0.3} ${y - s*1.5} Q${x} ${y - s*1.2} ${x + s*0.3} ${y - s*1.5} L${x + s*0.2} ${y - s*1.15} Q${x} ${y - s*1.0} ${x - s*0.2} ${y - s*1.15} Z" fill="#f2efe8" stroke="${INK}" stroke-width="${s*0.03}"/>
     ${head(x, cy, r, { brow: o.brow || 'angry', iris: '#e0a326', mouth: o.mouth })}
     ${wolf}
-    ${o.blade ? slingBlade(x + s*0.6, y - s*0.68, s) : ''}
+    ${o.blade ? slingBlade(x + s*0.62, y - s*0.68, s, o.glow ?? 1) : ''}
     ${o.label ? label(x, y + s*0.38, o.label, o.lc) : ''}</g>`;
 }
 // Eo: red dress, long red hair with a braid, red haemanthus flower.
@@ -159,7 +167,7 @@ function eo(x, y, s, o = {}) {
     <path d="M${x - r*1.05} ${cy} C${x - r*1.25} ${cy + r*1.6}, ${x - r*0.9} ${cy + r*2.4}, ${x - r*0.55} ${cy + r*2.6} L${x + r*0.55} ${cy + r*2.6} C${x + r*0.9} ${cy + r*2.4}, ${x + r*1.25} ${cy + r*1.6}, ${x + r*1.05} ${cy}Z" fill="#8f2015" stroke="${INK}" stroke-width="${r*0.08}"/>
     ${bell(x, y, s * 1.02, '#cc3b2e', '#8f2015')}
     <path d="M${x - s*0.62} ${y - s*0.18} Q${x} ${y - s*0.05} ${x + s*0.62} ${y - s*0.18}" stroke="#f0c9a0" stroke-width="${s*0.05}" fill="none"/>
-    ${head(x, cy, r, { brow: o.brow || 'soft', mouth: o.mouth || 'smile', lashes: true, blush: true, closed: o.closed })}
+    ${head(x, cy, r, { brow: o.brow || 'soft', mouth: o.mouth || 'smile', open: o.open, lashes: true, blush: true, closed: o.closed })}
     <path d="M${x - r*1.05} ${cy + r*0.1} C${x - r*1.15} ${cy - r*1.35}, ${x + r*1.15} ${cy - r*1.35}, ${x + r*1.05} ${cy + r*0.1}
       C${x + r*0.85} ${cy - r*0.55}, ${x + r*0.3} ${cy - r*0.6}, ${x - r*0.05} ${cy - r*0.78} C${x - r*0.35} ${cy - r*0.5}, ${x - r*0.8} ${cy - r*0.5}, ${x - r*1.05} ${cy + r*0.1}Z"
       fill="#a3261a" stroke="${INK}" stroke-width="${r*0.08}" stroke-linejoin="round"/>
