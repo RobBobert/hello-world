@@ -1,5 +1,5 @@
 // Book 1 beats. art(pop) gets true once the twist line is showing.
-const { darrowRed, darrowGold, eo, npc, instituteMap, flag, label, xMark } = require('./chars.js');
+const { cassius, soaLogo, darrowRed, darrowGold, eo, npc, instituteMap, flag, label, xMark } = require('./chars.js');
 const C = { red: '#c8312b', gold: '#e2a93b', obs: '#2b2b33', gray: '#8a8f98', cream: '#f3e6c8' };
 const T = (x, y, t, sz = 44, fill = C.cream) => `<text x="${x}" y="${y}" text-anchor="middle" font-family="Cinzel" font-weight="700" font-size="${sz}" fill="${fill}">${t}</text>`;
 
@@ -27,9 +27,9 @@ const chains = (x, y) => `<g stroke="#9aa0a8" stroke-width="12" fill="none">${[0
 
 const BEATS = [
   { bg: 'dark', l1: 'TO DESTROY THE GOLDS,', l2: 'HE HAD TO BECOME ONE.', start: 'to destroy', pop: 'he had to', l2color: 'gold',
-    art: p => darrowRed(330, 1650, 230, { label: 'RED' }) + `<path d="M540 900 L520 1100 L560 1250 L530 1450 L550 1700" stroke="${C.cream}" stroke-width="6" fill="none" opacity=".5"/>` + darrowGold(760, 1650, 230, { label: 'GOLD', op: p ? 1 : .25 }).replace('<g>', `<g opacity="${p ? 1 : 0.2}">`) },
+    art: p => darrowRed(330, 1650, 230, { label: 'RED', drill: true }) + `<path d="M540 900 L520 1100 L560 1250 L530 1450 L550 1700" stroke="${C.cream}" stroke-width="6" fill="none" opacity=".5"/>` + darrowGold(760, 1650, 230, { label: 'GOLD', op: p ? 1 : .25 }).replace('<g>', `<g opacity="${p ? 1 : 0.2}">`) },
   { bg: 'none', l1: 'DARROW. 16. HELLDIVER.', l2: 'THE BEST MINER IN LYKOS.', start: 'mars', pop: 'the best',
-    art: () => mine() + darrowRed(460, 1640, 260, { label: 'DARROW' }) + `<g transform="translate(700 1250) rotate(-18)"><rect x="0" y="-30" width="260" height="60" rx="12" fill="#6d6d74" stroke="#000" stroke-width="5"/><path d="M260 -40 L360 0 L260 40Z" fill="#b5b5bb" stroke="#000" stroke-width="5"/></g>` },
+    art: () => mine() + darrowRed(500, 1680, 280, { label: 'DARROW', drill: true }) },
   { bg: 'none', l1: 'THE REDS DIG TO SAVE MARS.', start: 'the reds dig',
     art: () => mine() + [180, 360, 540, 720, 900].map((x, i) => npc(x, 1700 + (i % 2) * 40, 150, '#b3362b', '#a52617', { brow: 'sad' })).join('') + `<rect x="190" y="800" width="700" height="80" rx="40" fill="#222" stroke="${C.cream}" stroke-width="5"/><rect x="200" y="810" width="24" height="60" rx="12" fill="${C.red}"/>` + T(540, 770, 'TERRAFORMING PROGRESS', 40) + `<text x="540" y="970" text-anchor="middle" font-family="Anton" font-size="64" fill="${C.red}">0.4%</text>` },
   { bg: 'space', l1: '', l2: 'MARS WAS SAVED CENTURIES AGO.', start: 'but mars', l2color: 'gold',
@@ -48,9 +48,9 @@ const BEATS = [
   { bg: 'dark', l1: 'HE BURIED HER.', l2: 'SO THEY HANGED HIM TOO.', start: 'he buries', pop: 'so they hang',
     art: p => `<ellipse cx="540" cy="1620" rx="300" ry="70" fill="#4a2a18"/><path d="M290 1620 Q540 1460 790 1620Z" fill="#5c3520"/>` + flower(540, 1470, 46, 0) + (p ? `<g opacity=".55">${gallows(760, 1180)}</g>` : '') + darrowRed(220, 1820, 160, { closed: true, brow: 'sad' }) },
   { bg: 'dark', l1: 'HE WOKE UP.', l2: 'RESCUED BY REBELS.', start: 'he wakes', pop: 'rescued',
-    art: p => darrowRed(540, 1700, 240, { brow: p ? 'angry' : 'sad' }) + (p ? npc(220, 1760, 170, '#1d1d22', '#1d1d22', { brow: 'angry' }) + npc(860, 1760, 170, '#1d1d22', '#1d1d22', { brow: 'angry' }) + sigil(540, 950, .35) : '') },
+    art: p => darrowRed(540, 1700, 240, { brow: p ? 'angry' : 'sad' }) + (p ? npc(220, 1760, 170, '#1d1d22', '#1d1d22', { brow: 'angry' }) + npc(860, 1760, 170, '#1d1d22', '#1d1d22', { brow: 'angry' }) + soaLogo(560, 980, .42, '#b0231f', { rise: false }) : '') },
   { bg: 'dark', l1: 'THE SONS OF ARES HAD A PLAN.', l2: 'CARVE HIM INTO A GOLD.', start: 'the sons of', pop: 'carve him', l2color: 'gold',
-    art: () => sigil(540, 1250, 1) + T(540, 1760, 'SONS OF ARES', 56) },
+    art: () => soaLogo(560, 1150, 1.05) + T(540, 1840, 'THE SONS OF ARES', 50) },
   { bg: 'dark', l1: 'NEW BONES. NEW EYES.', l2: 'GOLD HAIR.', start: 'new bones', pop: 'gold hair', l2color: 'gold',
     art: p => p ? `<circle cx="540" cy="1350" r="460" fill="${C.gold}" opacity=".08"/>` + darrowGold(540, 1720, 300, { hood: false, mouth: 'flat' }) : xray() },
   { bg: 'parch', l1: 'THE INSTITUTE.', l2: 'WHERE GOLDS LEARN TO RULE.', start: 'he enters', pop: 'where golds',
@@ -58,7 +58,7 @@ const BEATS = [
   { bg: 'parch', l1: 'FIRST NIGHT:', l2: 'KILL A CLASSMATE.', start: 'the first night', pop: 'kill a classmate',
     art: () => `<ellipse cx="540" cy="1660" rx="460" ry="150" fill="#8b6b3f"/>` + darrowGold(330, 1660, 220, { hood: false, label: 'DARROW', lc: '#2a1d12' }) + npc(750, 1660, 220, '#e0a326', '#7a5a2a', { iris: '#e0a326', brow: 'sad', label: 'JULIAN', lc: '#2a1d12' }) },
   { bg: 'parch', l1: 'HE KILLED JULIAN.', l2: "CASSIUS'S BROTHER.", start: 'he kills julian', pop: "cassius's brother",
-    art: p => npc(300, 1650, 220, '#e0a326', '#7a5a2a', { iris: '#e0a326', closed: true, x: true, label: 'JULIAN', lc: '#2a1d12' }) + (p ? `<circle cx="780" cy="1300" r="260" fill="#fff" opacity=".25"/>` + npc(780, 1650, 240, '#e0a326', '#d9a92e', { iris: '#e0a326', brow: 'angry', label: 'CASSIUS', lc: '#2a1d12' }) : '') },
+    art: p => npc(300, 1650, 220, '#e0a326', '#7a5a2a', { iris: '#e0a326', closed: true, x: true, label: 'JULIAN', lc: '#2a1d12' }) + (p ? `<circle cx="780" cy="1300" r="260" fill="#fff" opacity=".25"/>` + cassius(780, 1650, 240, { label: 'CASSIUS', lc: '#2a1d12' }) : '') },
   { bg: 'parch', l1: '12 HOUSES. ONE VALLEY.', start: 'then the war',
     art: () => instituteMap({ overlay: houseFlags(0) + HOUSES.filter(h => h[3]).map(([x, y, , n]) => `<text x="${x + 35}" y="${y + 34}" text-anchor="middle" font-family="Cinzel" font-weight="700" font-size="26" fill="#2a1d12">${n.toUpperCase()}</text>`).join('') }) },
   { bg: 'dark', l1: 'HIS OWN HOUSE TURNED SAVAGE.', l2: 'HE KILLED THEIR LEADER.', start: 'his own house', pop: 'darrow kills',
@@ -79,9 +79,7 @@ const BEATS = [
     art: () => instituteMap({ overlay: houseFlags(11) }) },
   { bg: 'dark', l1: 'HIS PRIZE?', l2: 'SERVE THE MAN WHO HANGED EO.', start: 'his prize', pop: 'the man who',
     art: p => (p ? `<g opacity=".25">${gallows(870, 1500)}</g>` + flower(880, 1470, 30, 60) : '') + npc(620, 1700, 340, '#e0a326', '#cfcfcf', { crown: true, iris: '#e0a326', brow: 'angry', label: 'ARCHGOVERNOR AUGUSTUS' }) + darrowGold(230, 1700, 170, {}) },
-  { bg: 'dark', l1: 'HE BECAME A GOLD TO DESTROY THEM.', l2: 'NOW HE KNEELS TO ONE.', start: 'he became', pop: 'now he has',
-    art: p => `<g opacity=".22">${eo(330, 1300, 150, { closed: true })}</g>` + npc(720, 1820, 340, '#e0a326', '#cfcfcf', { crown: true, iris: '#e0a326' }) + (p ? `<g transform="translate(270 1830) scale(1 .8) translate(-270 -1830)">${darrowGold(270, 1830, 190, { brow: 'sad' })}</g>` : darrowGold(270, 1830, 190, {})) },
-  { bg: 'black', end: true, l1: 'SHOULD DARROW HAVE KILLED HIM?', l2: 'YES OR NO?', start: 'END',
-    art: () => darrowGold(300, 1150, 200, { blade: true }) + `<text x="540" y="900" text-anchor="middle" font-family="Anton" font-size="90" fill="${C.cream}">VS</text>` + npc(780, 1150, 200, '#e0a326', '#cfcfcf', { crown: true, iris: '#e0a326' }) },
+  { bg: 'dark', outro: true, l1: 'HE BECAME A GOLD TO DESTROY THEM.', l2: 'NOW HE KNEELS TO ONE.', start: 'he became', pop: 'now he has',
+    q: 'Do you want Golden Son next?', a: 'Yes or No', art: () => '' },
 ];
 module.exports = { BEATS };
