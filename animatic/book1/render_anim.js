@@ -23,6 +23,7 @@ const N = Math.round((AUDIO_END + END_CARD) * FPS);
 
 // ---- page ----
 const font = f => `data:font/woff2;base64,${fs.readFileSync(`${S}/fonts/${f}`).toString('base64')}`;
+const MAP = `data:image/jpeg;base64,${fs.readFileSync(`${B}/map.jpg`).toString('base64')}`;
 const AV = `data:image/png;base64,${fs.readFileSync(`${B}/avatar.png`).toString('base64')}`;
 const BG = {
   dark: 'radial-gradient(ellipse at 50% 55%, #3a2a22 0%, #1a1210 70%, #0c0807 100%)',
@@ -47,6 +48,7 @@ const TEMPLATE = `<!doctype html><html><head><style>
   .oq{position:absolute;top:1330px;width:100%;text-align:center;font-family:Cinzel;font-weight:700;font-size:52px;color:#f6ead2;font-variant:small-caps}
   .oa{position:absolute;top:1405px;width:100%;text-align:center;font-family:Cinzel;font-weight:700;font-size:52px;color:#e2a93b;font-variant:small-caps}
   .big{position:absolute;top:300px;width:100%;text-align:center;font-family:Cinzel;font-weight:700;font-size:150px;color:#2a1d12;letter-spacing:4px}
+  .mapimg{position:absolute;left:0;top:560px;width:1080px;height:870px;background:url(${MAP}) 0 0/100% 100% no-repeat}
   .grain{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.45) 100%)}
 </style></head><body><div id="w"></div></body></html>`;
 const DEFS = `<defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
@@ -73,7 +75,7 @@ function frame(f) {
     : `<div class="cap ${b.outro ? 'outcap' : ''} ${b.bg === 'parch' ? 'pcap' : ''}">${b.l1 ? `<div class="l1" ${slide(i === 0 ? 1 : t / 0.18)}>${b.l1}</div>` : ''}${b.l2 && p ? `<div class="l2" style="color:${l2c}"><span ${slide(pt / 0.18)} class="x">${b.l2}</span></div>` : ''}</div>`;
   const svg = `<svg viewBox="0 0 1080 1920" width="1080" height="1920">${DEFS}${b.bg === 'space' ? stars(90, T) : ''}${b.back ? b.back(t) : ''}<g transform="translate(540 520) scale(0.75) translate(-540 -520)">${b.art(p, t, pt)}</g></svg>`;
   const outro = b.outro ? `<div class="av" style="opacity:${ease(t / 0.4)};transform:scale(${(0.85 + 0.15 * ease(t / 0.4)).toFixed(3)})"></div><div class="oh">@AVANZO.TV</div><div class="oq" ${slide((t - 0.3) / 0.3)}>${b.q}</div><div class="oa" ${slide((t - 0.5) / 0.3)}>${b.a}</div>` : '';
-  return { bg: b.outro ? '#1c1512' : BG[b.bg], zoom, html: svg + (b.outro ? '' : '<div class="grain"></div>') + cap + outro };
+  return { bg: b.outro ? '#1c1512' : BG[b.bg], zoom, html: (b.mapImg ? `<div class="mapimg" style="opacity:${ease(i > 0 && !BEATS[i - 1].mapImg ? t / 0.3 : 1).toFixed(3)}"></div>` : '') + svg + (b.outro ? '' : '<div class="grain"></div>') + cap + outro };
 }
 
 (async () => {
@@ -82,7 +84,9 @@ function frame(f) {
   const pg = await browser.newPage({ viewport: { width: 1080, height: 1920 }, deviceScaleFactor: 1 });
   await pg.setContent(TEMPLATE); await pg.evaluate(() => document.fonts.ready);
   await pg.addStyleTag({ content: '.l2 span{display:inline-block}' });
+  const LIST = process.env.FRAMES ? process.env.FRAMES.split(',').map(Number) : null;
   for (let f = W; f < N; f += K) {
+    if (LIST && !LIST.includes(f)) continue;
     const file = `${out}/f${String(f).padStart(5, '0')}.jpg`;
     if (fs.existsSync(file)) continue;
     const { bg, zoom, html } = frame(f);

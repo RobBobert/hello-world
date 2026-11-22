@@ -54,6 +54,17 @@ const chains = (x, y) => `<g stroke="#9aa0a8" stroke-width="12" fill="none">${[0
 const note = (x, y, ch, op, sz) => `<text x="${x}" y="${y}" font-size="${sz}" fill="${C.gold}" opacity="${cl(op).toFixed(2)}">${ch}</text>`;
 const PROCTOR = (x, y, s, o = {}) => npc(x, y, s, '#e0a326', '#f5d35e', { crown: true, iris: '#e0a326', ...o });
 
+
+// ---- user's own Institute map (bitmap, placed full-width at y=560, 1080x870) ----
+const MY = 560;
+const MF = [[110, 45], [470, 160], [325, 237], [772, 110], [998, 180], [950, 335], [128, 272], [353, 387], [455, 445], [625, 562], [1040, 548], [775, 762]]; // flag body centres
+const MARS_I = 3, ORDER = [4, 5, 1, 2, 9, 10, 8, 7, 6, 11, 0];
+const wolf = (cx, cy) => `<path d="M${cx - 14} ${cy - 12} L${cx - 8} ${cy + 2} L${cx} ${cy + 12} L${cx + 8} ${cy + 2} L${cx + 14} ${cy - 12} L${cx + 5} ${cy - 5} L${cx - 5} ${cy - 5} Z" fill="#fff"/>`;
+const redFlag = (i, k = 1) => { const [x, y0] = MF[i], y = MY + y0; return scaleAt(`<path d="M${x - 48} ${y - 36} h98 l-16 36 l16 36 h-98 z" fill="#d8352a" stroke="#1b1210" stroke-width="5" stroke-linejoin="round"/>` + wolf(x - 2, y), x - 48, y + 36, back(k), cl(k * 3)); };
+const conquered = n => ORDER.map((i, j) => j < Math.floor(n) ? redFlag(i, 1) : (j === Math.floor(n) ? redFlag(i, n - Math.floor(n)) : '')).join('');
+const numDot = (i, n, u) => { const [x, y0] = MF[i], y = MY + y0 - 52, cx = x - 46; return popIn(`<circle cx="${cx}" cy="${y}" r="24" fill="#e2a93b" stroke="#1b1210" stroke-width="4"/><text x="${cx}" y="${y + 10}" text-anchor="middle" font-family="Anton" font-size="28" fill="#1b1210">${n}</text>`, cx, y, u); };
+const instLabel = op => T(540, 1515, 'THE INSTITUTE', 50, '#2a1d12', op);
+
 const BEATS = [
   { bg: 'dark', l1: 'TO DESTROY THE GOLDS,', l2: 'HE HAD TO BECOME ONE.', start: 'to destroy', pop: 'he had to', l2color: 'gold',
     art: (p, t, pt) => bob(darrowRed(330, 1650, 230, { label: 'RED' }), t) +
@@ -105,20 +116,20 @@ const BEATS = [
   { bg: 'dark', l1: 'NEW BONES. NEW EYES.', l2: 'GOLD HAIR.', start: 'new bones', pop: 'gold hair', l2color: 'gold',
     art: (p, t, pt) => p ? `<circle cx="540" cy="1350" r="${460 + 20 * Math.sin(t * 3)}" fill="${C.gold}" opacity="${(0.08 + 0.04 * Math.sin(t * 3)).toFixed(3)}"/>` + scaleAt(darrowGold(540, 1720, 300, { hood: false, mouth: 'flat' }), 540, 1720, back(pt / 0.5)) + `<rect x="-800" y="-800" width="2700" height="3600" fill="#fff" opacity="${cl(1 - pt / 0.25).toFixed(2)}"/>` : xray(t) },
   { bg: 'parch', l1: 'THE INSTITUTE.', l2: 'WHERE GOLDS LEARN TO RULE.', start: 'he enters', pop: 'where golds',
-    art: (p, t) => instituteMap({ overlay: houseFlags(0, t) }) + T(540, 1800, 'THE INSTITUTE', 56, '#2a1d12') },
+    mapImg: true, back: t => instLabel(ease((t - 0.3) / 0.4)), art: () => '' },
   { bg: 'parch', l1: 'FIRST NIGHT:', l2: 'KILL A CLASSMATE.', start: 'the first night', pop: 'kill a classmate',
     art: (p, t, pt) => `<ellipse cx="540" cy="1660" rx="460" ry="150" fill="#8b6b3f"/>` + at(darrowGold(330, 1660, 220, { hood: false, label: 'DARROW', lc: '#2a1d12' }), p ? 40 * ease(pt / 0.4) : 0, 0) + bob(npc(750, 1660, 220, '#e0a326', '#7a5a2a', { iris: '#e0a326', brow: 'sad', label: 'JULIAN', lc: '#2a1d12' }), t, 1, 4) },
   { bg: 'parch', l1: 'HE KILLED JULIAN.', l2: "CASSIUS'S BROTHER.", start: 'he kills julian', pop: "cassius's brother",
     art: (p, t, pt) => npc(300, 1650, 220, '#e0a326', '#7a5a2a', { iris: '#e0a326', closed: true, label: 'JULIAN', lc: '#2a1d12' }) + drawX(300, 1650 - 220 * 1.55 - 220 * 0.42 * 0.78, 110, t / 0.5) +
       (p ? at(`<circle cx="780" cy="1300" r="${260 + 10 * Math.sin(t * 3)}" fill="#fff" opacity=".25"/>` + cassius(780, 1650, 240, { label: 'CASSIUS', lc: '#2a1d12' }), 300 * (1 - ease(pt / 0.5)), 0, ease(pt / 0.3)) : '') },
   { bg: 'parch', l1: '12 HOUSES. ONE VALLEY.', start: 'then the war',
-    art: (p, t) => instituteMap({ overlay: houseFlags(0) + HOUSES.filter(h => h[3]).map(([x, y, , n], i) => `<text x="${x + 35}" y="${y + 34}" text-anchor="middle" font-family="Cinzel" font-weight="700" font-size="26" fill="#2a1d12" opacity="${ease((t - i * 0.25) / 0.3).toFixed(2)}">${n.toUpperCase()}</text>`).join('') }) },
+    mapImg: true, back: t => instLabel(1) + [0, 6, 2, 1, 3, 7, 8, 5, 4, 9, 10, 11].map((i, n) => numDot(i, n + 1, (t - n * 0.3) / 0.35)).join(''), art: () => '' },
   { bg: 'dark', l1: 'HIS OWN HOUSE TURNED SAVAGE.', l2: 'HE KILLED THEIR LEADER.', start: 'his own house', pop: 'darrow kills',
     art: (p, t, pt) => { const tilt = p ? 10 * ease(pt / 0.5) : 0; return `<g transform="rotate(${tilt} 680 1720)">${bob(npc(680, 1720, 330, '#b8291f', '#3a2a1a', { brow: 'angry', iris: '#e0a326', label: 'TITUS' }), t, 0, p ? 0 : 6)}</g>` + (p ? drawX(680, 1720 - 330 * 1.55 - 330 * 0.42 * 0.78, 160, pt / 0.4) : '') + bob(darrowGold(190, 1760, 190, { label: p ? 'DARROW' : '', blade: true, glow: 0.7 + 0.3 * Math.sin(t * 5) }), t, 2); } },
   { bg: 'dark', l1: 'THEY CALLED HIM', l2: 'THE REAPER.', start: 'they call him', pop: 'reaper',
     art: (p, t, pt) => `<circle cx="540" cy="1300" r="${480 + (p ? 40 * Math.sin(pt * 6) * Math.max(0, 1 - pt) : 0)}" fill="${C.red}" opacity="${p ? 0.16 : 0.08}"/>` + bob(darrowGold(420, 1760, 320, { blade: true, glow: 0.6 + 0.4 * Math.sin(t * 4) }), t, 0, 5) },
   { bg: 'parch', l1: 'HOUSE AFTER HOUSE FELL.', start: 'house after',
-    art: (p, t) => instituteMap({ overlay: houseFlags(Math.min(7, t / 0.26)) }) },
+    mapImg: true, back: t => instLabel(1) + conquered(Math.min(7, t / 0.26)), art: () => '' },
   { bg: 'dark', l1: 'BUT THE JUDGES CHEATED.', l2: 'FOR THE JACKAL.', start: 'but the judges', pop: 'for the jackal',
     art: (p, t, pt) => [200, 440, 680].map((x, i) => bob(PROCTOR(x, 1500, 170, { mouth: p ? 'smile' : undefined }), t, i)).join('') + T(440, 1590, 'THE PROCTORS', 44) +
       (p ? at(npc(870, 1800, 190, '#d9c27a', '#efe2a8', { iris: '#e0a326', mouth: 'smile', label: 'THE JACKAL' }), 350 * (1 - ease(pt / 0.5)), 0) + `<path pathLength="1" stroke-dasharray="1" stroke-dashoffset="${(1 - ease((pt - 0.3) / 0.5)).toFixed(3)}" d="M720 1280 Q820 1300 860 1400" stroke="${C.gold}" stroke-width="10" fill="none"/>` : '') },
@@ -132,7 +143,7 @@ const BEATS = [
     art: (p, t, pt) => bob(npc(680, 1720, 260, '#d9c27a', '#efe2a8', { iris: '#e0a326', mouth: p ? 'frown' : 'smile', brow: p ? 'sad' : undefined, label: 'THE JACKAL' }), t, 0, p ? 0 : 6) + bob(darrowGold(180, 1740, 190, { blade: true, glow: 0.7 + 0.3 * Math.sin(t * 5) }), t, 2) +
       (p ? hand(470, 1380 + 180 * easeIn(pt / 0.5), -25 - 120 * ease(pt / 0.5)) + `<rect x="-800" y="-800" width="2700" height="3600" fill="#c8312b" opacity="${(0.35 * cl(1 - pt / 0.2)).toFixed(2)}"/>` : '') },
   { bg: 'parch', l1: 'HE WON THE INSTITUTE.', start: 'darrow wins',
-    art: (p, t) => instituteMap({ overlay: houseFlags(Math.min(11, 7 + t / 0.2)) }) },
+    mapImg: true, back: t => instLabel(1) + conquered(Math.min(11, 7 + t / 0.2)), art: () => '' },
   { bg: 'dark', l1: 'HIS PRIZE?', l2: 'SERVE THE MAN WHO HANGED EO.', start: 'his prize', pop: 'the man who',
     art: (p, t, pt) => (p ? gallows(870, 1500, 0.25 * ease(pt / 0.6)) + `<g opacity="${ease(pt / 0.6).toFixed(2)}">${flower(880, 1470, 30, 60)}</g>` : '') + bob(npc(620, 1700, 340, '#e0a326', '#cfcfcf', { crown: true, iris: '#e0a326', brow: 'angry', label: 'ARCHGOVERNOR AUGUSTUS' }), t, 0, 4) + darrowGold(230, 1700, 170, {}) },
   { bg: 'dark', outro: true, l1: 'HE BECAME A GOLD TO DESTROY THEM.', l2: 'NOW HE KNEELS TO ONE.', start: 'he became', pop: 'now he has',
