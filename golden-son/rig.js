@@ -25,7 +25,16 @@ function spikes(seed = 5) {
   for (let lon = 80; lon <= 280; lon += 25) for (const lat of [0, -20]) out.push({ lon: lon > 180 ? lon - 360 : lon, lat, s: 0.27 });
   return out;
 }
-const HAIR = { curls: curls(), spikes: spikes() };
+function short(seed = 9) {
+  const R = rngf(seed), out = [];
+  for (let lat = 40; lat <= 86; lat += 15) {
+    const n = Math.max(3, Math.round(12 * Math.cos(lat * D)));
+    for (let i = 0; i < n; i++) out.push({ lon: -180 + (360 / n) * (i + 0.5) + (R() - .5) * 8, lat: lat + (R() - .5) * 5, s: 0.25, spike: lat > 60 ? 0.22 + R() * 0.1 : 0.08 });
+  }
+  for (let lon = 85; lon <= 275; lon += 26) out.push({ lon: lon > 180 ? lon - 360 : lon, lat: 12, s: 0.24 });
+  return out;
+}
+const HAIR = { curls: curls(), spikes: spikes(), short: short() };
 
 // head(cx, cy, r, { yaw, pitch (deg), hair:'curls'|'spikes', hairCol, hairHi, iris, brow:'angry'|'soft'|'sad', mouth:'smile'|'smirk'|'flat'|'frown'|'open', blink })
 function head(cx, cy, r, o = {}) {
@@ -40,7 +49,7 @@ function head(cx, cy, r, o = {}) {
   // hair
   const hc = o.hairCol || '#c48a2c', hh = o.hairHi || '#f0c46a';
   const clumps = (HAIR[o.hair || 'curls']).map(c => ({ ...c, p: P(c.lon, c.lat, 1.02) })).sort((a, b) => a.p.z - b.p.z);
-  const unified = o.hair === 'spikes';
+  const unified = o.hair === 'spikes' || o.hair === 'short';
   const shape = (c, stroke) => {
     const { p } = c, rr = c.s * r, st = stroke ? `fill="${INK}" stroke="${INK}" stroke-width="${f(sw * 1.7)}" stroke-linejoin="round"` : `fill="${hc}"`;
     let g = `<circle cx="${f(p.x)}" cy="${f(p.y)}" r="${f(rr)}" ${st}/>`;
