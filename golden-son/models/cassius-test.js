@@ -12,25 +12,25 @@ const bust = (x, y, w, hh, o, zoom = 1) => { const h = 1500 * zoom; return `<svg
 function sheet() {
   const W = 2400, H = 2360; let b = '';
   [-60, -30, 0, 30, 60].forEach((yaw, i) => { b += cassius(250 + i * 475, 1010, 900, { yaw }) + label(250 + i * 475, 1050, `yaw ${yaw}`); });
-  const ex = [['smirk', -60], ['neutral', -30], ['angry', 0], ['shock', 30], ['pain', 60]];
+  const ex = [['smirk', -18], ['neutral', -9], ['angry', 0], ['shock', 9], ['pain', 18]];
   ex.forEach(([expr, yaw], i) => { b += bust(40 + i * 475, 1090, 440, 560, { yaw, expr }) + label(260 + i * 475, 1690, `${expr} / yaw ${yaw}`); });
   // seated behind a table edge
   b += cassius(420, 2260, 900, { pose: 'seated', yaw: -25, expr: 'smirk' }) + `<rect x="60" y="2260" width="720" height="60" fill="#2b4a8a" stroke="#120d0f" stroke-width="6"/>` + label(420, 2350, 'seated / smirk');
   b += cassius(1180, 2260, 900, { pose: 'seated', yaw: 35, expr: 'angry' }) + `<rect x="820" y="2260" width="720" height="60" fill="#2b4a8a" stroke="#120d0f" stroke-width="6"/>` + label(1180, 2350, 'seated / angry');
   // phone-size read: whole figure in a 270x480 frame (quarter-scale 1080x1920)
   b += `<svg x="1620" y="1760" width="270" height="480" viewBox="0 0 1080 1920"><rect width="1080" height="1920" fill="#141c3a"/>${cassius(540, 1800, 1500, { yaw: -20, expr: 'smirk' })}</svg>` + label(1755, 2280, 'phone 1/4 full');
-  b += `<svg x="1960" y="1760" width="270" height="480" viewBox="0 0 1080 1920"><rect width="1080" height="1920" fill="#141c3a"/>${cassius(540, 800 + 3600 * 0.867, 3600, { yaw: 25, expr: 'angry', crop: 'bust' })}</svg>` + label(2095, 2280, 'phone 1/4 close');
+  b += `<svg x="1960" y="1760" width="270" height="480" viewBox="0 0 1080 1920"><rect width="1080" height="1920" fill="#141c3a"/>${cassius(540, 800 + 3600 * 0.867, 3600, { yaw: 12, expr: 'angry', crop: 'bust' })}</svg>` + label(2095, 2280, 'phone 1/4 close');
   return svg(W, H, b);
 }
-function faces() { // big faces across the hero swing, neutral -> angry
+function faces() { // gentle hero turn -18 -> +18 with neutral -> angry, then the other expressions inside the film's range
   const W = 2400, H = 1480; let b = '';
-  [-45, -25, -5, 15, 40].forEach((yaw, i) => { b += bust(10 + i * 478, 10, 468, 700, { yaw, expr: 'neutral', exprTo: 'angry', mix: i / 4 }, 1.35) ; });
-  [['smirk', -15, 8], ['shock', 10, 0], ['pain', -35, -8], ['neutral', 60, 0], ['neutral', -60, 10]].forEach(([expr, yaw, pitch], i) => { b += bust(10 + i * 478, 730, 468, 700, { yaw, expr, pitch, blink: i === 3 ? 1 : 0 }, 1.35); });
+  [-18, -9, 0, 9, 18].forEach((yaw, i) => { b += bust(10 + i * 478, 10, 468, 700, { yaw, expr: 'neutral', exprTo: 'angry', mix: i / 4 }, 1.35) + label(244 + i * 478, 700, `yaw ${yaw} / angry ${i * 25}%`); });
+  [['neutral', 0, 0, 0], ['smirk', -12, 0, 0], ['shock', 10, 0, 0], ['pain', -15, -6, 0], ['angry', 15, 0, 0]].forEach(([expr, yaw, pitch, blink], i) => { b += bust(10 + i * 478, 730, 468, 700, { yaw, expr, pitch, blink }, 1.35) + label(244 + i * 478, 1420, `${expr} / yaw ${yaw}`); });
   return svg(W, H, b);
 }
 function adjacent() { // neighbouring yaws side by side: nothing should pop
   const W = 2400, H = 720; let b = '';
-  [10, 14, 18, -38, -42].forEach((yaw, i) => { b += bust(10 + i * 478, 10, 468, 700, { yaw }, 1.35) + label(244 + i * 478, 700, `yaw ${yaw}`); });
+  [0, 3, 6, -12, -15].forEach((yaw, i) => { b += bust(10 + i * 478, 10, 468, 700, { yaw }, 1.35) + label(244 + i * 478, 700, `yaw ${yaw}`); });
   return svg(W, H, b);
 }
 (async () => {
@@ -39,6 +39,10 @@ function adjacent() { // neighbouring yaws side by side: nothing should pop
   await shot('cassius-turnaround.png', sheet(), 2400, 2360);
   await shot('cassius-faces.png', faces(), 2400, 1480);
   await shot('cassius-adjacent.png', adjacent(), 2400, 720);
+  // true phone-size frames (1080x1920 art shown at 360x640): full figure, seated, neutral close-up, angry close-up
+  const ph = (i, body) => `<svg x="${20 + i * 380}" y="20" width="360" height="640" viewBox="0 0 1080 1920"><rect width="1080" height="1920" fill="#141c3a"/>${body}</svg>`;
+  await shot('cassius-phone.png', svg(1540, 680, ph(0, cassius(540, 1800, 1500, { yaw: -12, expr: 'smirk' })) + ph(1, cassius(540, 1500, 1900, { pose: 'seated', yaw: 10 }) + '<rect x="0" y="1500" width="1080" height="420" fill="#2b4a8a"/>')
+    + ph(2, cassius(540, 800 + 3600 * 0.867, 3600, { yaw: -8, crop: 'bust' })) + ph(3, cassius(540, 800 + 3600 * 0.867, 3600, { yaw: 12, expr: 'angry', crop: 'bust' }))), 1540, 680);
   await shot('cassius-seated.png', svg(1600, 900, cassius(420, 800, 1500, { pose: 'seated', yaw: -25, expr: 'smirk' }) + '<rect x="0" y="800" width="800" height="100" fill="#2b4a8a" stroke="#120d0f" stroke-width="8"/>' + cassius(1200, 800, 1500, { pose: 'seated', yaw: 35, expr: 'angry' }) + '<rect x="800" y="800" width="800" height="100" fill="#2b4a8a" stroke="#120d0f" stroke-width="8"/>'), 1600, 900);
   await br.close();
 })();

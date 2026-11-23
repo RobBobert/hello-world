@@ -23,10 +23,10 @@ const S = require('../style.js');
 const W = 1080, H = 1920, DUR = 9.6;
 const LAND = 0.6, RISE0 = 1.6, RISE1 = 4.0, SMILE = 4.5, CUT = 5.6, FURY = 7.8;
 // fractions of h ABOVE the (x, y) handed to the model. Defaults match models/darrow.js + models/cassius.js.
-const ANCHORS = { darrowHairTop: 1.0, darrowHeadC: 0.90, cassiusSeatedHairTop: 0.45, cassiusSeatedHeadC: 0.316 };
+const ANCHORS = { darrowHairTop: 1.017, darrowHeadC: 0.90, cassiusSeatedHairTop: 0.45, cassiusSeatedHeadC: 0.316 };
 // world (see sets/gala.js): y=0 table top, floor y=400
 const DAR = { x: 0, y: 0, h: 1000 }, CAS = { x: 520, y: -40, h: 980 };   // Cassius: seated, y = table edge his fists rest on
-const CAP_BOTTOM = 560, FACE_TOP = 610;   // caption band ends at 560: hairline never rises above 610 while a caption is up
+const CAP_BOTTOM = 560, FACE_TOP = 625;   // caption band ends at 560: hairline rests at 625 while a caption is up
 
 const cl = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const io = u => { u = cl(u); return u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
@@ -39,7 +39,7 @@ function camera(t, A) {
   // frame a face so that its hair top sits at FACE_TOP for a given zoom
   const dTop = DAR.y - A.darrowHairTop * DAR.h, cTop = CAS.y - A.cassiusSeatedHairTop * CAS.h;
   const yFor = (top, z) => top + (H / 2 - FACE_TOP) / z;
-  const Z = { b0: 2.5, b1: 2.58, f0: 2.72, f1: 2.86, c0: 3.0, c1: 3.2 };
+  const Z = { b0: 2.5, b1: 2.58, f0: 3.5, f1: 3.7, c0: 3.0, c1: 3.2 };
   let c;
   if (t < CUT) c = {   // boots (locked, breathing push) -> one crane -> settle on the face
     x: kf(t, [[0, 78], [RISE0, 78], [RISE1, 0], [CUT, 0]]),

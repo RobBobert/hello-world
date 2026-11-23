@@ -74,7 +74,8 @@ function darrow(x, y, h, opts = {}) {
   const G = n => `url(#${id}${n})`;
 
   const lw = h * 0.0023, silW = h * 0.0072, rimW = h * 0.0026;
-  const M = (px, py) => [x + px * h, y - py * h];
+  const ry = py => py < 0.47 ? py * 1.07 : 0.5029 + (py - 0.47) * 0.938; // longer legs, slightly shorter torso
+  const M = (px, py) => [x + px * h, y - ry(py) * h];
   const line = (pts, w, col, extra = '') => `<path d="${pathD(pts, false)}" fill="none" stroke="${col}" stroke-width="${f(w)}" stroke-linecap="round" stroke-linejoin="round"${extra}/>`;
   const poly = (pts, fill, extra = '') => `<path d="${pathD(pts)}" fill="${fill}"${extra}/>`;
   let sil = '';
@@ -83,7 +84,7 @@ function darrow(x, y, h, opts = {}) {
     const d = pathD(pts), w = o.sw === undefined ? lw : o.sw;
     if (o.sil !== false) sil += d;
     let s = `<path d="${d}" fill="${o.fill}"/>`;
-    const inner = (o.in || []).join('') + (o.sh ? `<path d="${d}" fill="${G(o.sh)}"/>` : '') + (o.rim ? rimPath(pts, rimW * o.rim, w * 0.5, 0.75) : '');
+    const inner = (o.in || []).join('') + (o.sh ? `<path d="${d}" fill="${G(o.sh)}"/>` : '') + (o.rim ? rimPath(pts, rimW * o.rim, w * 0.5, 0.42) : '');
     if (inner) { if (o.in && o.in.length) { const c = nid(); s += `<clipPath id="${c}"><path d="${d}"/></clipPath><g clip-path="url(#${c})">${inner}</g>`; } else s += inner; }
     if (w) s += `<path d="${d}" fill="none" stroke="${o.line || LINE_G}" stroke-width="${f(w)}" stroke-linejoin="round"/>`;
     return s;
@@ -114,10 +115,10 @@ function darrow(x, y, h, opts = {}) {
   const stack = (LV, cxAt) => py => { let i = 0; while (i < LV.length - 2 && py < LV[i + 1][0]) i++; const a = LV[i], b = LV[i + 1], t = cl((a[0] - py) / (a[0] - b[0])); return ell(cxAt(py), 0, lerp(a[1], b[1], t), lerp(a[2], b[2], t)); };
 
   // lion face relief (cx, cy in px; R in px; kx = horizontal squash)
-  function lion(cx, cy, R, kx) {
+  function lion(cx, cy, R, kx, withMane = true) {
     const q = (u, v) => [cx + u * R * kx, cy - v * R], mir = a => a.map(([u, v]) => [-u, v]);
     const mane = []; for (let i = 0; i < 26; i++) { const a = (i * 360 / 26 + 7) * D, rr = i % 2 ? 1.02 : 0.82; mane.push(q(Math.sin(a) * rr, Math.cos(a) * rr * 0.98)); }
-    let o = form(smooth(mane, true, 3), { fill: G('ga'), sw: lw * 0.8, sil: false, sh: 'sg',
+    let o = !withMane ? '' : form(smooth(mane, true, 3), { fill: G('ga'), sw: lw * 0.8, sil: false, sh: 'sg',
       in: Array.from({ length: 13 }, (_, i) => { const a = (i * 360 / 13 + 7) * D; return line([q(Math.sin(a) * 0.62, Math.cos(a) * 0.62), q(Math.sin(a) * 0.9, Math.cos(a) * 0.9)], lw * 0.7, BRONZE, ' opacity=".7"'); }) });
     const earL = [[-0.34, 0.5], [-0.7, 0.78], [-0.62, 0.36]];
     o += poly(earL.map(p => q(p[0], p[1])), G('gp'), ` stroke="${LINE_G}" stroke-width="${f(lw * 0.7)}" stroke-linejoin="round"`) + poly(mir(earL).map(p => q(p[0], p[1])), G('gd'), ` stroke="${LINE_G}" stroke-width="${f(lw * 0.7)}" stroke-linejoin="round"`);
@@ -179,10 +180,10 @@ function darrow(x, y, h, opts = {}) {
     // knee cop + lower lame
     const lam = [[-58, 0.262], [0, 0.272], [58, 0.262], [50, 0.238], [0, 0.226], [-50, 0.238]].map(([p, py]) => M(fx(py, p), py));
     o += form(lam, { fill: G('gd'), sw: lw * 0.9, sil: false, in: [spec([M(fx(0.25, -40), 0.252), M(fx(0.25, -18), 0.258), M(fx(0.24, -18), 0.243), M(fx(0.24, -38), 0.24)], 0.4)] });
-    const kn = smooth([[0, 0.332], [42, 0.322], [66, 0.293], [60, 0.262], [0, 0.248], [-60, 0.262], [-66, 0.293], [-42, 0.322]].map(([p, py]) => M(fx(py, p) + (Math.abs(p) > 50 ? Math.sign(p) * 0.004 : 0), py)), true, 4);
+    const kn = smooth([[0, 0.312], [30, 0.305], [50, 0.286], [47, 0.264], [0, 0.252], [-47, 0.264], [-50, 0.286], [-30, 0.305]].map(([p, py]) => M(fx(py, p), py)), true, 4);
     o += form(kn, { fill: G('ga'), sh: 'sg', rim: 1, in: [
-      spec([M(fx(0.31, -36), 0.312), M(fx(0.31, -10), 0.322), M(fx(0.29, -12), 0.296), M(fx(0.29, -40), 0.29)], 0.8),
-      line(smooth([M(fx(0.325, 0), 0.328), M(fx(0.29, 3), 0.29), M(fx(0.25, 0), 0.25)], false, 4), lw * 0.8, LINE_G, ' opacity=".6"'),
+      spec([M(fx(0.3, -28), 0.3), M(fx(0.3, -12), 0.305), M(fx(0.288, -14), 0.29), M(fx(0.288, -32), 0.286)], 0.8),
+      line(smooth([M(fx(0.31, 0), 0.31), M(fx(0.29, 3), 0.29), M(fx(0.254, 0), 0.254)], false, 4), lw * 0.8, LINE_G, ' opacity=".6"'),
       line(smooth([M(fx(0.27, -60), 0.275), M(fx(0.262, 0), 0.262), M(fx(0.27, 60), 0.275)], false, 4), lw * 0.8, LINE_G, ' opacity=".7"')] });
     return o;
   }
@@ -207,7 +208,7 @@ function darrow(x, y, h, opts = {}) {
     for (const s of [-1, 1]) inn.push(form(pec(s), { fill: G('ga'), sw: lw * 0.8, sil: false, sh: s > 0 ? 'sg' : undefined }));
     inn.push(poly([[-80, 0.7], [-36, 0.68], [0, 0.69], [36, 0.68], [80, 0.7], [80, 0.64], [-80, 0.64]].map(([p, py]) => M(tx(py, p), py)), G('sd')));
     // abs
-    [[0.652, 0.014, 31], [0.622, 0.0125, 29], [0.594, 0.011, 26]].forEach(([yc, hh, p2]) => { for (const s of [-1, 1]) inn.push(form(ab(s, yc, hh, 3.5, p2), { fill: G('gp'), sw: lw * 0.7, sil: false, sh: 'sg' }).replace(/fill="url\(#[^"]*gp\)"/, m => m + ' opacity=".8"')); });
+    [[0.652, 0.014, 31], [0.622, 0.0125, 29], [0.594, 0.011, 26]].forEach(([yc, hh, p2]) => { for (const s of [-1, 1]) inn.push(form(ab(s, yc, hh, 3.5, p2), { fill: G('gp'), sw: lw * 0.5, line: '#8a5e1a', sil: false, sh: 'sg' }).replace(/fill="url\(#[^"]*gp\)"/, m => m + ' opacity=".55"')); });
     inn.push(line([0.69, 0.64, 0.6, 0.57].map(py => M(tx(py, 0), py)), lw, BRONZE));
     // obliques / rib lines
     for (const s of [-1, 1]) for (const [py, a, b] of [[0.66, 44, 70], [0.63, 40, 66], [0.602, 36, 60]]) inn.push(line([M(tx(py + 0.006, s * a), py + 0.008), M(tx(py - 0.006, s * b), py - 0.004)], lw * 0.8, BRONZE, ' opacity=".7"'));
@@ -217,7 +218,7 @@ function darrow(x, y, h, opts = {}) {
     inn.push(spec([[-26, 0.662], [-12, 0.664], [-12, 0.646], [-25, 0.645]].map(([p, py]) => M(tx(py, p), py)), 0.6));
     inn.push(poly([[-98, 0.76], [-78, 0.76], [-70, 0.6], [-98, 0.6]].map(([p, py]) => M(-TE(py).w + (p + 98) * 0.0006, py)), BOUNCE, ' opacity=".0"'));
     cuirass = form(out, { fill: G('ga'), in: inn, sh: 'sg', rim: 1 });
-    cuirass += lion(x + tx(0.738, 0) * h, y - 0.737 * h, 0.036 * h, 0.9 + 0.1 * cb);
+    cuirass += lion(M(tx(0.738, 0), 0.737)[0], M(0, 0.737)[1], 0.036 * h, 0.9 + 0.1 * cb);
     // hip plates (fauld) over the thighs
     const HE = TE(0.5);
     for (const s of [-1, 1]) {
@@ -245,10 +246,10 @@ function darrow(x, y, h, opts = {}) {
   // ---------- ARMS + PAULDRONS ----------
   const A3 = (X, Y, Z) => [X * cb + Z * sb, Y];
   function arm(s, withBlade) {
-    const sh = A3(s * 0.15, 0.765, 0), el = A3(s * 0.176, 0.607, -0.01), wr = A3(s * 0.169, 0.478, 0.03), hd = A3(s * 0.166, 0.437, 0.04);
+    const sh = A3(s * 0.146, 0.765, 0), el = A3(s * 0.168, 0.596, -0.01), wr = A3(s * 0.163, 0.462, 0.03), hd = A3(s * 0.161, 0.423, 0.04);
     const seg = (a, b, wa, wb) => { const dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l; return [[a[0] + nx * wa, a[1] + ny * wa], [b[0] + nx * wb, b[1] + ny * wb], [b[0] - nx * wb, b[1] - ny * wb], [a[0] - nx * wa, a[1] - ny * wa]]; };
     const round = q => smooth([q[0], [lerp(q[0][0], q[1][0], 0.5) + (q[0][0] < q[3][0] ? -0.004 : 0.004), lerp(q[0][1], q[1][1], 0.5)], q[1], q[2], [lerp(q[2][0], q[3][0], 0.5) + (q[0][0] < q[3][0] ? 0.004 : -0.004), lerp(q[2][1], q[3][1], 0.5)], q[3]].map(p => M(p[0], p[1])), true, 3);
-    let o = form(round(seg(sh, [el[0], el[1] - 0.01], 0.034, 0.027)), { fill: G('kb'), line: LINE_K, sh: 'sk', rim: 1, in: [line([M(sh[0] - 0.014, 0.72), M(el[0] - 0.012, 0.63)], h * 0.004, '#6b6a7c', ' opacity=".45"')] });
+    let o = form(round(seg(sh, [el[0], el[1] - 0.01], 0.033, 0.026)), { fill: G('kb'), line: LINE_K, sh: 'sk', rim: 1, in: [line([M(sh[0] - 0.014, 0.72), M(el[0] - 0.012, 0.63)], h * 0.004, '#6b6a7c', ' opacity=".45"')] });
     let bl = '';
     if (withBlade) {
       const th = -8 * D, ct = Math.cos(th), st = Math.sin(th);
@@ -261,13 +262,13 @@ function darrow(x, y, h, opts = {}) {
       bl += form([B(-0.008, -0.052), B(0.008, -0.052), B(0.009, 0.022), B(-0.009, 0.022)], { fill: '#1b1418', line: LINE_K }) + form([B(-0.012, -0.066), B(0.012, -0.066), B(0.014, -0.052), B(-0.014, -0.052)], { fill: G('ga') });
     }
     // gauntleted fist (black glove, gold back plate)
-    const fist = smooth([[-0.027, 0.03], [0.026, 0.032], [0.031, 0.002], [0.025, -0.03], [0.002, -0.041], [-0.023, -0.032], [-0.031, 0]].map(([dx, dy]) => M(hd[0] + dx, hd[1] + dy)), true, 3);
-    const handF = form(fist, { fill: G('kb'), line: LINE_K, sh: 'sk', in: [
-      form([[-0.03, 0.034], [0.03, 0.036], [0.03, 0.004], [0, -0.006], [-0.03, 0.002]].map(([dx, dy]) => M(hd[0] + dx, hd[1] + dy)), { fill: G('ga'), sw: lw * 0.8, sil: false, sh: 'sg' }),
-      ...[-0.012, 0.001, 0.014].map(dx => line([M(hd[0] + dx, hd[1] - 0.006), M(hd[0] + dx * 1.05, hd[1] - 0.034)], lw * 0.8, '#3a3944')),
+    const fist = smooth([[-0.023, 0.03], [0.022, 0.031], [0.027, 0.002], [0.022, -0.028], [0.002, -0.038], [-0.02, -0.03], [-0.027, 0]].map(([dx, dy]) => M(hd[0] + dx, hd[1] + dy)), true, 3);
+    const handF = form(fist, { fill: G('ga'), sh: 'sg', in: [
+      form([[-0.03, 0.034], [0.03, 0.036], [0.03, 0.006], [0, -0.004], [-0.03, 0.004]].map(([dx, dy]) => M(hd[0] + dx, hd[1] + dy)), { fill: G('ga'), sw: lw * 0.8, sil: false, sh: 'sg' }),
+      ...[-0.012, 0.001, 0.014].map(dx => line([M(hd[0] + dx, hd[1] - 0.004), M(hd[0] + dx * 1.05, hd[1] - 0.034)], lw * 0.9, LINE_G)), line([M(hd[0] - 0.03, hd[1] - 0.018), M(hd[0] + 0.03, hd[1] - 0.016)], lw * 0.8, LINE_G, ' opacity=".6"'),
       spec([[-0.022, 0.028], [-0.008, 0.03], [-0.01, 0.014], [-0.023, 0.012]].map(([dx, dy]) => M(hd[0] + dx, hd[1] + dy)), 0.7)] });
     // vambrace (gold cylinder, flared at the elbow) + elbow cop
-    const fo = seg([el[0], el[1] + 0.004], [wr[0], wr[1] - 0.004], 0.033, 0.024), vam = round(fo);
+    const fo = seg([el[0], el[1] - 0.006], [wr[0], wr[1] - 0.004], 0.031, 0.022), vam = round(fo);
     const ax = t => [lerp(el[0], wr[0], t), lerp(el[1], wr[1], t)];
     const vIn = [
       poly([M(ax(0)[0] - 0.017, ax(0)[1]), M(ax(0)[0] - 0.006, ax(0)[1]), M(ax(1)[0] - 0.004, ax(1)[1]), M(ax(1)[0] - 0.012, ax(1)[1])], SPEC, ' opacity=".5"'),
@@ -276,24 +277,25 @@ function darrow(x, y, h, opts = {}) {
       line([M(ax(0.14)[0] + 0.012, ax(0.14)[1]), M(ax(0.86)[0] + 0.009, ax(0.86)[1])], lw * 0.8, LINE_G, ' opacity=".7"'),
     ];
     const vamS = form(vam, { fill: G('gb'), in: vIn, rim: 1 });
-    const ec = smooth([[-0.036, 0.014], [0, 0.03], [0.036, 0.014], [0.03, -0.02], [0, -0.03], [-0.03, -0.02]].map(([dx, dy]) => M(el[0] + dx, el[1] + dy)), true, 3);
+    const ec = smooth([[-0.027, 0.01], [0, 0.022], [0.027, 0.01], [0.025, -0.012], [0, -0.02], [-0.025, -0.012]].map(([dx, dy]) => M(el[0] + dx, el[1] + dy)), true, 3);
     const ecS = form(ec, { fill: G('ga'), sh: 'sg', in: [spec([[-0.024, 0.012], [-0.006, 0.02], [-0.01, 0], [-0.025, -0.004]].map(([dx, dy]) => M(el[0] + dx, el[1] + dy)), 0.75)] });
     o += bl + handF + vamS + ecS;
-    // lion-head pauldron: under lame, dome, lion face
-    const pc = A3(s * 0.156, 0.772, 0), kx = 0.88 + 0.12 * cb;
-    const dome = smooth([[-0.06, 0.018], [-0.044, 0.052], [0, 0.066], [0.042, 0.052], [0.064, 0.012], [0.068, -0.032], [0.046, -0.064], [0, -0.074], [-0.04, -0.06], [-0.06, -0.022]].map(([u, v]) => M(pc[0] + s * u * kx, pc[1] + v)), true, 4);
-    const lame2 = smooth([[-0.05, -0.03], [0.064, -0.03], [0.062, -0.092], [0.03, -0.108], [-0.02, -0.1], [-0.046, -0.078]].map(([u, v]) => M(pc[0] + s * u * kx, pc[1] + v)), true, 3);
-    o += form(lame2, { fill: G('gd'), sh: 'sg', rim: 1, in: [line([M(pc[0] - 0.08, pc[1] - 0.088), M(pc[0] + 0.08, pc[1] - 0.086)], lw * 0.9, LINE_G), s < 0 ? spec([M(pc[0] - 0.056 * kx, pc[1] - 0.074), M(pc[0] - 0.04 * kx, pc[1] - 0.076), M(pc[0] - 0.04 * kx, pc[1] - 0.092), M(pc[0] - 0.054 * kx, pc[1] - 0.088)], 0.5) : ''] });
-    o += form(dome, { fill: G('ga'), sh: 'sg', rim: 1, in: [
-      line(smooth(dome.map(p => [lerp(p[0], x + pc[0] * h, 0.1), lerp(p[1], y - pc[1] * h, 0.1)]), true, 1), lw * 0.8, LINE_G, ' opacity=".55"'),
-      s < 0 ? spec([[-0.05, 0.03], [-0.03, 0.05], [-0.012, 0.056], [-0.032, 0.04]].map(([u, v]) => M(pc[0] + u * kx, pc[1] + v)), 0.85) : spec([[-0.04, 0.046], [-0.02, 0.058], [-0.004, 0.058], [-0.022, 0.05]].map(([u, v]) => M(pc[0] + u * kx, pc[1] + v)), 0.6)] });
-    o += lion(x + (pc[0] + s * 0.003) * h, y - (pc[1] - 0.006) * h, 0.047 * h, kx);
+    // lion-head pauldron: under lame, shoulder cap with mane grooves, lion face
+    const pc = A3(s * 0.146, 0.772, 0), kx = 0.88 + 0.12 * cb;
+    const Q = (u, v) => M(pc[0] + s * u * kx, pc[1] + v);
+    const dome = smooth([[-0.052, 0.022], [-0.034, 0.045], [0.004, 0.054], [0.04, 0.04], [0.058, 0.006], [0.058, -0.03], [0.04, -0.054], [0.002, -0.062], [-0.034, -0.05], [-0.05, -0.016]].map(([u, v]) => Q(u, v)), true, 4);
+    const lame2 = smooth([[-0.04, -0.03], [0.055, -0.03], [0.054, -0.076], [0.028, -0.09], [-0.014, -0.084], [-0.038, -0.066]].map(([u, v]) => Q(u, v)), true, 3);
+    o += form(lame2, { fill: G('gd'), sh: 'sg', rim: 1, in: [line([Q(-0.06, -0.073), Q(0.07, -0.071)], lw * 0.9, LINE_G), s < 0 ? spec([Q(0.048, -0.06), Q(0.036, -0.062), Q(0.036, -0.076), Q(0.046, -0.072)], 0.5) : ''] });
+    const grooves = [-150, -115, -80, -45, -10, 25, 60, 95, 130, 165].map(a => { const c = Math.sin(a * D), d2 = Math.cos(a * D); return line([Q(0.004 + c * 0.034, -0.006 + d2 * 0.036), Q(0.004 + c * 0.052, -0.004 + d2 * 0.054)], lw * 0.9, BRONZE, ' opacity=".6"'); });
+    o += form(dome, { fill: G('ga'), sh: 'sg', rim: 1, in: grooves.concat([
+      s < 0 ? spec([Q(0.046, 0.022), Q(0.03, 0.04), Q(0.014, 0.046), Q(0.03, 0.032)], 0.85) : spec([Q(-0.034, 0.036), Q(-0.016, 0.046), Q(-0.002, 0.047), Q(-0.018, 0.04)], 0.6)]) });
+    o += lion(Q(0.004, -0.006)[0], Q(0.004, -0.006)[1], 0.04 * h, kx, false);
     return o;
   }
 
   // ---------- HEAD ----------
-  const r = h * 0.07, ya = yaw * D, pa = pitch * D, cy_ = Math.cos(ya), sy_ = Math.sin(ya), cp = Math.cos(pa), sp = Math.sin(pa);
-  const hcx = x + h * 0.008 * sy_, hcy = y - h * 0.915;
+  const r = h * 0.072, ya = yaw * D, pa = pitch * D, cy_ = Math.cos(ya), sy_ = Math.sin(ya), cp = Math.cos(pa), sp = Math.sin(pa);
+  const hcx = x + h * 0.008 * sy_, hcy = y - h * 0.925;
   const P = (X, Y, Z) => { const y1 = Y * cp + Z * sp, z1 = -Y * sp + Z * cp; return [hcx + (X * cy_ + z1 * sy_) * r, hcy - y1 * r, -X * sy_ + z1 * cy_]; };
   const p2 = (X, Y, Z) => { const q = P(X, Y, Z); return [q[0], q[1]]; };
   const fw = r * 0.03;
@@ -315,18 +317,18 @@ function darrow(x, y, h, opts = {}) {
   // skull + jaw hull
   const hp = [];
   for (let la = -60; la <= 90; la += 15) for (let lo = 0; lo < 360; lo += 20) { const A = la * D, L = lo * D; hp.push(P(0.9 * Math.cos(A) * Math.sin(L), 0.05 + Math.sin(A), -0.08 + 1.05 * Math.cos(A) * Math.cos(L))); }
-  for (const s of [-1, 1]) hp.push(P(s * 0.77, -0.8, -0.05), P(s * 0.82, -0.3, 0.42), P(s * 0.31, -1.36, 0.66), P(s * 0.6, -1.1, 0.38), P(s * 0.3, 0.02, 0.93), P(s * 0.42, -0.55, 0.74));
+  for (const s of [-1, 1]) hp.push(P(s * 0.79, -0.84, -0.05), P(s * 0.82, -0.3, 0.42), P(s * 0.34, -1.37, 0.66), P(s * 0.62, -1.12, 0.38), P(s * 0.3, 0.02, 0.93), P(s * 0.42, -0.55, 0.74));
   hp.push(P(0, -1.4, 0.7), P(0, 0.05, 0.97), P(0, 0.5, 0.86), P(0, -0.98, 0.9), P(0, -1.24, 0.8));
-  const headHull = smooth(hull(hp.map(p => [p[0], p[1]])), true, 2);
+  const headHull = hull(hp.map(p => [p[0], p[1]]));
 
   // hair: short, swept up off the forehead
-  const HC = [0, 0.1, -0.1], HA = [0.97, 1.1, 1.12];
+  const HC = [0, 0.1, -0.1], HA = [0.94, 1.08, 1.12];
   const dir = (lo, la) => { const A = la * D, L = lo * D; return [Math.cos(A) * Math.sin(L), Math.sin(A), Math.cos(A) * Math.cos(L)]; };
   const HP = (v, k = 1) => P(HC[0] + HA[0] * v[0] * k, HC[1] + HA[1] * v[1] * k, HC[2] + HA[2] * v[2] * k);
   const hh = [];
   for (let la = -40; la <= 90; la += 15) for (let lo = 0; lo < 360; lo += 20) hh.push(HP(dir(lo, la)));
-  hh.push(P(0, 1.34, 0.5), P(-0.42, 1.27, 0.48), P(0.42, 1.27, 0.48), P(0, 1.3, 0.05), P(-0.72, 1.0, 0.4), P(0.72, 1.0, 0.4), P(0, 1.1, 0.86));
-  const hairHull = smooth(hull(hh.map(p => [p[0], p[1]])), true, 2);
+  hh.push(P(0, 1.3, 0.5), P(-0.42, 1.25, 0.48), P(0.42, 1.25, 0.48), P(0, 1.26, 0.05), P(-0.7, 1.0, 0.4), P(0.7, 1.0, 0.4), P(0, 1.08, 0.86));
+  const hairHull = hull(hh.map(p => [p[0], p[1]]));
   const sk = (lo, la) => { const v = dir(lo, la); return [0.9 * v[0], 0.05 + v[1], -0.08 + 1.05 * v[2]]; };
   const half = [[0.8, -0.82, -0.3], [0.88, -0.5, -0.36], [0.93, -0.12, -0.2], sk(86, -6), sk(77, -20), sk(73, 2), sk(67, 20), sk(58, 35), sk(42, 44), sk(22, 47), sk(8, 45)];
   const HL3 = half.map(v => [-v[0], v[1], v[2]]).concat([sk(0, 43)], half.slice().reverse());
@@ -409,7 +411,7 @@ function darrow(x, y, h, opts = {}) {
     } else {
       const sm = expr === 'smile', br = expr === 'brood';
       // 'smile' = small, closed, lopsided: his right corner (viewer's left) lifts, the other stays level
-      const pts = sm ? [[-0.35, -0.975, 0.78], [-0.18, -1.018, 0.89], [0, -1.022, 0.93], [0.16, -1.016, 0.9], [0.31, -1.012, 0.8]]
+      const pts = sm ? [[-0.37, -0.955, 0.77], [-0.2, -1.012, 0.89], [0, -1.022, 0.93], [0.16, -1.018, 0.9], [0.31, -1.012, 0.8]]
         : [[-0.3, br ? -1.05 : -1.03, 0.8], [-0.15, -1.012, 0.9], [0, -1.018, 0.93], [0.15, -1.012, 0.9], [0.3, br ? -1.05 : -1.03, 0.8]];
       const ul = mp([pts[0], [-0.14, -0.972, 0.92], [-0.04, -0.96, 0.95], [0, -0.972, 0.95], [0.04, -0.96, 0.95], [0.14, -0.972, 0.92], pts[4]]);
       const ll = mp([pts[4], [0.16, -1.09, 0.9], [0, -1.11, 0.92], [-0.16, -1.09, 0.9], pts[0]]);
@@ -417,7 +419,7 @@ function darrow(x, y, h, opts = {}) {
       feat += poly(ul.concat(mline.slice().reverse()), '#b06a5a', ' opacity=".7"') + poly(mline.concat(ll), LIP, ' opacity=".75"');
       feat += poly(mp([[-0.1, -1.045, 0.93], [0.02, -1.05, 0.94], [0.0, -1.085, 0.93], [-0.1, -1.075, 0.92]]).concat(), '#f0c0ae', ' opacity=".5"');
       feat += line(mline, fw * 1.15, '#4a1e16');
-      if (sm) feat += line(mp([[-0.4, -0.93, 0.74], [-0.41, -0.975, 0.74], [-0.38, -1.02, 0.74]]), fw * 0.7, LINE_S, ' opacity=".75"');
+      if (sm) feat += line(mp([[-0.42, -0.9, 0.74], [-0.44, -0.955, 0.74], [-0.41, -1.01, 0.74]]), fw * 0.7, LINE_S, ' opacity=".75"');
     }
   }
   if (scar) feat += line([p2(-0.5, 0.2, 0.75), p2(-0.46, 0.02, 0.8)], fw * 0.8, '#c98f7c', ' opacity=".7"');
@@ -429,17 +431,22 @@ function darrow(x, y, h, opts = {}) {
     const mid = nid(), cid = nid(), bb = [hcx - 3 * r, hcy - 3 * r, 6 * r, 6 * r].map(f);
     const rotX = (v, b) => [v[0], v[1] * Math.cos(b) + v[2] * Math.sin(b), -v[1] * Math.sin(b) + v[2] * Math.cos(b)];
     const flow = (lo, la, s0, s1, lift = 1, n = 12) => { const v0 = dir(lo, la), out = []; for (let i = 0; i <= n; i++) { const s = lerp(s0, s1, i / n), v = rotX(v0, s * 120 * D), q = HP([v[0] * (1 + 0.15 * s), v[1], v[2]], lift * (1 + 0.1 * Math.sin(Math.PI * cl(s * 1.6)))); if (q[2] < -0.02) break; out.push([q[0], q[1]]); } return out; };
-    // tufts poking above the mass (swept up and back)
-    for (const [lo, w, k] of [[-46, 9, 1.14], [-24, 10, 1.2], [-2, 10, 1.22], [20, 10, 1.19], [42, 9, 1.13]]) {
-      const a = HP(dir(lo - w, 62), 1.0), b = HP(dir(lo + w, 62), 1.0), t = HP(dir(lo * 1.1 + 6, 80), k);
-      tufts += form([[a[0], a[1]], [t[0], t[1]], [b[0], b[1]]], { fill: lo > 10 ? HAIR_LO : HAIR, line: '#5a3c10' });
+    // swept-up tufts that break the top silhouette (drawn over the cap; base edge left open)
+    for (const [lo, w, k, la] of [[-54, 17, 1.09, 58], [-32, 17, 1.14, 64], [-10, 17, 1.17, 68], [12, 17, 1.17, 68], [34, 17, 1.13, 64], [56, 17, 1.07, 58]]) {
+      const a = HP(dir(lo - w, la - 22), 1.0), b = HP(dir(lo + w, la - 22), 1.0), t = HP(dir(lo * 0.9 + 18, la + 2), k), c = HP(dir(lo, la - 30), 0.98);
+      if (t[2] < -0.3) continue;
+      const tri = [[a[0], a[1]], [t[0], t[1]], [b[0], b[1]]];
+      sil += pathD(tri);
+      tufts += poly(tri.concat([[c[0], c[1]]]), G('hg')) + poly([[lerp(a[0], b[0], 0.55), lerp(a[1], b[1], 0.55)], [t[0], t[1]], [b[0], b[1]]], HAIR_SH, ` opacity="${lo > 0 ? 0.5 : 0.25}"`)
+        + line([[lerp(a[0], b[0], 0.3), lerp(a[1], b[1], 0.3)], [lerp(a[0], t[0], 0.8), lerp(a[1], t[1], 0.8)]], fw * 1.2, SPEC, ' opacity=".6"') + line(tri, lw * 0.9, '#5a3c10');
     }
     let inner = '';
     for (const [lo, la, a, b, w, op] of [[-40, 46, 0.02, 0.5, 0.2, 0.8], [-16, 48, 0.02, 0.42, 0.16, 0.9], [-62, 28, 0.05, 0.5, 0.14, 0.6], [10, 48, 0.02, 0.36, 0.12, 0.6]]) { const pp = flow(lo, la, a, b); if (pp.length > 2) inner += line(pp, r * w, HAIR_HI, ` opacity="${op}"`); }
+    { const a = p2(-2, 0.32, 0), b = p2(2, 0.32, 0); inner += poly([a, b, [b[0], b[1] + 3 * r], [a[0], a[1] + 3 * r]], HAIR_LO, ' opacity=".55"'); } // short, darker sides
     inner += `<path d="${pathD(hairHull)}" fill="${G('hh')}"/>`;
     for (const [lo, la, e, op] of [[-72, 14, 0.5, 0.6], [-56, 36, 0.6, 0.7], [-34, 46, 0.66, 0.75], [-12, 47, 0.6, 0.7], [6, 46, 0.66, 0.75], [26, 47, 0.6, 0.7], [46, 42, 0.62, 0.7], [64, 28, 0.55, 0.6], [76, 8, 0.45, 0.6]]) { const pp = flow(lo, la, 0.02, e); if (pp.length > 2) inner += line(pp, fw * 0.9, '#6a4612', ` opacity="${op}"`); }
     for (const [lo, la, a, b] of [[-26, 47, 0.06, 0.3], [-48, 42, 0.1, 0.34], [-4, 47, 0.05, 0.24]]) { const pp = flow(lo, la, a, b, 1.0); if (pp.length > 2) inner += line(pp, fw * 1.1, SPEC, ' opacity=".75"'); }
-    inner += rimPath(hairHull, rimW, lw * 0.5, 0.7);
+    inner += rimPath(hairHull, rimW, lw * 0.5, 0.4);
     sil += pathD(hairHull);
     hairCap = `<mask id="${mid}" maskUnits="userSpaceOnUse" x="${bb[0]}" y="${bb[1]}" width="${bb[2]}" height="${bb[3]}"><rect x="${bb[0]}" y="${bb[1]}" width="${bb[2]}" height="${bb[3]}" fill="#fff"/><path d="${pathD(cutPoly)}" fill="#000"/></mask>`
       + `<clipPath id="${cid}"><path d="${pathD(hairHull)}"/></clipPath>`
@@ -449,15 +456,15 @@ function darrow(x, y, h, opts = {}) {
   // ---------- EARS ----------
   let ears = '';
   for (const s of [-1, 1]) {
-    const e = [p2(s * 0.92, -0.04, 0.03), p2(s * 1.06, 0.02, -0.14), p2(s * 1.11, -0.2, -0.2), p2(s * 1.04, -0.47, -0.12), p2(s * 0.93, -0.57, 0.02), p2(s * 0.9, -0.3, 0.08)];
+    const e = [p2(s * 0.91, -0.08, 0.03), p2(s * 1.02, -0.03, -0.14), p2(s * 1.06, -0.2, -0.2), p2(s * 1.0, -0.43, -0.12), p2(s * 0.92, -0.52, 0.02), p2(s * 0.89, -0.3, 0.08)];
     const m = s * (e[2][0] - e[5][0]) / r, k = ss(0.02, 0.14, m);
     if (k <= 0) continue;
-    ears += `<g opacity="${f(k)}">${form(smooth(e, true, 3), { fill: G('sn'), line: LINE_S, sil: k > 0.9, in: [s > 0 ? poly([p2(0, 1, 0), p2(2, 1, 0), p2(2, -2, 0), p2(0, -2, 0)], SKIN_SH, ' opacity=".6"') : '', line(smooth([p2(s * 1.02, -0.08, -0.1), p2(s * 1.05, -0.26, -0.12), p2(s * 0.98, -0.4, -0.05)], false, 3), fw * 0.8, LINE_S, ' opacity=".8"')] })}</g>`;
+    ears += `<g opacity="${f(k)}">${form(smooth(e, true, 3), { fill: G('sn'), line: LINE_S, sil: k > 0.9, in: [s > 0 ? poly([p2(0, 1, 0), p2(2, 1, 0), p2(2, -2, 0), p2(0, -2, 0)], SKIN_SH, ' opacity=".6"') : '', line(smooth([p2(s * 0.98, -0.11, -0.1), p2(s * 1.01, -0.25, -0.12), p2(s * 0.96, -0.38, -0.05)], false, 3), fw * 0.8, LINE_S, ' opacity=".8"')] })}</g>`;
   }
 
   // ---------- ASSEMBLE ----------
   const far = yaw >= 0 ? 1 : -1;
-  let fig = (bust ? '' : leg(far) + leg(-far)) + pelvis + (bust ? '' : hips) + neck + cuirass + sash + arm(far, blade && far === -1) + arm(-far, blade && far === 1 ? false : blade && -far === -1) + tufts + head + hairCap + ears;
+  let fig = (bust ? '' : leg(far) + leg(-far)) + pelvis + (bust ? '' : hips) + neck + cuirass + sash + arm(far, blade && far === -1) + arm(-far, blade && far === 1 ? false : blade && -far === -1) + head + hairCap + tufts + ears;
   let out = `<defs>${defs}</defs><path d="${sil}" fill="none" stroke="${INK}" stroke-width="${f(silW)}" stroke-linejoin="round"/>${fig}`;
   if (bust) { const c = nid(); out = `<clipPath id="${c}"><rect x="${f(x - h)}" y="${f(y - 1.4 * h)}" width="${f(2 * h)}" height="${f(0.88 * h)}"/></clipPath><g clip-path="url(#${c})">${out}</g>`; }
   return `<g class="darrow">${out}</g>`;
