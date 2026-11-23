@@ -15,12 +15,12 @@ function razor(hx, hy, ang, ext, t, o = {}) {
   // coiled: loops around the wrist; extended: whip wave that dies out as it stiffens
   for (let i = 0; i <= N; i++) { const u = i / N;
     if (ext < 0.12) { const k = 1 - ext / 0.12, a = u * Math.PI * 4.2 + t * 3, r = 38 + u * 22; pts.push([hx + Math.cos(a) * r * (0.6 + 0.4 * k) + ca * u * 60 * (1 - k), hy + Math.sin(a) * r * 0.55 * (0.6 + 0.4 * k) + sa * u * 60 * (1 - k)]); continue; }
-    const d = u * len, w = (1 - stiff) * (Math.sin(u * 8.5 - t * 13) * 34 * u + Math.sin(u * Math.PI * 1.6) * 60 * (1 - ext) * u);
+    const d = u * len * (1 - .18 * stiff * u * u), w = (1 - stiff) * (Math.sin(u * 8.5 - t * 13) * 34 * u + Math.sin(u * Math.PI * 1.6) * 60 * (1 - ext) * u) + stiff * (o.hook ?? 1) * (Math.sin(u * Math.PI * .9) * len * .26 + Math.pow(u, 6) * len * .22);
     pts.push([hx + ca * d - sa * w, hy + sa * d + ca * w]); }
   // tapered blade outline from the centre line
   const L1 = [], L2 = [];
   for (let i = 0; i <= N; i++) { const p = pts[i], q = pts[Math.min(N, i + 1)], r0 = pts[Math.max(0, i - 1)], dx = q[0] - r0[0], dy = q[1] - r0[1], m = Math.hypot(dx, dy) || 1, nx = -dy / m, ny = dx / m, u = i / N;
-    const wd = (ext < 0.12 ? 7 : 15) * (1 - u * 0.75) * (u > 0.94 ? (1 - u) / 0.06 : 1) + 1.5; L1.push([p[0] + nx * wd, p[1] + ny * wd]); L2.push([p[0] - nx * wd, p[1] - ny * wd]); }
+    const wd = (ext < 0.12 ? 7 : 15 + 14 * stiff * Math.sin(Math.PI * u)) * (1 - u * 0.6) * (u > 0.94 ? (1 - u) / 0.06 : 1) + 1.5; L1.push([p[0] + nx * wd, p[1] + ny * wd]); L2.push([p[0] - nx * wd, p[1] - ny * wd]); }
   const outline = 'M' + L1.map(p => p.map(f).join(' ')).join(' L') + ' L' + L2.reverse().map(p => p.map(f).join(' ')).join(' L') + ' Z';
   const spine = 'M' + pts.map(p => p.map(f).join(' ')).join(' L');
   // segment notches every few points
@@ -119,42 +119,51 @@ function rain(t) {
   CUTS.forEach((c, i) => { d += swoosh(DX + 60, FY - 500, 450, -2.0, 0.7, (t - (c - .3)) / .4, i === 0 ? '#ffe6a8' : '#e9eef4'); });
   // landing impact
   d += impact(DX, FY - 10, (t - LAND) / .6, 1.3);
-  // WOLF JAWS: one-frame slam. Karnus drawn as a glowing outline, engulfed by a giant wolf head with razor teeth.
-  const JT = CUTS[0] - .02, jk = t - JT;
-  if (jk >= 0 && jk < 4 / 30) {
-    const HS = .7, kx = 700, ky = FY, cx = kx - 130, cy = FY - 560;
-    const WT = process.env.WOLF !== 'white' ? { fur: '#16101e', fur2: '#2a2038', line: '#ffcf6a', mouth: '#3a0d14', eye: '#ffd23a', glow: '#ffb02e' }
-                                          : { fur: '#f4f2ee', fur2: '#c9ccd6', line: '#120d0f', mouth: '#4a0f18', eye: '#7fd3ff', glow: '#9fd8ff' };
-    // wolf head in profile facing right; mouth hinge at (-330, 0), jaws open ±gap around Karnus
-    const G = 250 - 60 * cl(jk / (3 / 30)), LW = 14;
+  // WOLF JAWS (manga): B&W panel, white wolf with ink detail + red eyes, Karnus a solid black silhouette whose outline/eyes turn red.
+  const JA = CUTS[0] - .42, jk = t - JA, JD = .5;
+  if (jk >= 0 && jk < JD) {
+    const u = jk / JD, open = u < .7 ? eo(u / .7) : 1, snap = u < .7 ? 0 : eo((u - .7) / .15);
+    const HS = .62 + .14 * eo(u / .7), kx = 700, ky = FY, cx = kx - 130 - 120 * (1 - eo(u / .5)), cy = FY - 560 - 140 * (1 - eo(u / .5));
+    const G = 330 * open - 230 * snap, red = snap > .3;
+    // manga speed lines + screentone
+    let bg = `<rect x="-300" y="-300" width="1680" height="2520" fill="#f4f1ea"/>`;
+    for (let i = 0; i < 70; i++) { const a = i / 70 * Math.PI * 2 + (i % 3) * .01, r0 = 330 + (i * 37) % 160; bg += `<path d="M${f(cx + Math.cos(a) * r0)} ${f(cy + Math.sin(a) * r0)} L${f(cx + Math.cos(a - .012) * 1800)} ${f(cy + Math.sin(a - .012) * 1800)} L${f(cx + Math.cos(a + .012) * 1800)} ${f(cy + Math.sin(a + .012) * 1800)} Z" fill="#111"/>`; }
+    // Karnus silhouette
+    const kar = K.karnus(kx, ky, 280, { yaw: -16, brow: 'sad', mouth: 'flat', blink: true, arms: ['raise', 'raise'], kitOverride: { hair: 'none' } });
+    const sil = `<g>${kar.replace(/fill="(?!none)[^"]*"/g, 'fill="#050505"').replace(/stroke="[^"]*"/g, `stroke="${red ? '#e8251c' : '#050505'}"`).replace(/stroke-width="([\d.]+)"/g, (m, w) => `stroke-width="${(+w * (red ? 1.4 : 1)).toFixed(1)}"`)}</g>`;
+    const SS = 280 * 1.12, rr = SS * .42, hx = kx - 16 * SS * .0012, hy = ky - SS * 1.55 - rr * .78;
+    const kHair = `<path d="M${f(hx - rr)} ${f(hy - rr * .2)} L${f(hx - rr * .7)} ${f(hy - rr * 1.35)} L${f(hx - rr * .3)} ${f(hy - rr * .95)} L${f(hx)} ${f(hy - rr * 1.55)} L${f(hx + rr * .3)} ${f(hy - rr * .95)} L${f(hx + rr * .72)} ${f(hy - rr * 1.35)} L${f(hx + rr)} ${f(hy - rr * .2)} Z" fill="#050505" stroke="${red ? '#e8251c' : '#050505'}" stroke-width="10" stroke-linejoin="round"/>`;
+    const kEyes = red ? [-1, 1].map(d => `<path d="M${f(hx + d * rr * .55)} ${f(hy - rr * .05)} L${f(hx + d * rr * .15)} ${f(hy + rr * .08)}" stroke="#ff2a1a" stroke-width="12" stroke-linecap="round"/>${L.glow(hx + d * rr * .35, hy, 40, '#ff2a1a', .8)}`).join('') : '';
+    // white wolf head, manga ink
+    const fur = (x, y, n, len, ang) => Array.from({ length: n }, (_, i) => { const a = ang + (i - n / 2) * .06, l = len * (.7 + (i % 3) * .15); return `<path d="M${f(x + i * 6)} ${f(y + (i % 2) * 8)} q${f(Math.cos(a) * l * .5)} ${f(Math.sin(a) * l * .5 - 6)} ${f(Math.cos(a) * l)} ${f(Math.sin(a) * l)}" stroke="#111" stroke-width="4" fill="none" stroke-linecap="round"/>`; }).join('');
     let teeth = '';
-    for (let i = 0; i < 10; i++) { const x = -200 + i * 72, h = (i === 8 ? 150 : i % 2 ? 70 : 105); // upper row
-      const yT = -G + 30 + i * 8; teeth += `<path d="M${x - 24} ${yT} L${x + 4} ${yT + h} L${x + 26} ${yT} Z" fill="#fffdf6" stroke="#120d0f" stroke-width="6"/>`; }
-    for (let i = 0; i < 9; i++) { const x = -190 + i * 72, h = (i === 7 ? 140 : i % 2 ? 65 : 95), yB = G - 30 - i * 6; teeth += `<path d="M${x - 24} ${yB} L${x + 2} ${yB - h} L${x + 26} ${yB} Z" fill="#fffdf6" stroke="#120d0f" stroke-width="6"/>`; }
-    const ruff = Array.from({ length: 9 }, (_, i) => { const a = (-150 + i * 28) * Math.PI / 180, r1 = 430, r2 = 560 + (i % 2) * 60; return `L${f(-380 + Math.cos(a) * r2)} ${f(Math.sin(a) * r2 * .9)} L${f(-380 + Math.cos(a + .17) * r1)} ${f(Math.sin(a + .17) * r1 * .9)}`; }).join(' ');
-    const head = `<g transform="translate(${cx} ${cy}) scale(${HS})">
-      <path d="M-380 -470 ${ruff} L-380 470 Z" fill="${WT.fur2}" stroke="${WT.line}" stroke-width="${LW}" stroke-linejoin="round"/>
-      <path d="M-330 0 L-470 -230 Q-470 -520 -170 -560 L-40 -560 Q200 -470 420 -330 L590 -${G + 20} Q630 -${G} 600 -${G - 40} L-150 -${G - 40} Z" fill="${WT.fur}" stroke="${WT.line}" stroke-width="${LW}" stroke-linejoin="round"/>
-      <path d="M-330 0 L-470 220 Q-430 470 -120 470 Q200 430 520 ${G + 10} Q540 ${G - 30} 500 ${G - 40} L-150 ${G - 40} Z" fill="${WT.fur}" stroke="${WT.line}" stroke-width="${LW}" stroke-linejoin="round"/>
-      <path d="M-330 0 L-150 -${G - 40} L560 -${G - 40} L500 ${G - 40} L-150 ${G - 40} Z" fill="${WT.mouth}"/>
-      <path d="M-300 -470 L-360 -820 L-140 -560 Z M-80 -540 L-60 -860 L110 -500 Z" fill="${WT.fur}" stroke="${WT.line}" stroke-width="${LW}" stroke-linejoin="round"/>
-      <path d="M-280 -520 L-320 -730 L-180 -560 Z M-50 -540 L-40 -760 L70 -520 Z" fill="${WT.fur2}"/>
-      <ellipse cx="575" cy="-${G + 10}" rx="46" ry="34" fill="#120d0f"/>
-      <path d="M-60 -400 L140 -440 L110 -360 Z" fill="${WT.eye}" stroke="#120d0f" stroke-width="9" stroke-linejoin="round"/>${L.glow(70, -405, 110, WT.glow, .9)}
-      <path d="M-200 -480 Q60 -500 380 -360 M-420 -150 Q-380 -330 -200 -420 M-420 160 Q-360 360 -150 420 M-100 330 Q150 330 400 250" stroke="${WT.fur2}" stroke-width="10" fill="none" stroke-linecap="round"/>
-      <path d="M-180 -400 L-120 -430 M140 -440 L200 -455" stroke="#120d0f" stroke-width="10" stroke-linecap="round"/>
+    for (let i = 0; i < 10; i++) { const x = -200 + i * 72, h = (i === 8 ? 165 : i % 2 ? 80 : 115), yT = -G + 30 + i * 8; teeth += `<path d="M${x - 24} ${yT} Q${x} ${yT + h * .55} ${x + 4} ${yT + h} Q${x + 10} ${yT + h * .5} ${x + 26} ${yT} Z" fill="#fff" stroke="#111" stroke-width="6"/><path d="M${x - 6} ${yT + 10} L${x + 2} ${yT + h * .7}" stroke="#999" stroke-width="3"/>`; }
+    for (let i = 0; i < 9; i++) { const x = -190 + i * 72, h = (i === 7 ? 150 : i % 2 ? 72 : 105), yB = G - 30 - i * 6; teeth += `<path d="M${x - 24} ${yB} Q${x} ${yB - h * .55} ${x + 2} ${yB - h} Q${x + 10} ${yB - h * .5} ${x + 26} ${yB} Z" fill="#fff" stroke="#111" stroke-width="6"/>`; }
+    const ruff = Array.from({ length: 11 }, (_, i) => { const a = (-150 + i * 22) * Math.PI / 180, r1 = 420, r2 = 560 + (i % 2) * 80; return `L${f(-380 + Math.cos(a) * r2)} ${f(Math.sin(a) * r2 * .9)} L${f(-380 + Math.cos(a + .14) * r1)} ${f(Math.sin(a + .14) * r1 * .9)}`; }).join(' ');
+    const W1 = '#ffffff', LN = '#111', LW = 12;
+    const head = `<g transform="translate(${f(cx)} ${f(cy)}) scale(${f(HS)})">
+      <path d="M-380 -470 ${ruff} L-380 470 Z" fill="${W1}" stroke="${LN}" stroke-width="${LW}" stroke-linejoin="round"/>
+      ${fur(-640, -200, 9, 90, Math.PI)}${fur(-660, 120, 9, 90, Math.PI * .95)}${fur(-560, -420, 7, 80, -2.4)}${fur(-560, 380, 7, 80, 2.4)}
+      <path d="M-330 0 L-470 -230 Q-470 -520 -170 -560 L-40 -560 Q200 -470 420 -330 L600 -${G + 20} Q640 -${G} 610 -${G - 40} L-150 -${G - 40} Z" fill="${W1}" stroke="${LN}" stroke-width="${LW}" stroke-linejoin="round"/>
+      <path d="M-330 0 L-470 220 Q-430 470 -120 470 Q200 430 520 ${G + 10} Q540 ${G - 30} 500 ${G - 40} L-150 ${G - 40} Z" fill="${W1}" stroke="${LN}" stroke-width="${LW}" stroke-linejoin="round"/>
+      <path d="M-330 0 L-150 -${G - 40} L560 -${G - 40} L500 ${G - 40} L-150 ${G - 40} Z" fill="#1a0505"/>
+      <path d="M-300 -470 L-370 -840 L-130 -560 Z M-80 -540 L-60 -880 L120 -500 Z" fill="${W1}" stroke="${LN}" stroke-width="${LW}" stroke-linejoin="round"/>
+      <path d="M-290 -520 L-335 -760 L-185 -565 Z M-50 -545 L-42 -780 L75 -525 Z" fill="#cfcfcf"/>
+      ${Array.from({ length: 14 }, (_, i) => `<line x1="${-280 + i * 14}" y1="-560" x2="${-250 + i * 14}" y2="-700" stroke="#111" stroke-width="3"/>`).join('')}
+      <ellipse cx="590" cy="-${G + 10}" rx="46" ry="34" fill="#111"/>
+      <path d="M-60 -400 Q40 -455 150 -440 Q120 -380 110 -360 Q20 -365 -60 -400 Z" fill="#e8251c" stroke="#111" stroke-width="9"/><circle cx="70" cy="-405" r="16" fill="#111"/>${L.glow(60, -405, 120, '#ff2a1a', .85)}
+      <path d="M-120 -470 L-20 -440 M150 -440 L230 -470 M-140 -340 Q-40 -380 60 -350" stroke="#111" stroke-width="10" fill="none" stroke-linecap="round"/>
+      ${fur(-200, -500, 12, 60, -.4)}${fur(0, -470, 12, 55, -.35)}${fur(-300, 300, 10, 60, .4)}${fur(-80, 380, 10, 50, .3)}
+      <path d="M-420 -150 Q-380 -330 -200 -420 M-420 160 Q-360 360 -150 420 M200 -440 Q350 -380 480 -300 M-100 330 Q150 330 400 250" stroke="#111" stroke-width="6" fill="none" stroke-linecap="round"/>
       </g>`;
-    const teethG = `<g transform="translate(${cx} ${cy}) scale(${HS})">${teeth}</g>`;
-    const outline = `<g>${K.karnus(kx, ky, 280, { yaw: -16, brow: 'sad', mouth: 'flat', blink: true, arms: ['raise', 'raise'], kitOverride: { hair: 'none' } }).replace(/fill="#[0-9a-fA-F]{3,6}"/g, 'fill="none"').replace(/stroke="#[0-9a-fA-F]{3,6}"/g, 'stroke="#ff3a2a"').replace(/stroke-width="([\d.]+)"/g, (m, w) => `stroke-width="${(+w * 0.8).toFixed(1)}"`)}</g>`;
-    { const S = 280 * 1.12, r = S * .42, hx = kx - 16 * S * .0012, hy = ky - S * 1.55 - r * .78;
-      var hairLine = `<path d="M${f(hx - r)} ${f(hy - r * .2)} L${f(hx - r * .7)} ${f(hy - r * 1.35)} L${f(hx - r * .3)} ${f(hy - r * .95)} L${f(hx)} ${f(hy - r * 1.55)} L${f(hx + r * .3)} ${f(hy - r * .95)} L${f(hx + r * .72)} ${f(hy - r * 1.35)} L${f(hx + r)} ${f(hy - r * .2)}" fill="none" stroke="#ff3a2a" stroke-width="9" stroke-linejoin="round"/>`; }
-    d += `<rect x="-200" y="-200" width="1480" height="2400" fill="#1a0606" opacity=".75"/>` + L.glow(cx, cy, 650, '#ff6a2a', .45) + head + outline + hairLine + teethG
-      + Array.from({ length: 18 }, (_, i) => { const a = i / 18 * Math.PI * 2; return `<line x1="${f(cx + Math.cos(a) * 560)}" y1="${f(cy + Math.sin(a) * 560)}" x2="${f(cx + Math.cos(a) * 820)}" y2="${f(cy + Math.sin(a) * 820)}" stroke="#fff" stroke-width="12"/>`; }).join('');
+    const teethG = `<g transform="translate(${f(cx)} ${f(cy)}) scale(${f(HS)})">${teeth}</g>`;
+    const impactLines = snap > 0 ? Array.from({ length: 16 }, (_, i) => { const a = i / 16 * Math.PI * 2; return `<line x1="${f(kx + Math.cos(a) * 260)}" y1="${f(hy + 80 + Math.sin(a) * 260)}" x2="${f(kx + Math.cos(a) * (360 + 200 * snap))}" y2="${f(hy + 80 + Math.sin(a) * (360 + 200 * snap))}" stroke="#e8251c" stroke-width="12" stroke-linecap="round"/>`; }).join('') : '';
+    d += `<g>${bg}${sil}${kHair}${kEyes}${head}${teethG}${impactLines}</g>`;
   }
   s += d;
   let out = `<g transform="translate(540 1000) scale(${f(lerp(1.0, 1.08, io(t / 6.4)) * 100) / 100}) translate(-560 -1160)">${s}</g>`;
   out = shakeG(out, t, LAND, 22); CUTS.forEach(c => { out = shakeG(out, t, c, 10); });
-  out += flash(t, LAND, '#fff3c4', .6) + flash(t, CUTS[0] + .08, '#ffffff', .8);
+  out += flash(t, LAND, '#fff3c4', .6) + flash(t, CUTS[0] + .08, '#ffffff', .6);
   const c = t < 1.4 ? ['AN ARMY FROM ORBIT.', 'THE IRON RAIN.', '#ffe08a'] : t < CUTS[2] - .2 ? ['THE REAPER LANDS.', 'GOLDS FALL.', '#ffe08a'] : ['MARS FALLS.', 'TO DARROW.', '#ffe08a'];
   return { svg: out, cap: cap(...c) };
 }

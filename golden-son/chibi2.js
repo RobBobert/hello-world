@@ -40,11 +40,29 @@ function longHair(cx, cy, r, o = {}) {
   return { back, front };
 }
 
+
+// Half-moon hooked sickle (the iconic slingBlade): grip at (0,0), blade rises and curls over. dir = 1 hooks to the right.
+function moonBlade(x, y, s, rot = 0, dir = 1, glow = false) {
+  const L = s * 0.95, pts = [], N = 26;
+  for (let i = 0; i <= N; i++) { const u = i / N, a = -Math.PI / 2 + dir * u * Math.PI * 1.15, R = L * 0.5; pts.push([dir * R * (1 - Math.cos(u * Math.PI * 1.15)) * 0.55, -L * 0.15 - R * Math.sin(u * Math.PI * 1.15) * 1.25 + u * u * L * 0.12]); }
+  const O = [], I = [];
+  for (let i = 0; i <= N; i++) { const p = pts[i], q = pts[Math.min(N, i + 1)], r0 = pts[Math.max(0, i - 1)], dx = q[0] - r0[0], dy = q[1] - r0[1], m = Math.hypot(dx, dy) || 1, nx = -dy / m, ny = dx / m, u = i / N;
+    const w = s * 0.13 * Math.sin(Math.PI * Math.min(1, u * 1.05 + 0.08)) * (u > .9 ? (1 - u) / .1 : 1) + s * 0.012; O.push([p[0] + nx * w * dir, p[1] + ny * w * dir]); I.push([p[0] - nx * w * 0.25 * dir, p[1] - ny * w * 0.25 * dir]); }
+  const d = 'M' + O.map(p => p.map(f).join(' ')).join(' L') + ' L' + I.reverse().map(p => p.map(f).join(' ')).join(' L') + ' Z';
+  let seg = ''; for (let i = 5; i < N - 3; i += 5) seg += `<line x1="${f(O[i][0])}" y1="${f(O[i][1])}" x2="${f(pts[i][0])}" y2="${f(pts[i][1])}" stroke="#7d8894" stroke-width="${f(s * .014)}"/>`;
+  return `<g transform="translate(${f(x)} ${f(y)}) rotate(${f(rot)})">${glow ? `<path d="${d}" fill="none" stroke="#ffd36a" stroke-width="${f(s * .08)}" opacity=".35"/>` : ''}
+    <path d="${d}" fill="#e6ebf1" stroke="${INK}" stroke-width="${f(s * .03)}" stroke-linejoin="round"/>${seg}
+    <path d="M${pts.slice(2, N - 2).map(p => p.map(f).join(' ')).join(' L')}" stroke="#ffffff" stroke-width="${f(s * .014)}" fill="none" opacity=".9" transform="translate(${f(dir * s * .03)} 0)"/>
+    <rect x="${f(-s * .045)}" y="${f(-s * .16)}" width="${f(s * .09)}" height="${f(s * .36)}" rx="${f(s * .025)}" fill="#2a1a12" stroke="${INK}" stroke-width="${f(s * .025)}"/>
+    ${[0, 1, 2, 3].map(k => `<line x1="${f(-s * .045)}" y1="${f(-s * .1 + k * s * .07)}" x2="${f(s * .045)}" y2="${f(-s * .07 + k * s * .07)}" stroke="#6b4a32" stroke-width="${f(s * .015)}"/>`).join('')}
+    <circle cx="0" cy="${f(s * .2)}" r="${f(s * .04)}" fill="#c9a24a" stroke="${INK}" stroke-width="${f(s * .02)}"/></g>`;
+}
+
 // ---------- arms ----------
 // pose per side: 'hang' | 'hip' | 'blade' (right only) | 'table' | 'raise' | 'cross'
 function arm(sx, sy, s, side, pose, col, o) {
   const P = {
-    thrust: [[side * 0.34, 0.08], [side * 0.66, 0.06]], slashUp: [[side * 0.3, -0.25], [side * 0.42, -0.6]], slashDown: [[side * 0.36, 0.22], [side * 0.6, 0.52]], guard: [[side * 0.3, 0.3], [side * 0.12, 0.05]],
+    sword: [[side * 0.24, 0.36], [side * 0.3, 0.7]], thrust: [[side * 0.34, 0.08], [side * 0.66, 0.06]], slashUp: [[side * 0.3, -0.25], [side * 0.42, -0.6]], slashDown: [[side * 0.36, 0.22], [side * 0.6, 0.52]], guard: [[side * 0.3, 0.3], [side * 0.12, 0.05]],
     hang: [[side * 0.17, 0.42], [side * 0.22, 0.85]], stump: [[side * 0.17, 0.42], [side * 0.2, 0.72]], hip: [[side * 0.34, 0.36], [side * 0.08, 0.72]], blade: [[side * 0.26, 0.38], [side * 0.36, 0.76]],
     table: [[side * 0.24, 0.42], [side * -0.02, 0.6]], raise: [[side * 0.26, -0.28], [side * 0.2, -0.62]], cross: [[side * 0.18, 0.4], [side * -0.3, 0.52]],
   }[pose] || [[side * 0.17, 0.42], [side * 0.22, 0.85]];
@@ -54,7 +72,13 @@ function arm(sx, sy, s, side, pose, col, o) {
   const cuff = `<circle cx="${f(h[0] - (h[0] - e[0]) * 0.18)}" cy="${f(h[1] - (h[1] - e[1]) * 0.18)}" r="${f(w * 0.55)}" fill="${col.cuff || col.fore || col.sleeve}" stroke="${INK}" stroke-width="${f(sw * 0.8)}"/>`;
   const hand = pose === 'stump' ? `<circle cx="${f(h[0])}" cy="${f(h[1])}" r="${f(s * 0.06)}" fill="#5a4a3a" stroke="${INK}" stroke-width="${f(sw * 0.9)}"/>` : `<circle cx="${f(h[0])}" cy="${f(h[1])}" r="${f(s * 0.085)}" fill="${col.hand}" stroke="${INK}" stroke-width="${f(sw * 0.9)}"/>`;
   let blade = '';
-  if (pose === 'blade') { const [x, y] = h; blade = `<path d="M${f(x)} ${f(y)} q${f(s * 0.3)} ${f(s * 0.12)} ${f(s * 0.24)} ${f(s * 0.7)} q${f(-s * 0.22)} ${f(-s * 0.26)} ${f(-s * 0.2)} ${f(-s * 0.68)}Z" fill="#e9eef4" stroke="${INK}" stroke-width="${f(sw * 0.7)}" stroke-linejoin="round"/><path d="M${f(x + s * 0.04)} ${f(y + s * 0.05)} q${f(s * 0.17)} ${f(s * 0.12)} ${f(s * 0.17)} ${f(s * 0.5)}" stroke="#fff" stroke-width="${f(sw * 0.6)}" fill="none" stroke-linecap="round"/>`; }
+  if (pose === 'sword') { const [x, y] = h, L = s * 1.35, w = s * .07, ang = 0.28 * side;
+    const tx = x + Math.cos(ang - Math.PI / 2 * 0) * 0, P = (d, o = 0) => [x + Math.sin(ang) * d + Math.cos(ang) * o, y - Math.cos(ang) * d + Math.sin(ang) * o];
+    const pts = [P(s * .08, -w), P(L * .92, -w * .55), P(L, 0), P(L * .92, w * .55), P(s * .08, w)].map(p => p.map(f).join(' ')).join(' L');
+    const ctr = [P(s * .1), P(L * .95)].map(p => p.map(f).join(' ')).join(' L');
+    blade = `<path d="M${ctr}" stroke="#ffae2a" stroke-width="${f(s * .18)}" opacity=".3" stroke-linecap="round"/><path d="M${pts} Z" fill="#f2f4f8" stroke="${INK}" stroke-width="${f(s * .03)}" stroke-linejoin="round"/><path d="M${ctr}" stroke="#fff" stroke-width="${f(s * .015)}"/><path d="M${pts} Z" fill="none" stroke="#ffd36a" stroke-width="${f(s * .012)}"/>`
+      + `<path d="M${[P(s * .06, -s * .14), P(s * .1, -s * .14), P(s * .1, s * .14), P(s * .06, s * .14)].map(p => p.map(f).join(' ')).join(' L')} Z" fill="#ffd36a" stroke="${INK}" stroke-width="${f(s * .02)}"/>`; }
+  if (pose === 'blade') { const [x, y] = h; blade = moonBlade(x, y + s * 0.02, s * 0.85, side * 8, side); }
   return blade + upper + fore + cuff + hand;
 }
 
@@ -136,10 +160,7 @@ function build(x, y, s, o, kit) {
 const lionPauldrons = (x, y, s) => [-1, 1].map(d => { const px = x + d * s * 0.36, py = y - s * 1.47;
   return `<path d="M${f(px - d * s * 0.2)} ${f(py - s * 0.04)} Q${f(px)} ${f(py - s * 0.2)} ${f(px + d * s * 0.17)} ${f(py + s * 0.02)} Q${f(px + d * s * 0.12)} ${f(py + s * 0.12)} ${f(px - d * s * 0.06)} ${f(py + s * 0.1)} Z" fill="#b8862a" stroke="${INK}" stroke-width="${f(s * 0.04)}" stroke-linejoin="round"/>${lionFace(px + d * s * 0.01, py - s * 0.02, s * 0.085, '#a87a26', '#e2b65a', '#5a3a10')}`; }).join('');
 const longSash = (x, y, s) => sash(x, y, s) + `<path d="M${f(x + s * 0.2)} ${f(y - s * 0.86)} l${f(s * 0.05)} ${f(s * 0.62)} l${f(s * 0.08)} ${f(-s * 0.01)} l${f(-s * 0.04)} ${f(-s * 0.62)} Z" fill="#8f1a16" stroke="${INK}" stroke-width="${f(s * 0.03)}"/>`;
-const hipSickle = (x, y, s) => { const hx = x - s * 0.3, hy = y - s * 0.86;
-  return `<g><rect x="${f(hx - s * 0.035)}" y="${f(hy - s * 0.02)}" width="${f(s * 0.07)}" height="${f(s * 0.22)}" rx="${f(s * 0.02)}" fill="#3a2418" stroke="${INK}" stroke-width="${f(s * 0.03)}" transform="rotate(14 ${f(hx)} ${f(hy)})"/>
-    <path d="M${f(hx - s * 0.05)} ${f(hy + s * 0.18)} q${f(-s * 0.2)} ${f(s * 0.06)} ${f(-s * 0.22)} ${f(s * 0.42)} q${f(s * 0.1)} ${f(-s * 0.2)} ${f(s * 0.24)} ${f(-s * 0.38)} Z" fill="#e6ebf1" stroke="${INK}" stroke-width="${f(s * 0.03)}" stroke-linejoin="round"/>
-    <circle cx="${f(hx)}" cy="${f(hy - s * 0.02)}" r="${f(s * 0.035)}" fill="#e2b65a" stroke="${INK}" stroke-width="${f(s * 0.025)}"/></g>`; };
+const hipSickle = (x, y, s) => moonBlade(x - s * 0.34, y - s * 0.74, s * 0.62, 200, -1);
 const DARROW = { yaw: 15, hair: 'long', arms: ['hang', 'blade'], hipBlade: hipSickle,
   hairOpts: { hairCol: '#e3ad3e', hairHi: '#fff2b8', hairShade: '#a8782a' },
   headOpts: { hairCol: '#e3ad3e', hairHi: '#fff0b0', brow: 'angry', mouth: 'smirk', iris: '#e0a326' },
@@ -157,4 +178,4 @@ const cassius = (x, y, s, o = {}) => build(x, y, s, o, CASSIUS);
 const ARMP = { thrust: [0.66, 0.06], slashUp: [0.42, -0.6], slashDown: [0.6, 0.52], guard: [0.12, 0.05], hang: [0.22, 0.85] };
 // hand position (world) for a pose, matching build()'s shoulder math
 const handAt = (x, y, s, side, pose, yaw = 0) => { const k = -yaw * s * 0.0016, top = y - s * 1.55, sx = x + k + side * s * 0.33, sy = top + s * 0.1, P = ARMP[pose] || ARMP.hang; return [sx + side * P[0] * s, sy + P[1] * s]; };
-module.exports = { handAt, darrow, cassius, longHair, arm, build, lionFace, sunEmblem };
+module.exports = { moonBlade, handAt, darrow, cassius, longHair, arm, build, lionFace, sunEmblem };

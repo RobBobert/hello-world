@@ -116,7 +116,7 @@ const BEATS = [
     art: (t, p, pt, d) => W(room('space', t, { deck: true, floorY: 1440 }) + (p ? slideIn(RIM(K.ragnar(720, 1680, 360, { yaw: -12 }), 'space'), 260, pt / .5) : '') + RIM(K.darrow(300, 1680, 320, { yaw: 16, arms: ['hang', 'table'] }), 'space'), t, d, 1, 1.06, 540, 1120) },
   // 13. Lorn
   { start: 'lorn the old', pop: 'who taught', l1: 'LORN, THE OLD RAGE KNIGHT.', l2: 'WHO TAUGHT HIM THE BLADE.', l2color: 'gold', mood: 'void',
-    art: (t, p, pt, d) => W(L.skyOrRoom('void', t, { floorY: 1450 }) + L.glow(540, 900, 600, '#9fc0ff', .25) + L.dust(5, t, { count: 50, color: '#e8f2ff', opacity: .6 }) + RIM(K.lorn(560, 1680, 360, { yaw: -8, arms: ['hang', 'blade'] }), 'void'), t, d, 1, 1.07, 540, 1120) },
+    art: (t, p, pt, d) => W(L.skyOrRoom('void', t, { floorY: 1450 }) + L.glow(540, 900, 600, '#9fc0ff', .25) + L.dust(5, t, { count: 50, color: '#e8f2ff', opacity: .6 }) + RIM(K.lorn(560, 1680, 360, { yaw: -8, arms: ['hang', 'sword'] }), 'void'), t, d, 1, 1.07, 540, 1120) },
   // 14. Sevro + Howlers (one woman, one with normal blonde hair)
   { start: 'sevro and his', pop: 'howlers', l1: 'SEVRO...', l2: 'AND HIS HOWLERS.', l2color: 'gold', mood: 'mars',
     art: (t, p, pt, d) => { const H = [[170, 14, { hair: 'long', kitOverride: { hairLong: true, hair: 'short', hairCol: '#3a2418', over: [] } }], [380, 14, { kitOverride: { hair: 'short', hairCol: '#e6c46a', over: [] } }], [700, -14, { kitOverride: { over: ['mohawk'], hairCol: '#2a2420' } }], [910, -14, { kitOverride: { hair: 'short', hairCol: '#8a5a2a', over: [] } }]];
