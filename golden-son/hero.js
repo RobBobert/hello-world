@@ -24,7 +24,7 @@ function sun(x, y, r, col, core) {
 }
 
 // joints in units of h (y negative = up)
-const STAND = { head: [0, -.935], neck: [0, -.862], sL: [-.128, -.83], sR: [.128, -.83], eL: [-.16, -.66], eR: [.16, -.66], wL: [-.165, -.5], wR: [.165, -.5],
+const STAND = { head: [0, -.965], neck: [0, -.862], sL: [-.128, -.83], sR: [.128, -.83], eL: [-.16, -.66], eR: [.16, -.66], wL: [-.165, -.5], wR: [.165, -.5],
   hL: [-.085, -.52], hR: [.085, -.52], kL: [-.075, -.275], kR: [.075, -.275], aL: [-.072, -.045], aR: [.072, -.045] };
 
 function hero(x, y, h, kit, o = {}) {
@@ -78,8 +78,8 @@ function hero(x, y, h, kit, o = {}) {
     g += `<path d="M${f(px - d * W(.05))} ${f(py - W(.005))} Q${f(px + d * W(.01))} ${f(py - W(.05))} ${f(px + d * W(.06))} ${f(py + W(.01))} Q${f(px + d * W(.05))} ${f(py + W(.05))} ${f(px - d * W(.01))} ${f(py + W(.045))} Z" fill="${C.plate}" stroke="${INK}" stroke-width="${sw}" stroke-linejoin="round"/>`;
     if (kit.emblem === 'lion') g += lionFace(px + d * W(.008), py + W(.01), W(.02), C.plateDk, C.plateHi, '#3a2508'); }
   // neck + head
-  g += limb([J.neck[0], J.neck[1] + W(.012)], [J.neck[0], J.neck[1] - W(.04)], W(.036), W(.034), C.skin, INK, sw) + `<path d="M${f(J.neck[0] - W(.028))} ${f(J.neck[1] + W(.004))} Q${f(J.neck[0])} ${f(J.neck[1] + W(.022))} ${f(J.neck[0] + W(.028))} ${f(J.neck[1] + W(.004))}" stroke="${C.suit}" stroke-width="${f(W(.014))}" fill="none" stroke-linecap="round"/>`;
-  const [hx, hy] = J.head, rx = W(.05), ry = W(.062);
+  g += limb([J.neck[0], J.neck[1] + W(.01)], [J.head[0], J.head[1]], W(.05), W(.05), C.skin, INK, sw) + `<path d="M${f(J.neck[0] - W(.04))} ${f(J.neck[1] + W(.012))} L${f(J.neck[0] - W(.034))} ${f(J.neck[1] - W(.014))} Q${f(J.neck[0])} ${f(J.neck[1] - W(.004))} ${f(J.neck[0] + W(.034))} ${f(J.neck[1] - W(.014))} L${f(J.neck[0] + W(.04))} ${f(J.neck[1] + W(.012))} Z" fill="${C.suit}" stroke="${INK}" stroke-width="${sw}" stroke-linejoin="round"/>`;
+  const [hx, hy] = J.head, rx = W(.07), ry = W(.086);
   if (kit.hairBack) g += kit.hairBack(hx, hy, rx, ry, yaw, sw, o);
   g += `<path d="M${f(hx - rx)} ${f(hy - ry * .1)} Q${f(hx - rx)} ${f(hy - ry)} ${f(hx)} ${f(hy - ry)} Q${f(hx + rx)} ${f(hy - ry)} ${f(hx + rx)} ${f(hy - ry * .1)} Q${f(hx + rx * .92)} ${f(hy + ry * .6)} ${f(hx + rx * .3)} ${f(hy + ry * .98)} L${f(hx - rx * .3)} ${f(hy + ry * .98)} Q${f(hx - rx * .92)} ${f(hy + ry * .6)} ${f(hx - rx)} ${f(hy - ry * .1)} Z" fill="${C.skin}" stroke="${INK}" stroke-width="${sw}" stroke-linejoin="round"/>`;
   // shadow side of the face (moves with yaw)

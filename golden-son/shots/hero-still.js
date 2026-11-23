@@ -7,8 +7,8 @@ const table = `<rect x="-300" y="${TY}" width="1680" height="800" fill="#2b4a8a"
   + `<g transform="translate(230 ${TY})"><path d="M-22 -100 h44 l-7 52 h-10 v34 h18 v12 h-46 v-12 h18 v-34 h-10z" fill="#e2a93b" stroke="#1b1210" stroke-width="5"/></g><g transform="translate(660 ${TY}) rotate(80)"><path d="M-22 -100 h44 l-7 52 h-10 v34 h18 v12 h-46 v-12 h18 v-34 h-10z" fill="#e2a93b" stroke="#1b1210" stroke-width="5"/></g><path d="M670 ${TY + 2} q110 -8 200 6" stroke="#a81f1c" stroke-width="12" stroke-linecap="round" fill="none"/>`;
 const room = `<g filter="url(#mono)">${L.skyOrRoom('gala', 0, { floorY: 1470 })}</g>`;
 const SH = {
-  wide: { cap: ['HOUSE BELLONA WANTS HIM DEAD.', 'SO HE CLIMBS ON THEIR TABLE.'], svg: () => room + L.rimLight(Hh.cassius(800, TY + 520, 1040, { pose: 'seated', yaw: -10, arms: ['table', 'table'] }), 'gala', {}) + table + L.floorShadow(380, TY + 6, 220, { mood: 'gala' }) + L.rimLight(Hh.darrow(380, TY, 880, { yaw: 10, expr: 'smile' }), 'gala', {}) },
-  darrow: { cap: ['DARROW.', 'SMILING.'], svg: () => `<g transform="translate(540 960) scale(1.9) translate(-400 -760)">${room}${L.rimLight(Hh.darrow(380, TY, 1000, { yaw: 10, expr: 'smile' }), 'gala', {})}</g>` },
+  wide: { cap: ['HOUSE BELLONA WANTS HIM DEAD.', 'SO HE CLIMBS ON THEIR TABLE.'], svg: () => room + L.rimLight(Hh.cassius(800, TY + 480, 960, { pose: 'seated', yaw: -10, arms: ['table', 'table'] }), 'gala', {}) + table + L.floorShadow(380, TY + 6, 220, { mood: 'gala' }) + L.rimLight(Hh.darrow(380, TY, 810, { yaw: 10, expr: 'smile' }), 'gala', {}) },
+  darrow: { cap: ['DARROW.', 'SMILING.'], svg: () => `<g transform="translate(540 960) scale(1.9) translate(-400 -690)">${room}${L.rimLight(Hh.darrow(380, TY, 1000, { yaw: 10, expr: 'smile' }), 'gala', {})}</g>` },
   cassius: { cap: ['CASSIUS AU BELLONA.', "JULIAN'S BROTHER."], svg: () => `<g transform="translate(540 1000) scale(1.6) translate(-800 -1250)">${room}${L.rimLight(Hh.cassius(800, TY + 520, 1040, { pose: 'seated', yaw: -8, expr: 'angry', arms: ['table', 'table'] }), 'gala', {})}${table}</g>` },
 };
 (async () => {
