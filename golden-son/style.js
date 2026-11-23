@@ -40,3 +40,11 @@ module.exports.violetDeep = '#0d0630';  // gala deepest shadow / foreground silh
 module.exports.moon = '#6fd6ff';        // Luna moonlight (windows, floor reflections, gala rim)
 module.exports.ember = '#f2601c';       // painted warm light pools on walls and floors
 module.exports.shadowMulGala = '#5a46b4'; // multiply colour for cel shadows in the gala (use instead of shadowMul at 45%)
+
+// ---- Cassius v2 (painted pass): white-silver plate with Bellona-blue accents; warm/cool coloured lines instead of black ink.
+module.exports.cassius2 = {
+  plateHi: '#ffffff', plate: '#dde4ee', plateMid: '#a7b3c8', plateShade: '#6c7a99', plateDeep: '#3a4664', plateLine: '#27314d',
+  accent: '#2f5fc6', accentHi: '#7fa6f2', cloth: '#2b4a8a', clothHi: '#4470c4', clothShade: '#162a54', clothDeep: '#0d1a3a',
+  skinHi: '#efc79c', skin: '#d9a777', skinMid: '#c08458', skinShade: '#9c5e3e', skinLine: '#4f2616',
+  hairHi: '#fbe9ae', hair: '#d9a53e', hairMid: '#b47f28', hairShade: '#855a1c', hairLine: '#5c3b10', rim: '#b9d2ff',
+};

@@ -43,6 +43,9 @@ function farLayer(t, cam) {
     <linearGradient id="gaSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1250"/><stop offset=".6" stop-color="#2452c4"/><stop offset="1" stop-color="#58a0ff"/></linearGradient>
     <radialGradient id="gaGlow"><stop offset="0" stop-color="${S.candleHot}" stop-opacity=".95"/><stop offset=".25" stop-color="${S.candle}" stop-opacity=".5"/><stop offset="1" stop-color="${S.candle}" stop-opacity="0"/></radialGradient>
     <radialGradient id="gaEarthGlow"><stop offset=".7" stop-color="#6fa8ff" stop-opacity=".55"/><stop offset="1" stop-color="#6fa8ff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="gaCol" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6a45b8"/><stop offset=".45" stop-color="${C.col}"/><stop offset="1" stop-color="${C.colSh}"/></linearGradient>
+    <linearGradient id="gaBan" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a62b4"/><stop offset="1" stop-color="${S.bellonaDeep}"/></linearGradient>
+    <linearGradient id="gaHaze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a4fd0" stop-opacity="0"/><stop offset=".6" stop-color="#7a4fd0" stop-opacity=".38"/><stop offset="1" stop-color="#3a2590" stop-opacity=".75"/></linearGradient>
     <clipPath id="gaWin">`;
   const winD = x => `M${x - 125} 230 V-500 Q${x - 125} -640 ${x} -700 Q${x + 125} -640 ${x + 125} -500 V230 Z`;
   for (let i = -4; i <= 5; i++) o += `<path d="${winD(WIN(i))}"/>`;
@@ -61,23 +64,23 @@ function farLayer(t, cam) {
     <path d="M${f(ex + 60)} ${ey - er * 0.98} A${er} ${er} 0 0 1 ${f(ex + 60)} ${ey + er * 0.98} A${er * 1.5} ${er * 1.5} 0 0 0 ${f(ex + 60)} ${ey - er * 0.98}Z" fill="#06102e" opacity=".8"/></g>`;
   // window leading + frames
   for (let i = -4; i <= 5; i++) { const x = WIN(i);
-    o += `<g fill="none" stroke="${C.lead}" stroke-width="9"><path d="M${x} -700 V230"/><path d="M${x - 125} -500 H${x + 125} M${x - 125} -290 H${x + 125} M${x - 125} -80 H${x + 125}"/><path d="M${x - 125} -500 Q${x} -560 ${x} -700 M${x + 125} -500 Q${x} -560 ${x} -700"/></g>
-      <path d="${winD(x)}" fill="none" stroke="${C.lead}" stroke-width="26"/><path d="${winD(x)}" fill="none" stroke="${C.key}" stroke-width="7" opacity=".7" transform="translate(-9 0)"/>`; }
+    o += `<g fill="none" stroke="#2a1c86" stroke-width="6"><path d="M${x} -700 V230"/><path d="M${x - 125} -500 H${x + 125} M${x - 125} -290 H${x + 125} M${x - 125} -80 H${x + 125}"/><path d="M${x - 125} -500 Q${x} -560 ${x} -700 M${x + 125} -500 Q${x} -560 ${x} -700"/></g>
+      <path d="${winD(x)}" fill="none" stroke="#231672" stroke-width="16"/><path d="${winD(x)}" fill="none" stroke="${C.key}" stroke-width="7" opacity=".7" transform="translate(-9 0)"/>`; }
   // cool light shafts falling from the windows (diagonals)
   for (let i = -4; i <= 5; i++) { const x = WIN(i); o += `<path d="M${x - 120} -480 L${x + 120} -480 L${x + 620} 700 L${x + 170} 700 Z" fill="${C.rim}" opacity=".10"/>`; }
   // dado / lower wall
   o += `<rect x="-2200" y="230" width="4800" height="1300" fill="${C.dado}"/><rect x="-2200" y="230" width="4800" height="16" fill="${C.key}" opacity=".6"/>`;
   // columns + banners + sconces
   for (let i = -4; i <= 6; i++) { const x = COL(i);
-    o += `<rect x="${x - 62}" y="-1700" width="124" height="2600" fill="${C.col}"/><rect x="${x + 4}" y="-1700" width="58" height="2600" fill="${C.colSh}"/><rect x="${x - 62}" y="-1700" width="20" height="2600" fill="${C.key}" opacity=".85"/><rect x="${x + 54}" y="-1700" width="8" height="2600" fill="${C.rim}" opacity=".8"/>
+    o += `<rect x="${x - 62}" y="-1700" width="124" height="2600" fill="url(#gaCol)"/><rect x="${x - 62}" y="-1700" width="20" height="2600" fill="${C.key}" opacity=".85"/><rect x="${x + 54}" y="-1700" width="8" height="2600" fill="${C.rim}" opacity=".8"/>
       <path d="M${x - 30} -1700 V900 M${x - 8} -1700 V900" stroke="${C.colSh}" stroke-width="5" opacity=".6"/>
       <rect x="${x - 82}" y="-640" width="164" height="42" fill="${S.goldShade}"/><rect x="${x - 82}" y="-640" width="164" height="12" fill="${S.gold}"/>
       <rect x="${x - 76}" y="196" width="152" height="60" fill="${C.colSh}"/>`;
     const sw = 7 * Math.sin(t * 1.3 + i * 1.7), bw = 92;
-    o += `<g transform="translate(${x} -590) skewX(${f(sw * 0.35)})"><path d="M${-bw} 0 H${bw} V470 L0 400 L${-bw} 470 Z" fill="${S.bellonaBlue}" stroke="#0a0f24" stroke-width="7" stroke-linejoin="round"/>
+    o += `<g transform="translate(${x} -590) skewX(${f(sw * 0.35)})"><path d="M${-bw} 0 H${bw} V470 L0 400 L${-bw} 470 Z" fill="url(#gaBan)"/>
       <path d="M${bw * 0.1} 0 H${bw} V470 L${bw * 0.1} 407 Z" fill="${S.bellonaDeep}" opacity=".75"/>
       <path d="M${-bw + 13} 12 V440 M${bw - 13} 12 V440" stroke="${S.silver}" stroke-width="5" opacity=".8"/>
-      ${eagle(0, 190, 150, S.silver, `stroke="#0a0f24" stroke-width=".02"`)}<rect x="${-bw - 10}" y="-12" width="${bw * 2 + 20}" height="18" rx="6" fill="${S.silverShade}"/></g>`;
+      ${eagle(0, 190, 150, S.silver, `opacity=".92"`)}<rect x="${-bw - 10}" y="-12" width="${bw * 2 + 20}" height="18" rx="6" fill="${S.silverShade}"/></g>`;
     o += `<circle cx="${x}" cy="120" r="${f(120 + 10 * Math.sin(t * 9 + i))}" fill="url(#gaGlow)" opacity=".55"/>${flame(x, 132, 1.5, t, i)}<rect x="${x - 6}" y="130" width="12" height="34" fill="${S.silver}"/>`;
   }
   // chandeliers: rings of candles hanging in front of the windows
@@ -87,6 +90,8 @@ function farLayer(t, cam) {
       <ellipse rx="160" ry="27" fill="none" stroke="${S.gold}" stroke-width="13"/><path d="M-160 0 A160 27 0 0 0 160 0" fill="none" stroke="${S.goldShade}" stroke-width="13"/>`;
     for (let c = 0; c < 7; c++) { const a = c / 7 * Math.PI * 2 + 0.3, cx = Math.cos(a) * 160, cy = Math.sin(a) * 27; o += `<rect x="${f(cx - 5)}" y="${f(cy - 34)}" width="10" height="34" fill="${S.capCream}"/>${flame(cx, cy - 34, 1.1, t, c + k)}`; }
     o += `</g>`; }
+  // atmosphere: violet haze pooling toward the floor so the wall sits back and the figures read in front of it
+  o += `<rect x="-2200" y="-500" width="4800" height="1400" fill="url(#gaHaze)"/>`;
   return o;
 }
 
@@ -106,11 +111,12 @@ function guest(x, y, s, pal, hair, arm, t, jolt) {
     <path d="M-175 190 Q-170 96 -40 78 L40 78 Q170 96 175 190 L205 1400 L-205 1400 Z"/>` +
     (arm ? `<path d="M${arm * 150} 150 L${arm * 215} 70 L${arm * 200} -30 L${arm * 232} -34 L${arm * 262} 84 L${arm * 190} 210Z"/><path d="M${arm * 190} -30 h${arm * 52} l${-arm * 8} -66 h${-arm * 36}z"/>` : '');
   const lean = jolt * (x < 0 ? -3 : 3);
-  return `<g transform="translate(${f(x)} ${f(yy)}) rotate(${f(lean)} 0 700) scale(${s})"><g fill="${C.rim}" opacity=".9" transform="translate(7 -2)">${body}</g><g fill="${C.key}" opacity=".6" transform="translate(-5 -1)">${body}</g><g fill="${GPAL[pal]}">${body}</g></g>`;
+  return `<g transform="translate(${f(x)} ${f(yy)}) rotate(${f(lean)} 0 700) scale(${s})"><g fill="${C.rim}" opacity=".7" transform="translate(5 -1)">${body}</g><g fill="${C.key}" opacity=".45" transform="translate(-4 -1)">${body}</g><g fill="url(#gaGuest${pal})">${body}</g></g>`;
 }
 function midLayer(t, cam, o) {
   const dt = t - o.impact, jolt = dt > 0 ? Math.exp(-dt * 3.5) * Math.abs(Math.sin(dt * 9)) + 0.25 * cl(dt * 6) : 0;
-  return GUESTS.map(g => guest(g[0], g[1], g[2], g[3], g[4], g[5], t, jolt * Math.exp(-Math.abs(g[0] - o.impactX * DEPTH.mid) / 900))).join('');
+  const defs = `<defs>${GPAL.map((c, i) => `<linearGradient id="gaGuest${i}" gradientUnits="userSpaceOnUse" x1="0" y1="-90" x2="0" y2="620"><stop offset="0" stop-color="${c}"/><stop offset="1" stop-color="#4a32a8"/></linearGradient>`).join('')}</defs>`;
+  return defs + GUESTS.map(g => guest(g[0], g[1], g[2], g[3], g[4], g[5], t, jolt * Math.exp(-Math.abs(g[0] - o.impactX * DEPTH.mid) / 900))).join('');
 }
 
 // ---------------------------------------------------------------- TABLE + tableware
@@ -119,7 +125,7 @@ const WARE = [ // type, x (relative to impactX), depth 0 (far edge) .. 1 (front 
   ['plate', -640, .55], ['goblet', -545, .3], ['cand', -430, .25], ['plate', -168, .8], ['goblet', -215, .35], ['knife', -250, .9],
   ['spill', 158, .75], ['plate', 320, .3], ['plate', -330, .3], ['plate', 470, .85], ['knife', 590, .9], ['bowl', 745, .25], ['goblet', 700, .85], ['cand', 900, .25], ['goblet', 990, .6], ['plate', 1090, .6], ['knife', 395, .92],
 ];
-const ol = `stroke="${INK}" stroke-width="5" stroke-linejoin="round"`;
+const ol = `stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"`;
 function gobletSvg(wine) { return `<path d="M-26 -112 H26 L20 -66 Q0 -50 -20 -66 Z" fill="${S.silver}" ${ol}/><path d="M4 -110 H24 L18 -68 Q10 -60 4 -58Z" fill="${S.silverShade}"/>
   ${wine ? `<path d="M-23 -108 H23 L22 -98 H-22Z" fill="${WINE}"/>` : ''}<path d="M-5 -56 h10 v38 l18 12 v6 h-46 v-6 l18 -12z" fill="${S.silver}" ${ol}/>`; }
 function ware(type, x, y, sc, t, dt, a, i) {
@@ -147,20 +153,20 @@ function ware(type, x, y, sc, t, dt, a, i) {
 function tableLayer(t, cam, o) {
   const ix = o.impactX, dt = t - o.impact, live = dt > 0; let s = '';
   s += `<defs><radialGradient id="gaGlow2"><stop offset="0" stop-color="${S.candleHot}" stop-opacity=".9"/><stop offset=".3" stop-color="${S.candle}" stop-opacity=".4"/><stop offset="1" stop-color="${S.candle}" stop-opacity="0"/></radialGradient>
-    <linearGradient id="gaCloth" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${S.bellonaBlue}"/><stop offset="1" stop-color="${S.bellonaDeep}"/></linearGradient></defs>`;
+    <linearGradient id="gaLip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4f7fb"/><stop offset="1" stop-color="${S.silverShade}"/></linearGradient><linearGradient id="gaCloth" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${S.bellonaBlue}"/><stop offset="1" stop-color="${S.bellonaDeep}"/></linearGradient></defs>`;
   const X0 = ix - 2600, X1 = ix + 3200;
   // top surface (seen at a grazing, low angle), silver runner, lip, cloth with hard-edged folds
   s += `<rect x="${X0}" y="-46" width="${X1 - X0}" height="62" fill="#3d62b0"/><rect x="${X0}" y="-46" width="${X1 - X0}" height="9" fill="#5a80cc"/>
-    <rect x="${X0}" y="-22" width="${X1 - X0}" height="13" fill="${S.silver}" opacity=".5"/><path d="M${X0} -46 H${X1}" stroke="${INK}" stroke-width="6"/>
+    <rect x="${X0}" y="-22" width="${X1 - X0}" height="13" fill="${S.silver}" opacity=".5"/><path d="M${X0} -46 H${X1}" stroke="${S.bellonaDeep}" stroke-width="4"/>
     <rect x="${X0}" y="52" width="${X1 - X0}" height="1700" fill="url(#gaCloth)"/>`;
   for (let i = -18; i < 24; i++) { const x = ix + i * 138 + 30, w = 46 + (i * 37 % 30 + 30) % 30;
     s += `<path d="M${x} 52 L${x + w} 52 L${x + w + 26} 1700 L${x - 18} 1700 Z" fill="${S.bellonaDeep}" opacity=".55"/><path d="M${x - 40} 52 L${x - 28} 52 L${x - 46} 1700 L${x - 70} 1700Z" fill="#4a70bd" opacity=".35"/>`; }
   s += `<rect x="${X0}" y="52" width="${X1 - X0}" height="46" fill="${S.shadowMul}" opacity=".5"/>`;
   // big silver eagle embroidered on the drop, under where the boots land
-  s += eagle(ix + 20, 300, 420, S.silver, `opacity=".9" stroke="${INK}" stroke-width=".012"`) ;
+  s += eagle(ix + 20, 300, 420, S.silver, `opacity=".85"`) ;
   s += `<path d="M${ix + 40} 150 L${ix + 320} 150 L${ix + 320} 700 L${ix + 60} 700Z" fill="${S.bellonaDeep}" opacity=".35"/>`;
   // lip
-  s += `<rect x="${X0}" y="14" width="${X1 - X0}" height="40" fill="${S.silver}" stroke="${INK}" stroke-width="6"/><rect x="${X0}" y="36" width="${X1 - X0}" height="15" fill="${S.silverShade}"/>`;
+  s += `<rect x="${X0}" y="14" width="${X1 - X0}" height="40" fill="url(#gaLip)" stroke="${INK}" stroke-width="3.2"/><rect x="${X0}" y="36" width="${X1 - X0}" height="15" fill="${S.silverShade}"/>`;
   for (let i = -30; i < 40; i++) s += `<path d="M${ix + i * 84} 24 l14 9 l-14 9 l-14 -9z" fill="${S.bellonaBlue}"/>`;
   // tableware, far edge first
   const items = WARE.map((w, i) => ({ w, i })).sort((p, q) => p.w[2] - q.w[2]);

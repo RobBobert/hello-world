@@ -64,7 +64,7 @@ const guides = `<div style="position:absolute;left:150px;top:270px;width:780px;h
   const b = await chromium.launch();
   if (mode === 'stills' || mode === 'at') {
     const g = process.argv.includes('--guides');
-    const times = mode === 'at' ? [[process.argv[4] || 'at', +process.argv[3]]] : [0.3, 0.53, 0.75, 1.5, 2.4, 3.2, 4.2, 4.75, 5.3, 6.4, 7.0, 8.6].map((t, i) => [String(i + 1).padStart(2, '0'), t]);
+    const times = mode === 'at' ? [[process.argv[4] || 'at', +process.argv[3]]] : [0.3, 0.62, 0.9, 1.6, 2.4, 3.2, 4.1, 5.4, 5.9, 7.2, 8.0, 9.5].map((t, i) => [String(i + 1).padStart(2, '0'), t]);
     const p = await page(b, 1);
     for (const [n, t] of times) { await put(p, t); if (g) await p.evaluate(h => document.getElementById('w').insertAdjacentHTML('beforeend', h), guides); await p.screenshot({ path: `${out}/comp-${n}.png` }); }
   } else {

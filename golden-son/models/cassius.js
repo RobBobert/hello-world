@@ -20,14 +20,30 @@ const hex = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
 const mix = (a, b, t) => { const A = hex(a), B = hex(b); return '#' + A.map((v, i) => Math.round(lerp(v, B[i], t)).toString(16).padStart(2, '0')).join(''); };
 let UID = 0;
 
-// ---------- palette ----------
-const SKIN = C.skin, SKIN_SH = C.skinShade, SKIN_MID = mix(C.skin, C.skinShade, 0.5), SKIN_HI = mix(C.skin, '#ffe9c8', 0.55);
-const HAIR = C.hair, HAIR_HI = C.hairHi, HAIR_SH = C.hairShade, HAIR_LINE = mix(C.hairShade, INK, 0.45);
-const GOLD = C.armor, GOLD_HI = C.armorHi, GOLD_SH = C.armorShade, GOLD_DK = mix(C.armorShade, INK, 0.45);
-const BLUE = C.cloth, BLUE_SH = C.clothShade, BLUE_HI = mix(C.cloth, '#9fc0ff', 0.35);
-const SILVER = S.silver, SILVER_SH = S.silverShade;
-const LIP_LO = mix(SKIN, '#b44a40', 0.42), LIP_UP = mix(SKIN_SH, '#7c2f2c', 0.42);
-const BROW = '#4a2f10', EYE_W = '#f6ecd9', EYE_WSH = '#c2ae93';
+// ---------- palette (painted pass: style.js cassius2) ----------
+const K = S.cassius2;
+const RIMC = K.rim;
+const SKIN = K.skin, SKIN_SH = K.skinShade, SKIN_MID = K.skinMid, SKIN_HI = K.skinHi, SK_LINE = K.skinLine;
+const HAIR = K.hair, HAIR_HI = K.hairHi, HAIR_SH = K.hairShade, HAIR_MID = K.hairMid, HAIR_LINE = K.hairLine;
+const PLATE = 'plate', CLOTH = 'cloth', CAPE = 'cape';          // material keys for form()
+const SPEC = K.plateHi, PL_LINE = K.plateLine, PL_DEEP = K.plateDeep, PL_SH = K.plateShade, ACC = K.accent, ACC_HI = K.accentHi;
+const BLUE_SH = K.clothShade, CL_LINE = K.clothDeep;
+const SILVER = K.plate, SILVER_SH = K.plateMid;
+const LIP_LO = mix(SKIN, '#b44a40', 0.4), LIP_UP = mix(SKIN_SH, '#7c2f2c', 0.4);
+const BROW = '#472a0e', EYE_W = '#f4ecdc', EYE_WSH = '#bfa890', LASH = '#2a1408';
+let CUR = '';   // gradient id prefix of the figure being drawn
+const MAT = { plate: ['pl', 'pm', 'ps', K.plateLine], cloth: ['cl', 'cm', 'cs', K.clothDeep], cape: ['cp', 'cs', 'cq', K.clothDeep] };
+const grad = (id, x1, y1, x2, y2, stops) => `<linearGradient id="${id}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">${stops.map(([o, c]) => `<stop offset="${o}" stop-color="${c}"/>`).join('')}</linearGradient>`;
+function matDefs(g) {
+  return grad(g + 'pl', 0.1, 0, 0.9, 1, [[0, '#ffffff'], [0.3, K.plate], [0.72, K.plateMid], [1, mix(K.plateMid, K.plateShade, 0.6)]])
+    + grad(g + 'pm', 0, 0, 1, 1, [[0, mix(K.plate, K.plateMid, 0.75)], [1, mix(K.plateMid, K.plateShade, 0.75)]])
+    + grad(g + 'ps', 0, 0, 1, 1, [[0, mix(K.plateMid, K.plateShade, 0.7)], [0.7, mix(K.plateShade, K.plateDeep, 0.45)], [1, mix(K.plateShade, '#7f9be0', 0.35)]])
+    + grad(g + 'cl', 0.1, 0, 0.9, 1, [[0, K.clothHi], [0.45, K.cloth], [1, mix(K.cloth, K.clothShade, 0.6)]])
+    + grad(g + 'cm', 0, 0, 1, 1, [[0, mix(K.cloth, K.clothShade, 0.45)], [1, mix(K.cloth, K.clothShade, 0.8)]])
+    + grad(g + 'cs', 0, 0, 1, 1, [[0, K.clothShade], [1, mix(K.clothShade, K.clothDeep, 0.7)]])
+    + grad(g + 'cp', 0, 0, 1, 1, [[0, mix(K.cloth, K.clothShade, 0.35)], [0.6, K.clothShade], [1, mix(K.clothShade, K.clothDeep, 0.5)]])
+    + grad(g + 'cq', 0, 0, 1, 1, [[0, mix(K.clothShade, K.clothDeep, 0.6)], [1, K.clothDeep]]);
+}
 
 // ---------- head geometry: horizontal cross-sections [y, halfWidth, zFront, zBack, squareness] ----------
 const SL = [
@@ -139,12 +155,16 @@ function crescent(cx, cy, R, dx, dy) {
   const sw2 = nm(phi - b2) < nm(b1 - b2) ? 1 : 0;
   return `M${pt(p1)}A${f(R)} ${f(R)} 0 1 ${sw1} ${pt(p2)}A${f(R)} ${f(R)} 0 0 ${sw2} ${pt(p1)}Z`;
 }
-// one cel-shaded form: fill, hard shadow (the shape minus itself shifted toward the key), cool rim on right edges, ink line.
-function form(d, fill, sh, u, o = {}) {
-  const id = 'cas' + (++UID), dx = (o.dx === undefined ? 0.16 : o.dx) * u, dy = (o.dy === undefined ? 0.07 : o.dy) * u, sw = (o.sw || 0.06) * u;
-  const rim = o.rim === false ? '' : `<use href="#${id}p" fill="${RIM}"/>`;
-  return `<defs><path id="${id}p" d="${d}"/></defs><use href="#${id}p" fill="${fill}"/><clipPath id="${id}"><use href="#${id}p"/></clipPath><g clip-path="url(#${id})">${rim}<use href="#${id}p" fill="${sh}" transform="translate(${f(-(o.rw || 0.035) * u)} 0)"/><use href="#${id}p" fill="${fill}" transform="translate(${f(-dx)} ${f(-dy)})"/>${o.inner || ''}</g>`
-    + (o.noStroke ? '' : `<use href="#${id}p" fill="none" stroke="${INK}" stroke-width="${f(sw)}" stroke-linejoin="round"/>`);
+// one painted form: gradient fill, a two-step shadow (soft mid band + core) made from the shape minus itself shifted
+// toward the key, a thin cool rim on right-facing edges, and a thin coloured line.
+function form(d, mat, _unused, u, o = {}) {
+  const id = 'cas' + (++UID), m = MAT[mat] || MAT.plate, g = k => `url(#${CUR}${k})`;
+  const dx = (o.dx === undefined ? 0.16 : o.dx) * u, dy = (o.dy === undefined ? 0.07 : o.dy) * u, sw = (o.sw || 0.06) * 0.45 * u;
+  const rim = o.rim === false ? '' : `<use href="#${id}p" fill="${RIMC}"/>`;
+  return `<defs><path id="${id}p" d="${d}"/></defs><use href="#${id}p" fill="${g(m[0])}"/><clipPath id="${id}"><use href="#${id}p"/></clipPath><g clip-path="url(#${id})">${rim}`
+    + `<use href="#${id}p" fill="${g(m[2])}" transform="translate(${f(-(o.rw || 0.022) * u)} 0)"/><use href="#${id}p" fill="${g(m[1])}" transform="translate(${f(-dx * 0.72)} ${f(-dy * 0.72)})"/>`
+    + `<use href="#${id}p" fill="${g(m[0])}" transform="translate(${f(-dx)} ${f(-dy)})"/>${o.inner || ''}</g>`
+    + (o.noStroke ? '' : `<use href="#${id}p" fill="none" stroke="${m[3]}" stroke-width="${f(sw)}" stroke-linejoin="round"/>`);
 }
 
 // ================= HEAD =================
@@ -337,8 +357,8 @@ function cassius(x, y, h, opts = {}) {
   const TZ = bx => 0.93 * Math.sqrt(Math.max(0, 1 - (bx / 1.6) * (bx / 1.6)));  // torso surface depth
   const T = (bx, by) => B(bx, by, TZ(bx));                                      // point on the chest surface
   const W = (bx, by) => [x + u * bx * wf, Y0 - u * by];                         // point on the torso silhouette
-  const OUT = 0.07, MID = 0.045 * u, FINE = 0.027 * u;
-  const st = (w, c = INK) => `fill="none" stroke="${c}" stroke-width="${f(w)}" stroke-linecap="round" stroke-linejoin="round"`;
+  const OUT = 0.075, MID = 0.02 * u, FINE = 0.012 * u;
+  const st = (w, c = PL_LINE) => `fill="none" stroke="${c}" stroke-width="${f(w)}" stroke-linecap="round" stroke-linejoin="round"`;
   const sym = pts => pts.concat(pts.slice().reverse().map(p => [-p[0], p[1]]));
 
   // head placement: neck pivot rides the body, the head leans a touch into its turn
@@ -350,10 +370,10 @@ function cassius(x, y, h, opts = {}) {
   { const sway = -sb * 0.7, pts = [[-1.5, 8.9], [1.5, 8.9], [2.35 + sway * 0.3, 6.2], [2.3 + sway, 2.3], [1.45 + sway, 1.75], [0.7 + sway, 2.25], [-0.1 + sway, 1.7], [-0.9 + sway, 2.2], [-1.6 + sway, 1.7], [-2.3 + sway, 2.35], [-2.35 + sway * 0.3, 6.2]].map(p => [x + u * p[0] * (0.9 + 0.1 * cb), Y0 - u * p[1]]);
     const d = poly(pts, 0.12 * u);
     const trim = `<path d="${poly(pts.map((p, i) => i < 2 ? p : [x + (p[0] - x) * 0.93, p[1] - 0.16 * u]), 0.1 * u)}" ${st(0.05 * u, SILVER_SH)}/>`;
-    s += form(d, BLUE_SH, mix(BLUE_SH, INK, 0.5), u, { dx: 0.3, dy: 0.0, inner: trim, sw: OUT }); }
+    s += form(d, CAPE, 0, u, { dx: 0.3, dy: 0.0, inner: trim, sw: OUT }); }
   // ---- collar back (inside face of the high collar, behind the neck) ----
   { const tl = B(-1.13, 10.0, -0.3), tr = B(1.13, 10.0, -0.3), bl = B(-1.0, 8.8, -0.2), br = B(1.0, 8.8, -0.2), tm = B(0, 9.62, -0.45);
-    s += `<path d="M${pt(tl)}Q${pt(tm)} ${pt(tr)}L${pt(br)}L${pt(bl)}Z" fill="${GOLD_DK}" stroke="${INK}" stroke-width="${f(OUT * u)}" stroke-linejoin="round"/>`; }
+    s += `<path d="M${pt(tl)}Q${pt(tm)} ${pt(tr)}L${pt(br)}L${pt(bl)}Z" fill="${PL_DEEP}" stroke="${PL_LINE}" stroke-width="${f(OUT * 0.45 * u)}" stroke-linejoin="round"/>`; }
   s += H.back;
 
   const limb = (a, wa, b2, wb) => { const dx = b2[0] - a[0], dy = b2[1] - a[1], l = Math.hypot(dx, dy) || 1, nx = -dy / l, ny = dx / l;
@@ -363,14 +383,14 @@ function cassius(x, y, h, opts = {}) {
   const armX = 1.74 * cb;
   if (!seated) for (const sd of [-1, 1]) {
     const sh = [x + sd * armX * u, Y0 - 8.5 * u], el = [x + sd * (armX + 0.3) * u, Y0 - 6.75 * u], wr = [x + sd * (armX + 0.32) * u + sb * 0.25 * u, Y0 - 5.2 * u], hd = [wr[0] + sb * 0.05 * u, wr[1] + 0.42 * u];
-    s += form(limb(sh, 0.47 * u, el, 0.4 * u), BLUE, BLUE_SH, u, { dx: 0.2 });
+    s += form(limb(sh, 0.47 * u, el, 0.4 * u), CLOTH, 0, u, { dx: 0.2 });
     if (!bust) {
-      s += form(`M${f(hd[0] - 0.33 * u)} ${f(hd[1] - 0.3 * u)}h${f(0.66 * u)}l${f(-0.04 * u)} ${f(0.52 * u)}q${f(-0.29 * u)} ${f(0.2 * u)} ${f(-0.58 * u)} 0Z`, GOLD, GOLD_SH, u, { dx: 0.13 });
+      s += form(`M${f(hd[0] - 0.33 * u)} ${f(hd[1] - 0.3 * u)}h${f(0.66 * u)}l${f(-0.04 * u)} ${f(0.52 * u)}q${f(-0.29 * u)} ${f(0.2 * u)} ${f(-0.58 * u)} 0Z`, PLATE, 0, u, { dx: 0.13 });
       s += `<path d="M${f(hd[0] - 0.1 * u)} ${f(hd[1] + 0.02 * u)}v${f(0.28 * u)}M${f(hd[0] + 0.08 * u)} ${f(hd[1] + 0.02 * u)}v${f(0.28 * u)}" ${st(FINE)}/>`;
       const vam = limb([el[0], el[1] + 0.2 * u], 0.44 * u, wr, 0.31 * u);
-      s += form(vam, GOLD, GOLD_SH, u, { dx: 0.16, inner: `<path d="M${f(el[0] - 0.26 * u)} ${f(el[1] + 0.35 * u)}L${f(wr[0] - 0.2 * u)} ${f(wr[1] - 0.25 * u)}" ${st(0.09 * u, GOLD_HI)}/>` });
-      s += `<path d="M${f(wr[0] - 0.33 * u)} ${f(wr[1] - 0.12 * u)}h${f(0.66 * u)}" ${st(0.09 * u, SILVER)}/><path d="M${f(wr[0] - 0.35 * u)} ${f(wr[1] - 0.18 * u)}h${f(0.7 * u)}M${f(wr[0] - 0.34 * u)} ${f(wr[1] - 0.06 * u)}h${f(0.68 * u)}" ${st(FINE)}/>`;
-      s += form(`M${f(el[0] - 0.44 * u)} ${f(el[1] + 0.28 * u)}Q${f(el[0] - 0.5 * u)} ${f(el[1] - 0.25 * u)} ${f(el[0])} ${f(el[1] - 0.3 * u)}Q${f(el[0] + 0.5 * u)} ${f(el[1] - 0.25 * u)} ${f(el[0] + 0.44 * u)} ${f(el[1] + 0.28 * u)}Q${f(el[0])} ${f(el[1] + 0.42 * u)} ${f(el[0] - 0.44 * u)} ${f(el[1] + 0.28 * u)}Z`, GOLD, GOLD_SH, u, { dx: 0.14 });
+      s += form(vam, PLATE, 0, u, { dx: 0.16, inner: `<path d="M${f(el[0] - 0.26 * u)} ${f(el[1] + 0.35 * u)}L${f(wr[0] - 0.2 * u)} ${f(wr[1] - 0.25 * u)}" ${st(0.09 * u, SPEC)}/>` });
+      s += `<path d="M${f(wr[0] - 0.33 * u)} ${f(wr[1] - 0.12 * u)}h${f(0.66 * u)}" ${st(0.09 * u, ACC)}/><path d="M${f(wr[0] - 0.35 * u)} ${f(wr[1] - 0.18 * u)}h${f(0.7 * u)}M${f(wr[0] - 0.34 * u)} ${f(wr[1] - 0.06 * u)}h${f(0.68 * u)}" ${st(FINE)}/>`;
+      s += form(`M${f(el[0] - 0.44 * u)} ${f(el[1] + 0.28 * u)}Q${f(el[0] - 0.5 * u)} ${f(el[1] - 0.25 * u)} ${f(el[0])} ${f(el[1] - 0.3 * u)}Q${f(el[0] + 0.5 * u)} ${f(el[1] - 0.25 * u)} ${f(el[0] + 0.44 * u)} ${f(el[1] + 0.28 * u)}Q${f(el[0])} ${f(el[1] + 0.42 * u)} ${f(el[0] - 0.44 * u)} ${f(el[1] + 0.28 * u)}Z`, PLATE, 0, u, { dx: 0.14 });
     }
   }
 
@@ -381,27 +401,27 @@ function cassius(x, y, h, opts = {}) {
       const toe = sd * 0.5 + sb * 0.75;
       // boot
       const bt = `M${f(an[0] - 0.33 * u)} ${f(an[1] - 0.1 * u)}L${f(an[0] + 0.33 * u)} ${f(an[1] - 0.1 * u)}L${f(an[0] + (toe > 0 ? 0.36 + toe * 0.9 : 0.36) * u)} ${f(Y0 - 0.12 * u)}L${f(an[0] + (toe > 0 ? 0.3 + toe * 0.9 : 0.36) * u)} ${f(Y0)}L${f(an[0] - (toe < 0 ? 0.3 - toe * 0.9 : 0.36) * u)} ${f(Y0)}L${f(an[0] - (toe < 0 ? 0.36 - toe * 0.9 : 0.36) * u)} ${f(Y0 - 0.12 * u)}Z`;
-      s += form(bt, GOLD, GOLD_SH, u, { dx: 0.14, dy: 0.05, inner: `<rect x="${f(an[0] - 2 * u)}" y="${f(Y0 - 0.1 * u)}" width="${f(4 * u)}" height="${f(0.2 * u)}" fill="${GOLD_DK}"/>` });
-      s += form(limb(hip, 0.58 * u, kn, 0.38 * u), BLUE, BLUE_SH, u, { dx: 0.2 });
+      s += form(bt, PLATE, 0, u, { dx: 0.14, dy: 0.05, inner: `<rect x="${f(an[0] - 2 * u)}" y="${f(Y0 - 0.1 * u)}" width="${f(4 * u)}" height="${f(0.2 * u)}" fill="${PL_DEEP}"/>` });
+      s += form(limb(hip, 0.58 * u, kn, 0.38 * u), CLOTH, 0, u, { dx: 0.2 });
       // greave
       const gr = poly([[kn[0] - 0.38 * u, kn[1] + 0.1 * u], [kn[0] + 0.38 * u, kn[1] + 0.1 * u], [kn[0] + 0.43 * u, kn[1] + 0.9 * u], [an[0] + 0.3 * u, an[1] + 0.05 * u], [an[0] - 0.3 * u, an[1] + 0.05 * u], [kn[0] - 0.43 * u, kn[1] + 0.9 * u]], 0.1 * u);
-      s += form(gr, GOLD, GOLD_SH, u, { dx: 0.17, inner: `<path d="M${f(kn[0] - 0.24 * u)} ${f(kn[1] + 0.45 * u)}L${f(an[0] - 0.17 * u)} ${f(an[1] - 0.25 * u)}" ${st(0.1 * u, GOLD_HI)}/>` });
-      s += `<path d="M${f(kn[0] + sb * 0.2 * u)} ${f(kn[1] + 0.5 * u)}L${f(an[0] + sb * 0.15 * u)} ${f(an[1] - 0.1 * u)}" ${st(FINE)}/><path d="M${f(an[0] - 0.33 * u)} ${f(an[1] - 0.02 * u)}h${f(0.66 * u)}" ${st(0.08 * u, SILVER)}/><path d="M${f(an[0] - 0.34 * u)} ${f(an[1] - 0.07 * u)}h${f(0.68 * u)}M${f(an[0] - 0.34 * u)} ${f(an[1] + 0.03 * u)}h${f(0.68 * u)}" ${st(FINE)}/>`;
+      s += form(gr, PLATE, 0, u, { dx: 0.17, inner: `<path d="M${f(kn[0] - 0.24 * u)} ${f(kn[1] + 0.45 * u)}L${f(an[0] - 0.17 * u)} ${f(an[1] - 0.25 * u)}" ${st(0.1 * u, SPEC)}/>` });
+      s += `<path d="M${f(kn[0] + sb * 0.2 * u)} ${f(kn[1] + 0.5 * u)}L${f(an[0] + sb * 0.15 * u)} ${f(an[1] - 0.1 * u)}" ${st(FINE)}/><path d="M${f(an[0] - 0.33 * u)} ${f(an[1] - 0.02 * u)}h${f(0.66 * u)}" ${st(0.08 * u, ACC)}/><path d="M${f(an[0] - 0.34 * u)} ${f(an[1] - 0.07 * u)}h${f(0.68 * u)}M${f(an[0] - 0.34 * u)} ${f(an[1] + 0.03 * u)}h${f(0.68 * u)}" ${st(FINE)}/>`;
       // knee cop
       const kc = `M${f(kn[0] - 0.44 * u)} ${f(kn[1] + 0.2 * u)}L${f(kn[0] - 0.38 * u)} ${f(kn[1] - 0.28 * u)}L${f(kn[0] + sb * 0.2 * u)} ${f(kn[1] - 0.66 * u)}L${f(kn[0] + 0.38 * u)} ${f(kn[1] - 0.28 * u)}L${f(kn[0] + 0.44 * u)} ${f(kn[1] + 0.2 * u)}L${f(kn[0] + sb * 0.2 * u)} ${f(kn[1] + 0.48 * u)}Z`;
-      s += form(kc, GOLD, GOLD_SH, u, { dx: 0.15, inner: `<path d="M${f(kn[0] - 0.3 * u)} ${f(kn[1] - 0.2 * u)}L${f(kn[0] - 0.02 * u + sb * 0.2 * u)} ${f(kn[1] - 0.5 * u)}L${f(kn[0] - 0.22 * u)} ${f(kn[1] + 0.12 * u)}Z" fill="${GOLD_HI}"/>` });
+      s += form(kc, PLATE, 0, u, { dx: 0.15, inner: `<path d="M${f(kn[0] - 0.3 * u)} ${f(kn[1] - 0.2 * u)}L${f(kn[0] - 0.02 * u + sb * 0.2 * u)} ${f(kn[1] - 0.5 * u)}L${f(kn[0] - 0.22 * u)} ${f(kn[1] + 0.12 * u)}Z" fill="${SPEC}"/>` });
     }
     // side tassets
     for (const sd of [-1, 1]) {
       const c0 = x + sd * 0.98 * wf * u + sb * 0.25 * u;
       const d = poly([[c0 - 0.5 * u, Y0 - 6.25 * u], [c0 + 0.5 * u, Y0 - 6.25 * u], [c0 + sd * 0.1 * u + 0.48 * u, Y0 - 5.2 * u], [c0 + sd * 0.12 * u, Y0 - 4.55 * u], [c0 + sd * 0.1 * u - 0.48 * u, Y0 - 5.2 * u]], 0.08 * u);
-      s += form(d, GOLD, GOLD_SH, u, { dx: 0.16, inner: `<path d="M${f(c0 - 0.3 * u)} ${f(Y0 - 6.0 * u)}L${f(c0 - 0.26 * u + sd * 0.1 * u)} ${f(Y0 - 5.2 * u)}" ${st(0.1 * u, GOLD_HI)}/>` });
+      s += form(d, PLATE, 0, u, { dx: 0.16, inner: `<path d="M${f(c0 - 0.3 * u)} ${f(Y0 - 6.0 * u)}L${f(c0 - 0.26 * u + sd * 0.1 * u)} ${f(Y0 - 5.2 * u)}" ${st(0.1 * u, SPEC)}/>` });
       s += `<path d="M${f(c0 - 0.46 * u)} ${f(Y0 - 5.75 * u)}Q${f(c0)} ${f(Y0 - 5.6 * u)} ${f(c0 + 0.46 * u)} ${f(Y0 - 5.75 * u)}" ${st(FINE)}/>`;
     }
     // tabard
     { const c0 = x + sb * 0.9 * u, d = poly([[c0 - 0.6 * u, Y0 - 6.25 * u], [c0 + 0.6 * u, Y0 - 6.25 * u], [c0 + 0.52 * u - sb * 0.2 * u, Y0 - 3.95 * u], [c0 - sb * 0.25 * u, Y0 - 3.35 * u], [c0 - 0.52 * u - sb * 0.2 * u, Y0 - 3.95 * u]], 0.05 * u);
       const tr = `<path d="M${f(c0 - 0.46 * u - sb * 0.2 * u)} ${f(Y0 - 4.08 * u)}L${f(c0 - sb * 0.25 * u)} ${f(Y0 - 3.55 * u)}L${f(c0 + 0.46 * u - sb * 0.2 * u)} ${f(Y0 - 4.08 * u)}" ${st(0.09 * u, SILVER)}/>`;
-      s += form(d, BLUE, BLUE_SH, u, { dx: 0.22, inner: tr });
+      s += form(d, CLOTH, 0, u, { dx: 0.22, inner: tr });
       s += `<path d="M${f(c0)} ${f(Y0 - 6.1 * u)}L${f(c0 - sb * 0.22 * u)} ${f(Y0 - 4.3 * u)}" ${st(FINE, BLUE_SH)}/>` + eagle(c0 - sb * 0.1 * u, Y0 - 5.15 * u, 0.85 * u, cb); }
   }
 
@@ -411,48 +431,48 @@ function cassius(x, y, h, opts = {}) {
     let inn = '';
     // pec shadow + abdominal lames
     const pl = [T(-1.38, 8.05), T(-0.75, 7.68), T(0, 7.78), T(0.75, 7.68), T(1.38, 8.05)];
-    inn += `<path d="M${pt(pl[0])}Q${pt(pl[1])} ${pt(pl[2])}Q${pt(pl[3])} ${pt(pl[4])}L${pt(T(1.4, 7.8))}Q${pt(T(0.75, 7.5))} ${pt(T(0, 7.62))}Q${pt(T(-0.75, 7.5))} ${pt(T(-1.4, 7.8))}Z" fill="${GOLD_SH}"/>`;
+    inn += `<path d="M${pt(pl[0])}Q${pt(pl[1])} ${pt(pl[2])}Q${pt(pl[3])} ${pt(pl[4])}L${pt(T(1.4, 7.8))}Q${pt(T(0.75, 7.5))} ${pt(T(0, 7.62))}Q${pt(T(-0.75, 7.5))} ${pt(T(-1.4, 7.8))}Z" fill="${0}"/>`;
     // speculars (upper-left planes)
-    inn += `<path d="${poly([T(-1.32, 8.62), T(-0.62, 8.72), T(-0.5, 8.5), T(-0.95, 8.3), T(-1.4, 8.3)], 0.05 * u)}" fill="${GOLD_HI}"/>`;
-    inn += `<path d="${poly([T(-1.12, 7.42), T(-0.72, 7.34), T(-0.74, 7.15), T(-1.02, 7.2)], 0.03 * u)}" fill="${GOLD_HI}"/><path d="${poly([T(-0.98, 7.02), T(-0.7, 6.96), T(-0.7, 6.82), T(-0.92, 6.86)], 0.03 * u)}" fill="${GOLD_HI}"/>`;
-    inn += `<path d="${poly([T(0.25, 8.68), T(0.7, 8.72), T(0.62, 8.56)], 0.03 * u)}" fill="${GOLD_HI}"/>`;
-    s += form(d, GOLD, GOLD_SH, u, { dx: 0.3, dy: 0.05, inner: inn, sw: OUT });
+    inn += `<path d="${poly([T(-1.32, 8.62), T(-0.62, 8.72), T(-0.5, 8.5), T(-0.95, 8.3), T(-1.4, 8.3)], 0.05 * u)}" fill="${SPEC}"/>`;
+    inn += `<path d="${poly([T(-1.12, 7.42), T(-0.72, 7.34), T(-0.74, 7.15), T(-1.02, 7.2)], 0.03 * u)}" fill="${SPEC}"/><path d="${poly([T(-0.98, 7.02), T(-0.7, 6.96), T(-0.7, 6.82), T(-0.92, 6.86)], 0.03 * u)}" fill="${SPEC}"/>`;
+    inn += `<path d="${poly([T(0.25, 8.68), T(0.7, 8.72), T(0.62, 8.56)], 0.03 * u)}" fill="${SPEC}"/>`;
+    s += form(d, PLATE, 0, u, { dx: 0.3, dy: 0.05, inner: inn, sw: OUT });
     s += `<path d="M${pt(pl[0])}Q${pt(pl[1])} ${pt(pl[2])}Q${pt(pl[3])} ${pt(pl[4])}" ${st(MID)}/>`;
     for (const ly of [7.3, 6.92]) s += `<path d="M${pt(W(-lerp(1.36, 1.1, (7.4 - ly) / 0.65), ly + 0.06))}Q${pt(T(0, ly - 0.14))} ${pt(W(lerp(1.36, 1.1, (7.4 - ly) / 0.65), ly + 0.06))}" ${st(FINE * 1.2)}/>`;
     s += `<path d="M${pt(T(0, 7.74))}L${pt(T(0, 6.5))}" ${st(FINE)}/>`;
     // Bellona shield + eagle on the chest
     const sh = [T(-0.72, 8.62), T(0.72, 8.62), T(0.66, 8.12), T(0, 7.72), T(-0.66, 8.12)];
-    s += form(poly(sh, 0.06 * u), BLUE, BLUE_SH, u, { dx: 0.14, dy: 0.04, sw: 0.05, rim: false });
+    s += form(poly(sh, 0.06 * u), CLOTH, 0, u, { dx: 0.14, dy: 0.04, sw: 0.05, rim: false });
     s += `<path d="${poly(sh.map((p, i) => { const c = T(0, 8.22); return [c[0] + (p[0] - c[0]) * 0.84, c[1] + (p[1] - c[1]) * 0.84]; }), 0.04 * u)}" ${st(FINE, SILVER)}/>`;
     s += eagle(T(0, 8.2)[0], T(0, 8.2)[1] + 0.02 * u, 0.98 * u, cb);
     // belt
     const b1 = W(-1.07, 6.5), b2 = W(1.07, 6.5), b3 = W(1.14, 6.12), b4 = W(-1.14, 6.12), bm = T(0, 6.36);
     s += `<path d="M${pt(b1)}Q${pt(T(0, 6.38))} ${pt(b2)}L${pt(b3)}Q${pt(T(0, 6.0))} ${pt(b4)}Z" fill="${SILVER}" stroke="${INK}" stroke-width="${f(MID)}" stroke-linejoin="round"/>`
       + `<path d="M${pt([lerp(b1[0], b2[0], 0.72), b2[1] - 0.02 * u])}L${pt(b2)}L${pt(b3)}L${pt([lerp(b4[0], b3[0], 0.66), b3[1] - 0.06 * u])}Z" fill="${SILVER_SH}"/>`
-      + `<circle cx="${f(bm[0])}" cy="${f(bm[1] + 0.14 * u)}" r="${f(0.25 * u)}" fill="${GOLD}" stroke="${INK}" stroke-width="${f(MID)}"/><circle cx="${f(bm[0])}" cy="${f(bm[1] + 0.14 * u)}" r="${f(0.12 * u)}" fill="${BLUE}" stroke="${INK}" stroke-width="${f(FINE)}"/>`;
+      + `<circle cx="${f(bm[0])}" cy="${f(bm[1] + 0.14 * u)}" r="${f(0.25 * u)}" fill="${PLATE}" stroke="${INK}" stroke-width="${f(MID)}"/><circle cx="${f(bm[0])}" cy="${f(bm[1] + 0.14 * u)}" r="${f(0.12 * u)}" fill="${BLUE}" stroke="${INK}" stroke-width="${f(FINE)}"/>`;
   }
 
   // ---- neck + ribbed gorget ----
   { const nb = B(0, 9.0, 0.1), tx = H.neckTop[0], ty = H.chin[1] - 0.5 * u, nw = 0.49 * u;
     const d = `M${f(nb[0] - nw * 1.08)} ${f(nb[1])}L${f(tx - nw)} ${f(ty)}L${f(tx + nw)} ${f(ty)}L${f(nb[0] + nw * 1.08)} ${f(nb[1])}Z`;
     const nid = 'cas' + (++UID);
-    s += `<path d="${d}" fill="${SKIN}" stroke="${INK}" stroke-width="${f(OUT * u)}" stroke-linejoin="round"/><clipPath id="${nid}"><path d="${d}"/></clipPath>`
+    s += `<path d="${d}" fill="${SKIN}" stroke="${PL_LINE}" stroke-width="${f(OUT * 0.45 * u)}" stroke-linejoin="round"/><clipPath id="${nid}"><path d="${d}"/></clipPath>`
       + `<g clip-path="url(#${nid})"><path d="${H.hullD}" fill="${SKIN_SH}" transform="translate(${f(0.16 * u)} ${f(0.5 * u)})"/><rect x="${f(nb[0] + nw * 0.35)}" y="${f(ty - u)}" width="${f(u)}" height="${f(3 * u)}" fill="${SKIN_SH}"/></g>`;
     // gorget: ribbed tube
     const g0 = 9.0, g1 = 9.42, gx = t => lerp(nb[0], tx, (t - 9.0) / ((Y0 - ty) / u - 9.0));
     const gw = 0.58 * u, gl = [gx(g1) - gw * 0.94, Y0 - g1 * u], gr = [gx(g1) + gw * 0.94, Y0 - g1 * u], gd = `M${f(nb[0] - gw * 1.06)} ${f(Y0 - (g0 - 0.25) * u)}L${pt(gl)}Q${f(gx(g1))} ${f(gl[1] + 0.2 * u)} ${pt(gr)}L${f(nb[0] + gw * 1.06)} ${f(Y0 - (g0 - 0.25) * u)}Z`;
     let ribs = '';
     for (let i = 1; i <= 4; i++) { const yy = lerp(g1, g0 - 0.2, i / 5), cxr = gx(yy); ribs += `<path d="M${f(cxr - gw * 1.1)} ${f(Y0 - yy * u)}Q${f(cxr)} ${f(Y0 - yy * u + 0.2 * u)} ${f(cxr + gw * 1.1)} ${f(Y0 - yy * u)}" ${st(FINE * 1.1)}/>`; }
-    s += form(gd, GOLD, GOLD_SH, u, { dx: 0.3, dy: 0, inner: `<rect x="${f(nb[0] - gw * 0.72)}" y="${f(Y0 - 10 * u)}" width="${f(0.13 * u)}" height="${f(2 * u)}" fill="${GOLD_HI}"/>` + ribs, sw: 0.055 });
+    s += form(gd, PLATE, 0, u, { dx: 0.3, dy: 0, inner: `<rect x="${f(nb[0] - gw * 0.72)}" y="${f(Y0 - 10 * u)}" width="${f(0.13 * u)}" height="${f(2 * u)}" fill="${SPEC}"/>` + ribs, sw: 0.055 });
   }
 
   // ---- collar wings (front, ribbed) ----
   for (const sd of [-1, 1]) {
     const A = B(sd * 0.08, 8.52, 0.92), Tp = B(sd * 1.16, 10.05, -0.28), Cc = B(sd * 1.5, 8.98, 0.05), Dd = B(sd * 0.78, 8.62, 0.8);
     let ribs = ''; for (let i = 1; i <= 4; i++) { const t = i / 5; ribs += `<path d="M${pt([lerp(A[0], Dd[0], t), lerp(A[1], Dd[1], t)])}L${pt([lerp(Tp[0], Cc[0], t * 0.9), lerp(Tp[1], Cc[1], t * 0.9)])}" ${st(FINE * 1.1)}/>`; }
-    const hi = `<path d="M${pt([lerp(A[0], Dd[0], 0.12), lerp(A[1], Dd[1], 0.12) - 0.1 * u])}L${pt([lerp(Tp[0], Cc[0], 0.1), lerp(Tp[1], Cc[1], 0.1) + 0.25 * u])}" ${st(0.08 * u, GOLD_HI)}/>`;
-    s += form(poly([A, Tp, Cc, Dd], 0.05 * u), GOLD, GOLD_SH, u, { dx: 0.22, dy: 0.02, inner: (sd < 0 ? hi : '') + ribs, sw: 0.06 });
-    s += `<path d="M${pt(A)}L${pt(Tp)}" ${st(0.075 * u, SILVER)}/><path d="M${pt(A)}L${pt(Tp)}" ${st(FINE * 0.8)} transform="translate(${f(sd * 0.05 * u)} ${f(0.03 * u)})"/>`;
+    const hi = `<path d="M${pt([lerp(A[0], Dd[0], 0.12), lerp(A[1], Dd[1], 0.12) - 0.1 * u])}L${pt([lerp(Tp[0], Cc[0], 0.1), lerp(Tp[1], Cc[1], 0.1) + 0.25 * u])}" ${st(0.08 * u, SPEC)}/>`;
+    s += form(poly([A, Tp, Cc, Dd], 0.05 * u), PLATE, 0, u, { dx: 0.22, dy: 0.02, inner: (sd < 0 ? hi : '') + ribs, sw: 0.06 });
+    s += `<path d="M${pt(A)}L${pt(Tp)}" ${st(0.075 * u, ACC)}/><path d="M${pt(A)}L${pt(Tp)}" ${st(FINE * 0.8)} transform="translate(${f(sd * 0.05 * u)} ${f(0.03 * u)})"/>`;
   }
 
   // ---- pauldrons: three layered lames per shoulder ----
@@ -463,18 +483,18 @@ function cassius(x, y, h, opts = {}) {
       const d = `M${pt(a)}Q${pt(Q(ax + w * 0.08, ay + hg * 0.95))} ${pt(tp)}Q${pt(Q(ax + w * 0.8, ay + hg * 0.95))} ${pt(tip)}Q${pt(Q(ax + w * 0.85, ay - hg * 0.3))} ${pt(lo)}Q${pt(Q(ax + w * 0.25, ay - hg * 0.62))} ${pt(a2)}Z`;
       const trim = `M${pt(tip)}Q${pt(Q(ax + w * 0.85, ay - hg * 0.3))} ${pt(lo)}Q${pt(Q(ax + w * 0.25, ay - hg * 0.62))} ${pt(a2)}`;
       const hl = Q(ax + w * (sd < 0 ? 0.62 : 0.22), ay + hg * 0.62), hl2 = Q(ax + w * (sd < 0 ? 0.3 : 0.5), ay + hg * 0.78), hl3 = Q(ax + w * (sd < 0 ? 0.42 : 0.4), ay + hg * 0.4);
-      return form(d, GOLD, GOLD_SH, u, { dx: 0.2, dy: 0.1, sw: 0.062, inner: `<path d="${trim}" ${st(0.17 * u, SILVER)}/><path d="${trim}" ${st(FINE)} transform="translate(0 ${f(-0.1 * u)})"/><path d="${poly([hl, hl2, hl3], 0.04 * u)}" fill="${GOLD_HI}"/>` }); };
+      return form(d, PLATE, 0, u, { dx: 0.2, dy: 0.1, sw: 0.062, inner: `<path d="${trim}" ${st(0.17 * u, ACC)}/><path d="${trim}" ${st(FINE)} transform="translate(0 ${f(-0.1 * u)})"/><path d="${poly([hl, hl2, hl3], 0.04 * u)}" fill="${SPEC}"/>` }); };
     s += lame(0.05, -0.92, 0.95, 0.42, -0.12) + lame(-0.2, -0.46, 1.2, 0.5, -0.02) + lame(-0.62, 0.05, 1.5, 0.62, 0.16);
   }
 
   // ---- seated: forearms and fists resting on the table ----
   if (seated) for (const sd of [-1, 1]) {
     const sh = [x + sd * armX * u, Y0 - 8.5 * u], el = [x + sd * (armX + 0.42) * u, y - 0.42 * u], hd = [x + sd * 0.62 * u + sb * 0.45 * u, y - 0.36 * u];
-    s += form(limb(sh, 0.47 * u, [el[0], el[1] - 0.25 * u], 0.42 * u), BLUE, BLUE_SH, u, { dx: 0.2 });
-    s += form(limb([el[0] + sd * 0.05 * u, el[1]], 0.4 * u, [hd[0] + sd * 0.3 * u, hd[1]], 0.3 * u), GOLD, GOLD_SH, u, { dx: 0.1, dy: 0.14,
-      inner: `<path d="M${f(el[0] - sd * 0.15 * u)} ${f(el[1] - 0.22 * u)}L${f(hd[0] + sd * 0.45 * u)} ${f(hd[1] - 0.16 * u)}" ${st(0.08 * u, GOLD_HI)}/>` });
-    s += `<path d="M${f(hd[0] + sd * 0.42 * u)} ${f(hd[1] - 0.3 * u)}v${f(0.62 * u)}" ${st(0.09 * u, SILVER)}/>`;
-    s += form(`M${f(hd[0] - 0.36 * u)} ${f(hd[1] - 0.26 * u)}q${f(0.36 * u)} ${f(-0.14 * u)} ${f(0.72 * u)} 0l${f(0.02 * u)} ${f(0.64 * u)}h${f(-0.76 * u)}Z`, GOLD, GOLD_SH, u, { dx: 0.14 });
+    s += form(limb(sh, 0.47 * u, [el[0], el[1] - 0.25 * u], 0.42 * u), CLOTH, 0, u, { dx: 0.2 });
+    s += form(limb([el[0] + sd * 0.05 * u, el[1]], 0.4 * u, [hd[0] + sd * 0.3 * u, hd[1]], 0.3 * u), PLATE, 0, u, { dx: 0.1, dy: 0.14,
+      inner: `<path d="M${f(el[0] - sd * 0.15 * u)} ${f(el[1] - 0.22 * u)}L${f(hd[0] + sd * 0.45 * u)} ${f(hd[1] - 0.16 * u)}" ${st(0.08 * u, SPEC)}/>` });
+    s += `<path d="M${f(hd[0] + sd * 0.42 * u)} ${f(hd[1] - 0.3 * u)}v${f(0.62 * u)}" ${st(0.09 * u, ACC)}/>`;
+    s += form(`M${f(hd[0] - 0.36 * u)} ${f(hd[1] - 0.26 * u)}q${f(0.36 * u)} ${f(-0.14 * u)} ${f(0.72 * u)} 0l${f(0.02 * u)} ${f(0.64 * u)}h${f(-0.76 * u)}Z`, PLATE, 0, u, { dx: 0.14 });
     s += `<path d="M${f(hd[0] - 0.18 * u)} ${f(hd[1] - 0.02 * u)}v${f(0.34 * u)}M${f(hd[0])} ${f(hd[1] - 0.02 * u)}v${f(0.34 * u)}M${f(hd[0] + 0.18 * u)} ${f(hd[1] - 0.02 * u)}v${f(0.34 * u)}" ${st(FINE)}/>`;
   }
 
