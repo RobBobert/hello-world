@@ -1,6 +1,6 @@
 // GOLDEN SON in 2 minutes: all beats, chibi v2 cast in lit sets, calm camera.
 // Each beat: start/pop cue (spoken words), captions, mood, art(t, p, pt) -> SVG (world space 1080x1920).
-const L = require('./lighting.js'), K = require('./cast.js');
+const L = require('./lighting.js'), K = require('./cast.js'), ACT = require('./shots/action-preview.js'), OTS = require('./shots/ots-frames.js');
 const cl = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v)), io = u => { u = cl(u); return u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
 const eo = u => 1 - Math.pow(1 - cl(u), 3), lerp = (a, b, u) => a + (b - a) * u;
 const f = v => v.toFixed(1);
@@ -31,13 +31,47 @@ const streaks = (t, n = 40, par = 0) => { let o = ''; for (let i = 0; i < n; i++
     o += `<g opacity="${((far ? .55 : .95) * Math.min(1, k * 6) * (1 - Math.pow(k, 6))).toFixed(2)}"><line x1="${f(x + len * .17)}" y1="${f(y - len)}" x2="${f(x)}" y2="${f(y)}" stroke="#ffcf7a" stroke-width="${wd}" stroke-linecap="round"/><circle cx="${f(x)}" cy="${f(y)}" r="${wd * 1.1}" fill="#fff"/></g>`; } return L.screen(o); };
 const crowd = (n, y, s, seed = 1, col = '#14141c') => { let o = ''; for (let i = 0; i < n; i++) { const x = ((i * 191 + seed * 53) % 1300) - 110, sc = s * (0.85 + ((i * 7) % 5) / 15); o += `<g opacity=".9"><circle cx="${x}" cy="${y - sc * 1.9}" r="${sc * .38}" fill="${col}"/><path d="M${x - sc * .5} ${y} Q${x - sc * .5} ${y - sc * 1.5} ${x} ${y - sc * 1.55} Q${x + sc * .5} ${y - sc * 1.5} ${x + sc * .5} ${y}Z" fill="${col}"/></g>`; } return o; };
 
+
+// ---------------- OPENING (6.4 s): boot smashes the steak -> plates explode, wine stains Cassius -> two steps -> OTS "Cassius." / OTS "Darrow."
+const OPEN = 6.4, LAND = 0.55, WINE_HIT = 1.75;
+const shards = (cx, cy, k, n = 10, seed = 1) => { if (k <= 0 || k > 1.4) return ''; let o = '';
+  for (let i = 0; i < n; i++) { const a = -Math.PI * (0.1 + 0.8 * ((i * 37 + seed * 13) % 100) / 100), v = 260 + ((i * 53) % 160), x = cx + Math.cos(a) * v * k, y = cy + Math.sin(a) * v * k + 520 * k * k, r = (i * 47) % 360 + k * 600;
+    o += `<path d="M${f(x)} ${f(y)} l18 -8 l10 22 l-24 6 Z" fill="#eef1f5" stroke="#1b1210" stroke-width="4" transform="rotate(${f(r)} ${f(x)} ${f(y)})" opacity="${f(cl(1.4 - k))}"/>`; } return o; };
+const stainOn = (t, x, y, s) => t >= WINE_HIT ? `<g opacity="${f(cl((t - WINE_HIT) / .2))}">${OTS.wine(x, y, s)}</g>` : '';
+function opening(t) {
+  // 1) close-up: steaming steak, boot slams down
+  if (t < 1.3) { const fall = t < LAND ? -900 * Math.pow(1 - t / LAND, 2) : 0, k = (t - LAND) / .9, crushed = t >= LAND;
+    const steam = crushed ? '' : Array.from({ length: 4 }, (_, i) => { const u = ((t * .9 + i * .25) % 1); return `<path d="M${470 + i * 50 + 20 * Math.sin(u * 6 + i)} ${1150 - 260 * u} q-24 -40 6 -80 q26 -40 0 -80" stroke="#fff" stroke-width="12" fill="none" stroke-linecap="round" opacity="${f(.45 * Math.sin(Math.PI * u))}"/>`; }).join('');
+    const boot = `<g transform="translate(560 ${f(1190 + fall)})"><rect x="-120" y="-760" width="230" height="640" rx="30" fill="#9a6f22" stroke="#1b1210" stroke-width="10"/><rect x="-128" y="-420" width="246" height="40" fill="#e2b65a" stroke="#1b1210" stroke-width="8"/><path d="M-120 -140 L110 -140 Q260 -110 250 -10 L-130 -10 Z" fill="#141218" stroke="#1b1210" stroke-width="10" stroke-linejoin="round"/><rect x="-140" y="-24" width="400" height="30" rx="10" fill="#0a0808"/></g>`;
+    let w = `<g filter="url(#mono)">${L.skyOrRoom('gala', t, { floorY: 1000 })}</g><rect x="0" y="1200" width="1080" height="720" fill="#2b4a8a"/><rect x="0" y="1200" width="1080" height="26" fill="#d8e0ea"/>`
+      + `<g transform="translate(540 1230) scale(2.2) translate(-540 -1230)">${crushed ? '' : OTS.steak(540, 1230, 1, false)}</g>` + steam
+      + (crushed ? `<g transform="translate(540 1230) scale(2.2) translate(-540 -1230)">${OTS.steak(540, 1230, 1, true)}</g>` : '') + shards(540, 1210, k, 14, 3) + boot
+      + (crushed ? ACT_IMPACT(540, 1180, k) : '');
+    const sh = crushed && t < LAND + .3 ? Math.exp(-(t - LAND) * 14) * 22 : 0;
+    return `<g transform="translate(${f(sh * Math.sin(t * 90))} ${f(sh * Math.cos(t * 77))})">${w}</g>` + (crushed && t < LAND + .12 ? `<rect width="1080" height="1920" fill="#fff" opacity="${f(.6 * (1 - (t - LAND) / .12))}"/>` : ''); }
+  // 2) wide: plates explode off the table, wine flies onto Cassius, Darrow takes two steps
+  if (t < 2.75) { const k = (t - LAND) / 1.1, walk = cl((t - 1.95) / .8), DX = 400 + 70 * walk, step = Math.abs(Math.sin(walk * Math.PI * 2)) * 16;
+    const wu = cl((t - 1.35) / (WINE_HIT - 1.35)), wx = lerp(650, 760, wu), wy = 1470 - 220 * Math.sin(Math.PI * wu) + 0 * wu;
+    const wine = t > 1.35 && t < WINE_HIT + .15 ? `<path d="M650 1480 Q${f(lerp(650, 705, wu))} ${f(1250)} ${f(wx)} ${f(wy)}" stroke="#8f1018" stroke-width="16" fill="none" stroke-linecap="round" opacity=".9"/>` + Array.from({ length: 5 }, (_, i) => `<circle cx="${f(wx - i * 14)}" cy="${f(wy - i * 6)}" r="${10 - i}" fill="#8f1018"/>`).join('') : '';
+    return W(room('gala', t) + RIM(K.cassius(790, TY + 310, 330, { yaw: -18, brow: t > WINE_HIT ? 'angry' : 'soft', mouth: t > WINE_HIT ? 'frown' : 'flat', arms: ['table', 'table'] }), 'gala') + stainOn(t, 790, TY + 310, 330)
+      + tableG(t, { land: LAND }) + shards(130, TY - 10, k, 9, 5) + shards(980, TY - 10, k * .9, 9, 8) + wine
+      + L.floorShadow(DX, TY + 6, 290, { mood: 'gala' }) + `<g transform="translate(0 ${f(-step)})">${RIM(K.darrow(DX, TY, 340, { yaw: 14, mouth: 'smirk', arms: ['hang', 'hang'], wind: t }), 'gala')}</g>`, t - 1.3, 1.45, 1.08, 1.0, 560, 1080) + fg(-30); }
+  // 3) OTS over Cassius: "Cassius."   4) swing -> OTS over Darrow: "Darrow."
+  const SW = 4.35, sw = cl((t - SW) / .3), A = OTS.FRAMES['ots-cassius'](), B = OTS.FRAMES['ots-darrow']();
+  const pushA = 1 + .04 * cl((t - 2.75) / 1.6), pushB = 1 + .04 * cl((t - SW) / 2);
+  const ga = `<g transform="translate(${f(-1080 * eo(sw))} 0) translate(540 960) scale(${f(pushA)}) translate(-540 -960)">${A}</g>`;
+  const gb = sw > 0 ? `<g transform="translate(${f(1080 * (1 - eo(sw)))} 0) translate(540 960) scale(${f(pushB)}) translate(-540 -960)">${B}</g>` : '';
+  const blur = sw > 0 && sw < 1 ? Array.from({ length: 10 }, (_, i) => `<rect x="0" y="${i * 200 + 40}" width="1080" height="18" fill="#fff" opacity=".12"/>`).join('') : '';
+  return ga + gb + blur;
+}
+const ACT_IMPACT = (x, y, u) => { if (u < 0 || u > 1) return ''; let o = ''; for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2, r0 = 40 + 300 * eo(u), r1 = r0 + 130 * (1 - u); o += `<line x1="${f(x + Math.cos(a) * r0)}" y1="${f(y + Math.sin(a) * r0 * .5)}" x2="${f(x + Math.cos(a) * r1)}" y2="${f(y + Math.sin(a) * r1 * .5)}" stroke="#fff6d0" stroke-width="${f(14 * (1 - u))}" stroke-linecap="round"/>`; } return o; };
+
 const BEATS = [
-  // 1. cold open: boots on the table
+  { fixed: true, t0f: 0, t1f: OPEN, l1: '', mood: 'gala', dialog: [[2.95, 'CASSIUS.'], [4.75, 'DARROW.']], art: (t) => opening(t) },
+  // 1. continues from the opening: Darrow on the table, Cassius stained
   { start: 'house bellona wants', pop: 'so he walks', l1: 'HOUSE BELLONA WANTS HIM DEAD.', l2: 'SO HE WALKS ACROSS THEIR TABLE.', mood: 'gala',
-    art: (t, p, pt, d) => { const land = 0.45, fall = t < land ? -1300 * Math.pow(1 - t / land, 2) : 0, sq = t > land ? 1 - 0.08 * Math.exp(-(t - land) * 10) * Math.cos((t - land) * 28) : 1.03;
-      const shake = t > land && t < land + .3 ? Math.exp(-(t - land) * 14) * 9 : 0;
-      return `<g transform="translate(${f(shake * Math.sin(t * 80))} ${f(shake * Math.cos(t * 70))})">` + W(room('gala', t) + RIM(K.cassius(790, TY + 310, 330, { yaw: -18, brow: t > 4 ? 'angry' : 'soft', mouth: t > 4 ? 'frown' : 'flat' }), 'gala') + tableG(t, { land })
-        + L.floorShadow(400, TY + 6, 290, { mood: 'gala' }) + `<g transform="translate(0 ${f(fall)}) translate(400 ${TY}) scale(${f((2 - sq) * 100) / 100} ${f(sq * 100) / 100}) translate(-400 ${-TY})">${RIM(K.darrow(400, TY, 340, { yaw: 14, mouth: t > 2 ? 'smirk' : 'flat', arms: ['hang', 'blade'], wind: t }), 'gala')}</g>`, t, d, 1.0, 1.12, 560, 1060, -60) + fg(-30) + '</g>'; } },
+    art: (t, p, pt, d) => W(room('gala', t) + RIM(K.cassius(790, TY + 310, 330, { yaw: -18, brow: 'angry', mouth: 'frown', arms: ['table', 'table'] }), 'gala') + OTS.wine(790, TY + 310, 330) + tableG(t, { land: -8 })
+      + L.floorShadow(470, TY + 6, 290, { mood: 'gala' }) + RIM(K.darrow(470, TY, 340, { yaw: 14, mouth: 'smirk', arms: ['hang', 'hang'], wind: t }), 'gala'), t, d, 1.0, 1.1, 580, 1060, -40) + fg(-30) },
   // 2. rewind
   { start: 'how did he', l1: 'HOW DID HE GET HERE?', mood: 'gala',
     art: (t, p, pt, d) => `<g filter="url(#sepia)">${W(room('gala', t) + RIM(K.cassius(790, TY + 310, 330, { yaw: -18, brow: 'angry', mouth: 'frown' }), 'gala') + tableG(t) + RIM(K.darrow(400, TY, 340, { yaw: 14, mouth: 'smirk', arms: ['hang', 'blade'] }), 'gala'), t, d, 1.12, 1.0, 500, 1060)}</g>`
@@ -66,11 +100,8 @@ const BEATS = [
   { start: 'instead he climbs', pop: 'in front of', l1: 'HE CHALLENGES CASSIUS TO A DUEL.', l2: 'IN FRONT OF EVERYONE.', mood: 'gala',
     art: (t, p, pt, d) => W(room('gala', t) + crowd(14, 1460, 110, 5) + RIM(K.sovereign(880, 1450, 230, { yaw: -20 }), 'gala') + RIM(K.cassius(780, TY + 310, 320, { yaw: -18, brow: 'angry', mouth: 'frown' }), 'gala') + tableG(t)
       + RIM(K.darrow(360, TY, 330, { yaw: 16, mouth: 'smirk', arms: ['hang', 'blade'], wind: t }), 'gala'), t, d, 1.05, 0.98, 540, 1080) },
-  // 9. duel won
-  { start: 'darrow wins', pop: 'he takes', l1: 'DARROW WINS.', l2: "HE TAKES CASSIUS'S SWORD ARM.", mood: 'gala',
-    art: (t, p, pt, d) => W(room('gala', t, { floorY: 1500 }) + crowd(12, 1480, 110, 9) + (p ? blade(700, 1600, 70) : '') + RIM(K.cassius(760, 1760 + (p ? 60 : 0), 320, { yaw: -20, brow: p ? 'sad' : 'angry', mouth: 'frown', arms: p ? ['cross', 'hang'] : ['hang', 'raise'] }), 'gala')
-      + RIM(K.darrow(330, 1700, 340, { yaw: 18, brow: 'angry', mouth: 'flat', arms: ['hang', 'blade'] }), 'gala'), t, d, 1, 1.07, 540, 1150)
-      + (p ? `<rect width="1080" height="1920" fill="#fff" opacity="${(0.6 * cl(1 - pt / .2)).toFixed(2)}"/>` : '') },
+  // 9. duel (whip-razors, arm cut timed to 'he takes')
+  { start: 'darrow wins', pop: 'he takes', l1: 'DARROW WINS.', l2: "HE TAKES CASSIUS'S SWORD ARM.", mood: 'gala', art: (t) => ACT.duel(Math.min(5.55, t + 2.12)).svg },
   // 10. Sovereign / bloodbath
   { start: 'the sovereign stops', pop: 'and the gala', l1: 'THE SOVEREIGN STOPS THE DUEL.', l2: 'THE GALA BECOMES A BLOODBATH.', mood: 'gala',
     art: (t, p, pt, d) => p ? `<g>${room('gala', t, { color: true })}</g><rect width="1080" height="1920" fill="#7a0d0d" opacity=".55"/>` + crowd(16, 1640, 160, 2, '#0a0505') + crowd(10, 1820, 220, 7, '#000') + L.dust(3, t, { count: 50, color: '#ff6a4a', opacity: .5 })
@@ -86,17 +117,14 @@ const BEATS = [
   // 13. Lorn
   { start: 'lorn the old', pop: 'who taught', l1: 'LORN, THE OLD RAGE KNIGHT.', l2: 'WHO TAUGHT HIM THE BLADE.', l2color: 'gold', mood: 'void',
     art: (t, p, pt, d) => W(L.skyOrRoom('void', t, { floorY: 1450 }) + L.glow(540, 900, 600, '#9fc0ff', .25) + L.dust(5, t, { count: 50, color: '#e8f2ff', opacity: .6 }) + RIM(K.lorn(560, 1680, 360, { yaw: -8, arms: ['hang', 'blade'] }), 'void'), t, d, 1, 1.07, 540, 1120) },
-  // 14. Sevro + Howlers
+  // 14. Sevro + Howlers (one woman, one with normal blonde hair)
   { start: 'sevro and his', pop: 'howlers', l1: 'SEVRO...', l2: 'AND HIS HOWLERS.', l2color: 'gold', mood: 'mars',
-    art: (t, p, pt, d) => W(room('mars', t, { sunX: 760, sunH: 300, floorY: 1440 }) + (p ? [170, 380, 700, 910].map((x, i) => slideIn(RIM(K.sevro(x, 1600, 230, { yaw: i < 2 ? 14 : -14, kitOverride: { over: ['mohawk'] } }), 'mars'), i < 2 ? -200 : 200, (pt - i * .08) / .4)).join('') : '')
-      + RIM(K.sevro(540, 1700, 330, { yaw: 0, mouth: 'smirk', arms: ['hip', 'hip'] }), 'mars'), t, d, 1, 1.06, 540, 1120) },
-  // 15. Iron Rain
-  { start: 'then he drops', pop: 'the iron rain', l1: 'HE DROPS HIS ARMY FROM ORBIT.', l2: 'THE IRON RAIN.', l2color: 'gold', mood: 'mars',
-    art: (t, p, pt, d) => W(room('mars', t, { sunX: 300, sunH: 420, floorY: 1380 }) + streaks(t, 46) + RIM(K.darrow(720, 1680, 340, { yaw: -18, pitch: 8, brow: 'angry', mouth: 'flat', wind: t }), 'mars') + L.dust(7, t, { count: 40, color: '#ffb070', opacity: .5 }), t, d, 1, 1.07, 540, 1120) },
-  // 16. takes the planet
-  { start: 'darrow takes the', l1: 'MARS FALLS.', l2: 'TO DARROW.', l2color: 'gold', mood: 'mars', popAt: 0.4,
-    art: (t, p, pt, d) => W(room('mars', t, { sunX: 820, sunH: 520, floorY: 1440 }) + `<line x1="540" y1="1680" x2="${540 + 10 * Math.sin(t)}" y2="${980 - 120 * eo(t / .8)}" stroke="#3a2418" stroke-width="14"/>` + `<g transform="translate(${540 + 10 * Math.sin(t)} ${980 - 120 * eo(t / .8)})">${banner(0, 0, 230, 160, '#a81f1c', `<g transform="translate(115 70)">${require('./chibi2.js').lionFace(0, 0, 42, '#b8862a', '#e6bb5c', '#5a3a10')}</g>`)}</g>`
-      + RIM(K.darrow(420, 1700, 340, { yaw: 14, mouth: 'smirk', arms: ['hang', 'raise'], wind: t }), 'mars'), t, d, 1, 1.05, 540, 1120) },
+    art: (t, p, pt, d) => { const H = [[170, 14, { hair: 'long', kitOverride: { hairLong: true, hair: 'short', hairCol: '#3a2418', over: [] } }], [380, 14, { kitOverride: { hair: 'short', hairCol: '#e6c46a', over: [] } }], [700, -14, { kitOverride: { over: ['mohawk'], hairCol: '#2a2420' } }], [910, -14, { kitOverride: { hair: 'short', hairCol: '#8a5a2a', over: [] } }]];
+      return W(room('mars', t, { sunX: 760, sunH: 300, floorY: 1440 }) + (p ? H.map(([x, yw, o], i) => slideIn(RIM(K.sevro(x, 1600, 230, { yaw: yw, mouth: 'flat', brow: 'angry', ...o }), 'mars'), i < 2 ? -200 : 200, (pt - i * .08) / .4)).join('') : '')
+        + RIM(K.sevro(540, 1700, 330, { yaw: 0, mouth: 'smirk', arms: ['hip', 'hip'] }), 'mars'), t, d, 1, 1.06, 540, 1120); } },
+  // 15-16. Iron Rain (one continuous action shot: drop, wolf jaws on Karnus, two more cuts)
+  { start: 'then he drops', pop: 'the iron rain', l1: 'HE DROPS HIS ARMY FROM ORBIT.', l2: 'THE IRON RAIN.', l2color: 'gold', mood: 'mars', art: (t) => ACT.rain(t).svg },
+  { start: 'darrow takes the', l1: 'MARS FALLS.', l2: 'TO DARROW.', l2color: 'gold', mood: 'mars', popAt: 0.2, art: (t) => ACT.rain(5.4 + t).svg },
   // 17. Ares is Fitchner
   { start: 'and he learns', pop: 'is fitchner', l1: 'WHO LEADS THE REBELLION?', l2: 'ARES... IS FITCHNER.', mood: 'void',
     art: (t, p, pt, d) => W(L.skyOrRoom('void', t, { floorY: 1450 }) + L.glow(540, 1000, 500, '#ff4a3a', .25) + (p ? fade(RIM(K.fitchner(540, 1700, 350, { yaw: -6, mouth: 'smirk', arms: ['hang', 'table'] }), 'void'), pt / .4) + `<g transform="translate(700 ${1270 + 40 * eo(pt / .5)})">${K.ares(0, 0, 360 * (1 - .3 * eo(pt / .5)))}</g>` : `<g transform="translate(540 ${1150 + 6 * Math.sin(t * 3)})">${K.ares(0, 0, 700)}</g>`), t, d, 1, 1.06, 540, 1120) },
@@ -134,4 +162,4 @@ const BEATS = [
   // 27. outro card
   { start: 'he walked across', pop: 'and lost everything', outro: true, l1: 'HE WON MARS.', l2: 'AND LOST EVERYTHING.', q: 'Can Roque ever be forgiven?', a: 'Yes or No — Morning Star next?', mood: 'void', art: () => '' },
 ];
-module.exports = { BEATS, MONO };
+module.exports = { BEATS, MONO, OPEN };

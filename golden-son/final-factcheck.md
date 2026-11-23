@@ -32,3 +32,14 @@ Checked every on-screen caption and visual against the approved claim table in `
 
 Not verifiable from sources and kept as style only: Darrow's smirk, the sun emblem on Cassius's armor
 (he is confirmed as the Morning Knight), helmet/emblem designs, Howlers' look.
+
+## Pass 2 addendum (v2 video: opening, duel, Iron Rain, Howlers)
+
+| Element | Status |
+|---|---|
+| Opening: boot smashes a steak, plates explode, wine stains Cassius, "Cassius." / "Darrow." exchange | Dramatization. Darrow walking onto the Bellona table is confirmed; the steak, the wine stain and the two spoken lines are invented for the cold open (one source mentions wine poured in Cassius's lap — single source). |
+| Duel: whip-razors, sword arm severed and thrown | OK — "sword arm" confirmed by 3 sources; no side shown; bloodless. Razor design is stylized. |
+| Iron Rain: the wolf jaws engulf **Karnus** and Darrow cuts him down | **Flag.** Sources do not put Karnus's death in the Iron Rain (one says Darrow kills Karnus later aboard the Sovereign's ship; sources conflict). Safer: make the first Gold an unnamed Bellona knight (change spiky hair/eagle crest), or accept as a stylized montage. |
+| Sevro with an eye patch | **Flag (user request).** In Golden Son he has a replacement bionic eye, not a patch ([TV Tropes / wiki summary]). |
+| Howlers: one woman, one blonde | OK — the Howlers include women; specific members not named on screen. |
+| Pronunciation of "Cassius" / "Darrow" in the dialogue lines | Not verified against the audiobook; uses ElevenLabs default pronunciation. |

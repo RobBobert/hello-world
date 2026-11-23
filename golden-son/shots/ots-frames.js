@@ -29,7 +29,8 @@ const FRAMES = {
       + L.dof('near', L.rimLight(K.darrow(130, 2560, 740, { back: true, yaw: 180, arms: ['hang', 'hang'] }), 'gala'));
   },
 };
-(async () => {
+module.exports = { FRAMES, steak, wine };
+if (require.main === module) (async () => {
   const b = await chromium.launch(), p = await b.newPage({ viewport: { width: W, height: H } });
   for (const [k, fn] of Object.entries(FRAMES)) { await p.setContent(`<style>body{margin:0}svg{position:absolute;inset:0}</style><svg class="gsl-frame" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><defs>${MONO}</defs>${L.defs()}${fn()}${L.bokeh(3, 0, { count: 14, opacity: .4 })}${L.grade('gala', {})}</svg>`); await p.screenshot({ path: `${ROOT}/out/${k}.png` }); }
   await b.close();

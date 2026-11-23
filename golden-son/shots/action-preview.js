@@ -145,8 +145,10 @@ function rain(t) {
       <path d="M-180 -400 L-120 -430 M140 -440 L200 -455" stroke="#120d0f" stroke-width="10" stroke-linecap="round"/>
       </g>`;
     const teethG = `<g transform="translate(${cx} ${cy}) scale(${HS})">${teeth}</g>`;
-    const outline = `<g>${K.karnus(kx, ky, 280, { yaw: -16, brow: 'sad', mouth: 'frown', arms: ['raise', 'raise'] }).replace(/fill="#[0-9a-fA-F]{3,6}"/g, 'fill="none"').replace(/stroke="#[0-9a-fA-F]{3,6}"/g, 'stroke="#ff3a2a"').replace(/stroke-width="([\d.]+)"/g, (m, w) => `stroke-width="${(+w * 0.8).toFixed(1)}"`)}</g>`;
-    d += `<rect x="-200" y="-200" width="1480" height="2400" fill="#1a0606" opacity=".75"/>` + L.glow(cx, cy, 650, '#ff6a2a', .45) + head + outline + teethG
+    const outline = `<g>${K.karnus(kx, ky, 280, { yaw: -16, brow: 'sad', mouth: 'flat', blink: true, arms: ['raise', 'raise'], kitOverride: { hair: 'none' } }).replace(/fill="#[0-9a-fA-F]{3,6}"/g, 'fill="none"').replace(/stroke="#[0-9a-fA-F]{3,6}"/g, 'stroke="#ff3a2a"').replace(/stroke-width="([\d.]+)"/g, (m, w) => `stroke-width="${(+w * 0.8).toFixed(1)}"`)}</g>`;
+    { const S = 280 * 1.12, r = S * .42, hx = kx - 16 * S * .0012, hy = ky - S * 1.55 - r * .78;
+      var hairLine = `<path d="M${f(hx - r)} ${f(hy - r * .2)} L${f(hx - r * .7)} ${f(hy - r * 1.35)} L${f(hx - r * .3)} ${f(hy - r * .95)} L${f(hx)} ${f(hy - r * 1.55)} L${f(hx + r * .3)} ${f(hy - r * .95)} L${f(hx + r * .72)} ${f(hy - r * 1.35)} L${f(hx + r)} ${f(hy - r * .2)}" fill="none" stroke="#ff3a2a" stroke-width="9" stroke-linejoin="round"/>`; }
+    d += `<rect x="-200" y="-200" width="1480" height="2400" fill="#1a0606" opacity=".75"/>` + L.glow(cx, cy, 650, '#ff6a2a', .45) + head + outline + hairLine + teethG
       + Array.from({ length: 18 }, (_, i) => { const a = i / 18 * Math.PI * 2; return `<line x1="${f(cx + Math.cos(a) * 560)}" y1="${f(cy + Math.sin(a) * 560)}" x2="${f(cx + Math.cos(a) * 820)}" y2="${f(cy + Math.sin(a) * 820)}" stroke="#fff" stroke-width="12"/>`; }).join('');
   }
   s += d;
@@ -157,7 +159,8 @@ function rain(t) {
   return { svg: out, cap: cap(...c) };
 }
 const SHOTS = { duel: [duel, 5.6], rain: [rain, 6.4] };
-(async () => {
+module.exports = { duel, rain };
+if (require.main === module) (async () => {
   const which = process.argv[2] ? [process.argv[2]] : Object.keys(SHOTS), b = await chromium.launch();
   const PAGE = `<style>@font-face{font-family:Anton;src:url(${font('anton.woff2')})}html,body{margin:0;background:#000;overflow:hidden}#w{position:absolute;inset:0;width:${W}px;height:${H}px;overflow:hidden}#w svg{position:absolute;inset:0}
     .cap{position:absolute;top:270px;left:150px;right:150px;text-align:center;font-family:Anton;line-height:1.08}.l1,.l2{font-size:80px;-webkit-text-stroke:2px #120c0a;paint-order:stroke fill;text-shadow:0 5px 0 rgba(0,0,0,.6),0 0 40px rgba(0,0,0,.7)}.l1{color:#f6ead2}</style><div id="w"></div>`;
