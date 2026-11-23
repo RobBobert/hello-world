@@ -120,7 +120,7 @@ function rain(t) {
   // landing impact
   d += impact(DX, FY - 10, (t - LAND) / .6, 1.3);
   // WOLF JAWS (manga): B&W panel, white wolf with ink detail + red eyes, Karnus a solid black silhouette whose outline/eyes turn red.
-  const JA = CUTS[0] - .42, jk = t - JA, JD = .5;
+  const JA = CUTS[0] - .35, jk = t - JA, JD = .5;
   if (jk >= 0 && jk < JD) {
     const u = jk / JD, open = u < .7 ? eo(u / .7) : 1, snap = u < .7 ? 0 : eo((u - .7) / .15);
     const HS = .62 + .14 * eo(u / .7), kx = 700, ky = FY, cx = kx - 130 - 120 * (1 - eo(u / .5)), cy = FY - 560 - 140 * (1 - eo(u / .5));
@@ -142,8 +142,15 @@ function rain(t) {
     const ruff = Array.from({ length: 11 }, (_, i) => { const a = (-150 + i * 22) * Math.PI / 180, r1 = 420, r2 = 560 + (i % 2) * 80; return `L${f(-380 + Math.cos(a) * r2)} ${f(Math.sin(a) * r2 * .9)} L${f(-380 + Math.cos(a + .14) * r1)} ${f(Math.sin(a + .14) * r1 * .9)}`; }).join(' ');
     const W1 = '#ffffff', SH = '#dfe4ec', SH2 = '#c4ccd8', LN = '#b8c0cc', LW = 10, MOUTH = '#8a1420';
     // wolf eye: almond, slanted, red iris with a vertical slit
-    const eye = `<path d="M-90 -395 Q20 -470 160 -430 Q90 -365 -90 -395 Z" fill="#fff6e0" stroke="${SH2}" stroke-width="8"/><ellipse cx="55" cy="-415" rx="44" ry="30" fill="#e8251c"/><ellipse cx="55" cy="-415" rx="11" ry="27" fill="#5a0810"/><circle cx="70" cy="-428" r="8" fill="#fff"/>${L.glow(55, -415, 100, '#ff2a1a', .6)}
-      <path d="M-110 -440 Q20 -500 175 -455" stroke="${SH2}" stroke-width="12" fill="none" stroke-linecap="round"/>`;
+    // furious eye: narrow slanted slit under a heavy furrowed brow, burning red, slit pupil
+    const eye = `<g transform="translate(40 -420) scale(1.45) translate(-40 420)"><path d="M-100 -380 Q10 -420 170 -455 Q120 -385 -100 -380 Z" fill="#ff3a1a" stroke="#7a1018" stroke-width="7"/>
+      <path d="M50 -428 L58 -398 L64 -428 Z" fill="#2a0306"/><circle cx="105" cy="-440" r="7" fill="#fff"/>
+      ${L.glow(40, -415, 160, '#ff1a0a', .95)}${L.glow(40, -415, 70, '#ffd0a0', .6)}
+      <path d="M-170 -420 Q-20 -455 200 -525 L210 -490 Q0 -420 -150 -395 Z" fill="#9aa4b4" stroke="${LN}" stroke-width="6" stroke-linejoin="round"/>
+      <path d="M-60 -470 Q-80 -520 -40 -560 M20 -485 Q10 -530 50 -565" stroke="#8a94a4" stroke-width="10" fill="none" stroke-linecap="round"/></g>`;
+    // snarl wrinkles on the muzzle + bared gums above the upper teeth
+    const snarl = `<path d="M240 -390 Q290 -440 350 -410 M285 -355 Q340 -400 400 -370 M330 -320 Q385 -360 440 -330" stroke="#8a94a4" stroke-width="14" fill="none" stroke-linecap="round"/>
+      <path d="M-150 -${G - 40} L560 -${G - 40} L540 -${G - 75} Q200 -${G - 50} -150 -${G - 75} Z" fill="#d94a5a"/>`;
     const head = `<g transform="translate(${f(cx)} ${f(cy)}) scale(${f(HS)})">
       <path d="M-380 -470 ${ruff} L-380 470 Z" fill="${SH}" stroke="${LN}" stroke-width="${LW}" stroke-linejoin="round"/>
       <path d="M-330 0 L-470 -230 Q-470 -520 -170 -560 L-40 -560 Q200 -470 420 -330 L600 -${G + 20} Q640 -${G} 610 -${G - 40} L-150 -${G - 40} Z" fill="${W1}" stroke="${LN}" stroke-width="${LW}" stroke-linejoin="round"/>
@@ -151,14 +158,14 @@ function rain(t) {
       <path d="M-330 0 L-470 220 Q-430 470 -120 470 Q200 430 520 ${G + 10} Q540 ${G - 30} 500 ${G - 40} L-150 ${G - 40} Z" fill="${W1}" stroke="${LN}" stroke-width="${LW}" stroke-linejoin="round"/>
       <path d="M-470 220 Q-430 470 -120 470 Q100 450 300 360 Q20 400 -200 380 Q-380 340 -470 220 Z" fill="${SH}"/>
       <path d="M-330 0 L-150 -${G - 40} L560 -${G - 40} L500 ${G - 40} L-150 ${G - 40} Z" fill="${MOUTH}"/>
-      <path d="M-300 -470 L-370 -840 L-130 -560 Z M-80 -540 L-60 -880 L120 -500 Z" fill="${W1}" stroke="${LN}" stroke-width="${LW}" stroke-linejoin="round"/>
-      <path d="M-290 -520 L-335 -760 L-185 -565 Z M-50 -545 L-42 -780 L75 -525 Z" fill="#f2c4cc"/>
+      <path d="M-300 -470 L-600 -720 L-160 -560 Z M-80 -540 L-420 -800 L80 -510 Z" fill="${W1}" stroke="${LN}" stroke-width="${LW}" stroke-linejoin="round"/>
+      <path d="M-290 -515 L-520 -690 L-190 -560 Z M-70 -540 L-360 -755 L50 -520 Z" fill="#f2c4cc"/>
       <ellipse cx="590" cy="-${G + 10}" rx="44" ry="32" fill="#8a7a80"/>
-      ${eye}
+      ${snarl}${eye}
       </g>`;
     const teethG = `<g transform="translate(${f(cx)} ${f(cy)}) scale(${f(HS)})">${teeth}</g>`;
     const impactLines = snap > 0 ? Array.from({ length: 16 }, (_, i) => { const a = i / 16 * Math.PI * 2; return `<line x1="${f(kx + Math.cos(a) * 260)}" y1="${f(hy + 80 + Math.sin(a) * 260)}" x2="${f(kx + Math.cos(a) * (360 + 200 * snap))}" y2="${f(hy + 80 + Math.sin(a) * (360 + 200 * snap))}" stroke="#e8251c" stroke-width="12" stroke-linecap="round"/>`; }).join('') : '';
-    d += `<g>${bg}${sil}${kHair}${kEyes}${head}${teethG}${impactLines}</g>`;
+    d += `<g>${sil}${kHair}${kEyes}${head}${teethG}${impactLines}</g>`;
   }
   s += d;
   let out = `<g transform="translate(540 1000) scale(${f(lerp(1.0, 1.08, io(t / 6.4)) * 100) / 100}) translate(-560 -1160)">${s}</g>`;

@@ -43,11 +43,12 @@ function frame(fn) {
 }
 (async () => {
   const out = `${B}/frames`; fs.mkdirSync(out, { recursive: true });
+  const RANGE = process.argv[4] === 'range' ? [+process.argv[5], +process.argv[6]] : null;
   const STILLS = process.argv[4] === 'stills', PICK = process.argv[4] === 'pick' ? process.argv[5].split(',').map(Number) : null;
   const list = PICK ? PICK : STILLS ? BEATS.map(b => Math.round(((b.tp ?? b.t0) + Math.min(1.2, (b.t1 - (b.tp ?? b.t0)) * .6)) * FPS)) : null;
   const b = await chromium.launch(), pg = await b.newPage({ viewport: { width: W, height: H } });
   await pg.setContent(PAGE); await pg.evaluate(() => document.fonts.ready);
-  const todo = (STILLS || PICK) ? list.filter((_, k) => k % NK === WK) : Array.from({ length: N }, (_, k) => k).filter(k => k % NK === WK);
+  const todo = RANGE ? Array.from({ length: RANGE[1] - RANGE[0] }, (_, k) => k + RANGE[0]).filter(k => k % NK === WK) : (STILLS || PICK) ? list.filter((_, k) => k % NK === WK) : Array.from({ length: N }, (_, k) => k).filter(k => k % NK === WK);
   for (const fn of todo) { const file = PICK ? `${B}/out/pick-${String(fn).padStart(5, '0')}.jpg` : STILLS ? `${B}/out/still-${String(list.indexOf(fn) + 1).padStart(2, '0')}.jpg` : `${out}/f${String(fn).padStart(5, '0')}.jpg`;
     await pg.evaluate(h => { document.getElementById('w').innerHTML = h; }, frame(fn)); await pg.screenshot({ path: file, type: 'jpeg', quality: 90 }); }
   await b.close(); if (WK === 0) console.log('frames', N, 'audio end', AUDIO_END.toFixed(2), 'beats', BEATS.map(x => x.t0.toFixed(1)).join(' '));
