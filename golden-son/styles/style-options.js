@@ -100,7 +100,8 @@ const STYLES = [
 
 const frame = s => `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${s.draw()}</svg>
   <div class="cap"><div class="l1">HOUSE BELLONA WANTS HIM DEAD.</div><div class="l2">SO HE CLIMBS ON THEIR TABLE.</div></div>`;
-(async () => {
+module.exports = { STYLES, W, H, font };
+if (require.main === module) (async () => {
   const b = await chromium.launch(), css = `@font-face{font-family:Anton;src:url(${font('anton.woff2')})}@font-face{font-family:Cinzel;font-weight:700;src:url(${font('cinzel700.woff2')})}
     body{margin:0;background:#0c0c10}.f{position:relative;width:${W}px;height:${H}px;overflow:hidden}.f svg{position:absolute;inset:0}
     .cap{position:absolute;top:270px;left:150px;right:150px;text-align:center;font-family:Anton;line-height:1.08}.l1,.l2{font-size:84px;-webkit-text-stroke:2px #120c0a;paint-order:stroke fill;text-shadow:0 5px 0 rgba(0,0,0,.55),0 0 40px rgba(0,0,0,.55)}.l1{color:#f6ead2}.l2{color:#e8372c}
