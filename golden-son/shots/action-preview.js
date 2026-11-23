@@ -121,12 +121,12 @@ function rain(t) {
   d += impact(DX, FY - 10, (t - LAND) / .6, 1.3);
   // WOLF JAWS: one-frame slam. Karnus drawn as a glowing outline, engulfed by a giant wolf head with razor teeth.
   const JT = CUTS[0] - .02, jk = t - JT;
-  if (jk >= 0 && jk < 1 / 30) {
-    const HS = .62, cx = 600, cy = FY - 640, kx = cx + 140, ky = cy + 165;
-    const WT = process.env.WOLF === 'dark' ? { fur: '#16101e', fur2: '#2a2038', line: '#ffcf6a', mouth: '#3a0d14', eye: '#ffd23a', glow: '#ffb02e' }
+  if (jk >= 0 && jk < 4 / 30) {
+    const HS = .7, kx = 700, ky = FY, cx = kx - 130, cy = FY - 560;
+    const WT = process.env.WOLF !== 'white' ? { fur: '#16101e', fur2: '#2a2038', line: '#ffcf6a', mouth: '#3a0d14', eye: '#ffd23a', glow: '#ffb02e' }
                                           : { fur: '#f4f2ee', fur2: '#c9ccd6', line: '#120d0f', mouth: '#4a0f18', eye: '#7fd3ff', glow: '#9fd8ff' };
     // wolf head in profile facing right; mouth hinge at (-330, 0), jaws open ±gap around Karnus
-    const G = 250, LW = 14;
+    const G = 250 - 60 * cl(jk / (3 / 30)), LW = 14;
     let teeth = '';
     for (let i = 0; i < 10; i++) { const x = -200 + i * 72, h = (i === 8 ? 150 : i % 2 ? 70 : 105); // upper row
       const yT = -G + 30 + i * 8; teeth += `<path d="M${x - 24} ${yT} L${x + 4} ${yT + h} L${x + 26} ${yT} Z" fill="#fffdf6" stroke="#120d0f" stroke-width="6"/>`; }
@@ -145,7 +145,7 @@ function rain(t) {
       <path d="M-180 -400 L-120 -430 M140 -440 L200 -455" stroke="#120d0f" stroke-width="10" stroke-linecap="round"/>
       </g>`;
     const teethG = `<g transform="translate(${cx} ${cy}) scale(${HS})">${teeth}</g>`;
-    const outline = `<g>${K.karnus(kx, ky, 125, { yaw: -16, brow: 'sad', mouth: 'frown', arms: ['raise', 'raise'] }).replace(/fill="#[0-9a-fA-F]{3,6}"/g, 'fill="none"').replace(/stroke="#[0-9a-fA-F]{3,6}"/g, 'stroke="#fff6dc"')}</g>`;
+    const outline = `<g>${K.karnus(kx, ky, 280, { yaw: -16, brow: 'sad', mouth: 'frown', arms: ['raise', 'raise'] }).replace(/fill="#[0-9a-fA-F]{3,6}"/g, 'fill="none"').replace(/stroke="#[0-9a-fA-F]{3,6}"/g, 'stroke="#ff3a2a"').replace(/stroke-width="([\d.]+)"/g, (m, w) => `stroke-width="${(+w * 0.8).toFixed(1)}"`)}</g>`;
     d += `<rect x="-200" y="-200" width="1480" height="2400" fill="#1a0606" opacity=".75"/>` + L.glow(cx, cy, 650, '#ff6a2a', .45) + head + outline + teethG
       + Array.from({ length: 18 }, (_, i) => { const a = i / 18 * Math.PI * 2; return `<line x1="${f(cx + Math.cos(a) * 560)}" y1="${f(cy + Math.sin(a) * 560)}" x2="${f(cx + Math.cos(a) * 820)}" y2="${f(cy + Math.sin(a) * 820)}" stroke="#fff" stroke-width="12"/>`; }).join('');
   }
@@ -165,7 +165,7 @@ const SHOTS = { duel: [duel, 5.6], rain: [rain, 6.4] };
     await Promise.all([0, 1, 2, 3].map(async w => { const p = await b.newPage({ viewport: { width: W, height: H } }); await p.setContent(PAGE); await p.evaluate(() => document.fonts.load('80px Anton'));
       for (let i = w; i < N; i += 4) { const { svg, cap: c } = fn(i / FPS); await p.evaluate(h => { document.getElementById('w').innerHTML = h; }, `<svg class="gsl-frame" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><defs>${MONO}</defs>${L.defs()}${svg}${L.grade(k === 'duel' ? 'gala' : 'mars', {})}</svg>${c}`); await p.screenshot({ path: `${dir}/f${String(i).padStart(4, '0')}.jpg`, type: 'jpeg', quality: 90 }); }
       await p.close(); }));
-    const name = k === 'duel' ? 'duel-preview' : 'ironrain-preview' + (process.env.WOLF === 'dark' ? '-darkwolf' : '');
+    const name = k === 'duel' ? 'duel-preview' : 'ironrain-preview' + (process.env.WOLF === 'white' ? '-whitewolf' : '');
     execFileSync('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS), '-i', `${dir}/f%04d.jpg`, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '21', '-movflags', '+faststart', `${ROOT}/${name}.mp4`]);
     execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', `${ROOT}/${name}.mp4`, '-vf', 'fps=2.2,scale=180:-1,tile=7x2', '-frames:v', '1', `${ROOT}/out/${name}-sheet.jpg`]);
     console.log(name, N); }
