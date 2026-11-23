@@ -7,17 +7,46 @@ const f = v => v.toFixed(1);
 const MONO = `<filter id="mono" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.32 0.34 0.34 0 -0.03  0.32 0.34 0.34 0 -0.03  0.33 0.34 0.38 0 0  0 0 0 1 0"/></filter>`;
 const font = n => `data:font/woff2;base64,${fs.readFileSync(`${ROOT}/fonts/${n}`).toString('base64')}`;
 
-// razor: a whip-blade from the hand. ext 0..1 = coiled -> fully extended; ang = direction (rad); wave = whip ripple; rigid = straight sword
+// razor: segmented whip-blade. ext 0..1 = coiled at the wrist -> full length; stiff 0..1 = flowing whip -> rigid sword.
+// theme: {edge, glow} colours. A light pulse runs down the blade while it locks stiff.
 function razor(hx, hy, ang, ext, t, o = {}) {
-  const len = (o.len || 520) * (0.18 + 0.82 * ext), segs = 22, wave = (o.wave ?? 1) * (1 - (o.rigid || 0)), pts = [];
-  for (let i = 0; i <= segs; i++) { const u = i / segs, d = u * len, coil = (1 - ext) * 2.2;
-    const off = Math.sin(u * 9 - t * 14) * 26 * u * wave + Math.sin(u * Math.PI * coil) * 90 * (1 - ext) * u;
-    pts.push([hx + Math.cos(ang) * d - Math.sin(ang) * off, hy + Math.sin(ang) * d + Math.cos(ang) * off]); }
-  const d = 'M' + pts.map(p => p.map(f).join(' ')).join(' L');
-  return `<path d="${d}" stroke="#1b1210" stroke-width="22" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" stroke="${o.col || '#e9eef4'}" stroke-width="13" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" opacity=".85"/>`
-    + `<rect x="${f(hx - 16)}" y="${f(hy - 16)}" width="32" height="32" rx="6" fill="#3a2418" stroke="#1b1210" stroke-width="5" transform="rotate(${f(ang * 57.3)} ${f(hx)} ${f(hy)})"/>`
-    + (o.trail ? `<path d="${d}" stroke="${o.col || '#e9eef4'}" stroke-width="60" fill="none" stroke-linecap="round" opacity=".18"/>` : '');
+  const th = o.theme || { edge: '#ffd36a', glow: '#ffb02e', steel: '#eef2f7' }, stiff = cl(o.stiff ?? 0), len = (o.len || 520) * (0.12 + 0.88 * ext), N = 30;
+  const ca = Math.cos(ang), sa = Math.sin(ang), pts = [];
+  // coiled: loops around the wrist; extended: whip wave that dies out as it stiffens
+  for (let i = 0; i <= N; i++) { const u = i / N;
+    if (ext < 0.12) { const k = 1 - ext / 0.12, a = u * Math.PI * 4.2 + t * 3, r = 38 + u * 22; pts.push([hx + Math.cos(a) * r * (0.6 + 0.4 * k) + ca * u * 60 * (1 - k), hy + Math.sin(a) * r * 0.55 * (0.6 + 0.4 * k) + sa * u * 60 * (1 - k)]); continue; }
+    const d = u * len, w = (1 - stiff) * (Math.sin(u * 8.5 - t * 13) * 34 * u + Math.sin(u * Math.PI * 1.6) * 60 * (1 - ext) * u);
+    pts.push([hx + ca * d - sa * w, hy + sa * d + ca * w]); }
+  // tapered blade outline from the centre line
+  const L1 = [], L2 = [];
+  for (let i = 0; i <= N; i++) { const p = pts[i], q = pts[Math.min(N, i + 1)], r0 = pts[Math.max(0, i - 1)], dx = q[0] - r0[0], dy = q[1] - r0[1], m = Math.hypot(dx, dy) || 1, nx = -dy / m, ny = dx / m, u = i / N;
+    const wd = (ext < 0.12 ? 7 : 15) * (1 - u * 0.75) * (u > 0.94 ? (1 - u) / 0.06 : 1) + 1.5; L1.push([p[0] + nx * wd, p[1] + ny * wd]); L2.push([p[0] - nx * wd, p[1] - ny * wd]); }
+  const outline = 'M' + L1.map(p => p.map(f).join(' ')).join(' L') + ' L' + L2.reverse().map(p => p.map(f).join(' ')).join(' L') + ' Z';
+  const spine = 'M' + pts.map(p => p.map(f).join(' ')).join(' L');
+  // segment notches every few points
+  let notches = ''; for (let i = 3; i < N - 1; i += 3) { const a = L1[i], b = L2[N - i]; if (a && b) notches += `<line x1="${f(a[0])}" y1="${f(a[1])}" x2="${f(b[0])}" y2="${f(b[1])}" stroke="#5a6676" stroke-width="2.5" opacity=".8"/>`; }
+  // lock pulse: a bright bead that runs hilt -> tip while stiffening
+  const pu = o.pulse ?? -1; let pulse = '';
+  if (pu >= 0 && pu <= 1) { const k = Math.min(N, Math.round(pu * N)), p = pts[k]; pulse = L.glow(p[0], p[1], 70, th.edge, .95) + `<circle cx="${f(p[0])}" cy="${f(p[1])}" r="12" fill="#fff"/>`; }
+  const glowA = 0.35 + 0.25 * stiff + (o.hot ? .3 : 0);
+  return `<g>
+    <path d="${spine}" stroke="${th.glow}" stroke-width="${ext < .12 ? 26 : 46}" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="${f(glowA * .45)}"/>
+    <path d="${spine}" stroke="${th.glow}" stroke-width="${ext < .12 ? 16 : 28}" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="${f(glowA)}"/>
+    <path d="${outline}" fill="${th.steel}" stroke="#141018" stroke-width="5" stroke-linejoin="round"/>
+    ${notches}
+    <path d="${spine}" stroke="#ffffff" stroke-width="3" fill="none" opacity=".9"/>
+    <path d="${outline}" fill="none" stroke="${th.edge}" stroke-width="2.5" opacity=".95"/>
+    ${o.trail ? `<path d="${spine}" stroke="${th.edge}" stroke-width="70" fill="none" stroke-linecap="round" opacity=".16"/>` : ''}
+    ${pulse}
+    <g transform="translate(${f(hx)} ${f(hy)}) rotate(${f(ang * 57.3)})">
+      <rect x="-58" y="-11" width="56" height="22" rx="6" fill="#2a1a12" stroke="#141018" stroke-width="5"/>
+      ${[-48, -36, -24, -12].map(x => `<line x1="${x}" y1="-11" x2="${x + 6}" y2="11" stroke="#6b4a32" stroke-width="3"/>`).join('')}
+      <circle cx="-64" cy="0" r="12" fill="${th.edge}" stroke="#141018" stroke-width="4"/>
+      <path d="M-4 -34 Q6 -30 10 -18 L10 18 Q6 30 -4 34 L2 0 Z" fill="${th.edge}" stroke="#141018" stroke-width="4" stroke-linejoin="round"/>
+      <circle cx="4" cy="0" r="7" fill="${th.glow}" stroke="#141018" stroke-width="3"/>
+    </g></g>`;
 }
+const GOLD = { edge: '#ffd36a', glow: '#ffae2a', steel: '#f2f4f8' }, STEEL = { edge: '#9fd0ff', glow: '#5aa8ff', steel: '#e6eef8' };
 const tipOf = (hx, hy, ang, ext, len = 520) => { const d = len * (0.18 + 0.82 * ext); return [hx + Math.cos(ang) * d, hy + Math.sin(ang) * d]; };
 function impact(x, y, u, s = 1) { if (u < 0 || u > 1) return ''; let o = '';
   for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2 + .2, r0 = 40 + 260 * eo(u), r1 = r0 + 120 * (1 - u); o += `<line x1="${f(x + Math.cos(a) * r0 * s)}" y1="${f(y + Math.sin(a) * r0 * s)}" x2="${f(x + Math.cos(a) * r1 * s)}" y2="${f(y + Math.sin(a) * r1 * s)}" stroke="#fff6d0" stroke-width="${f(12 * (1 - u))}" stroke-linecap="round"/>`; }
@@ -35,23 +64,23 @@ function duel(t) {
   const FY = 1640, DX = lerp(230, 290, eo((t - 1.0) / .4)), CX = lerp(860, 800, eo((t - 1.0) / .4));
   const T1 = 1.4, T2 = 2.6, T3 = 3.7; // first clash, second clash, the finishing cut
   // poses
-  const dPose = t < 1 ? 'guard' : t < T2 ? 'thrust' : t < T3 - .25 ? 'slashUp' : 'slashDown';
-  const cPose = t < 1 ? 'guard' : t < T3 ? (t < T2 ? 'thrust' : 'slashUp') : 'hang';
+  const dPose = t < .9 ? 'guard' : t < T2 - .3 ? 'slashUp' : t < T3 - .25 ? 'slashUp' : 'slashDown';
+  const cPose = t < .9 ? 'guard' : t < T3 ? 'slashUp' : 'hang';
   const [dhx, dhy] = C.handAt(DX, FY, 330, 1, dPose, 14), [chx, chy] = C.handAt(CX, FY, 320, -1, cPose, -14);
   // razor angles/extension
-  const dExt = t < 1 ? 0 : t < T1 ? eo((t - 1) / .4) : 1, cExt = t < 1 ? 0 : t < T1 ? eo((t - 1) / .4) : t < T3 ? 1 : 0;
-  const meet = [(dhx + chx) / 2, Math.min(dhy, chy) - 10];
+  const dExt = t < .9 ? 0.02 : t < T1 ? eo((t - .9) / .45) : 1, cExt = t < .9 ? 0.02 : t < T1 ? eo((t - .9) / .45) : t < T3 ? 1 : 0;
+  const meet = [(dhx + chx) / 2, Math.min(dhy, chy) - 330];
   let dAng = Math.atan2(meet[1] - dhy, meet[0] - dhx), cAng = Math.atan2(meet[1] - chy, meet[0] - chx);
   if (t >= T2 - .3 && t < T3 - .25) { dAng = lerp(-1.9, -0.9, io((t - (T2 - .3)) / .6)); cAng = lerp(-1.3, -2.2, io((t - (T2 - .3)) / .6)); }
   if (t >= T3 - .25) { dAng = lerp(-1.2, 0.5, io((t - (T3 - .25)) / .35)); }
-  const dLen = Math.hypot(meet[0] - dhx, meet[1] - dhy) / 0.98, cLen = Math.hypot(meet[0] - chx, meet[1] - chy) / 0.98;
+  const dLen = Math.hypot(meet[0] - dhx, meet[1] - dhy) * 1.35, cLen = Math.hypot(meet[0] - chx, meet[1] - chy) * 1.35;
   const casDown = t > T3 + .1, sink = casDown ? 70 * eo((t - T3 - .1) / .4) : 0;
   let s = `<g filter="url(#mono)">${L.skyOrRoom('gala', t, { floorY: 1500 })}</g>`;
   for (let i = 0; i < 12; i++) { const x = ((i * 191 + 40) % 1300) - 110, sc = 110 * (0.85 + ((i * 7) % 5) / 15); s += `<circle cx="${x}" cy="${1500 - sc * 1.9}" r="${sc * .38}" fill="#14141c"/><path d="M${x - sc * .5} 1500 Q${x - sc * .5} ${1500 - sc * 1.5} ${x} ${1500 - sc * 1.55} Q${x + sc * .5} ${1500 - sc * 1.5} ${x + sc * .5} 1500Z" fill="#14141c"/>`; }
   s += L.floorShadow(DX, FY + 6, 280, { mood: 'gala' }) + L.floorShadow(CX, FY + 6, 280, { mood: 'gala' });
-  s += `<g transform="translate(0 ${f(sink)})">` + L.rimLight(K.cassius(CX, FY, 320, { yaw: -14, brow: casDown ? 'sad' : 'angry', mouth: 'frown', arms: casDown ? ['cross', 'hang'] : ['hang', cPose] }), 'gala') + (cExt > 0 ? razor(chx, chy, cAng, cExt, t, { len: cLen, wave: t < T1 ? 1 : .35, col: '#dfe8f4' }) : '') + '</g>';
-  if (casDown) s += `<g transform="translate(${f(CX + 60)} ${f(FY - 20 + 60 * eo((t - T3 - .1) / .4))}) rotate(${f(80 * eo((t - T3) / .5))})">${razor(0, 0, 0, .15, t, { len: 300, wave: 0 })}</g>`;
-  s += L.rimLight(K.darrow(DX, FY, 330, { yaw: 14, brow: 'angry', mouth: t > T3 + .3 ? 'smirk' : 'flat', arms: ['hang', dPose], wind: t, armed: true }), 'gala') + (dExt > 0 || t >= 1 ? razor(dhx, dhy, dAng, Math.max(dExt, .05), t, { len: t >= T2 - .3 ? 560 : dLen, wave: t < T1 ? 1 : .3, trail: t >= T3 - .25 && t < T3 + .2 }) : '');
+  s += `<g transform="translate(0 ${f(sink)})">` + L.rimLight(K.cassius(CX, FY, 320, { yaw: -14, brow: casDown ? 'sad' : 'angry', mouth: 'frown', arms: casDown ? ['cross', 'hang'] : [cPose, 'hang'], armed: true }), 'gala') + razor(chx, chy, cAng, cExt, t, { len: cLen, theme: STEEL, stiff: t < T1 - .18 ? 0 : t < T2 - .3 ? 1 : t < T2 ? cl((t - (T2 - .3)) / .3) * 0 + .2 : 1, pulse: (t - (T1 - .18)) / .18 }) + '</g>';
+  if (casDown) s += `<g transform="translate(${f(CX + 60)} ${f(FY - 20 + 60 * eo((t - T3 - .1) / .4))}) rotate(${f(80 * eo((t - T3) / .5))})">${razor(0, 0, 0, .3, t, { len: 300, stiff: 1, theme: STEEL })}</g>`;
+  s += L.rimLight(K.darrow(DX, FY, 330, { yaw: 14, brow: 'angry', mouth: t > T3 + .3 ? 'smirk' : 'flat', arms: ['hang', dPose], wind: t, armed: true }), 'gala') + razor(dhx, dhy, dAng, dExt, t, { len: t >= T2 - .3 ? 560 : dLen, theme: GOLD, stiff: t < T1 - .18 ? 0 : t < T2 - .3 ? 1 : t < T3 - .1 ? .25 : 1, pulse: t < T2 ? (t - (T1 - .18)) / .18 : (t - (T3 - .1)) / .15, trail: t >= T3 - .25 && t < T3 + .2, hot: t >= T3 - .1 && t < T3 + .3 });
   s += t >= T3 - .25 ? swoosh(DX + 60, FY - 520, 430, -2.2, 0.6, (t - (T3 - .25)) / .35) : '';
   s += impact(meet[0], meet[1], (t - T1) / .55, 1.2) + impact(meet[0] - 40, meet[1] - 120, (t - T2) / .45, .8) + impact(CX - 40, FY - 520, (t - T3) / .5, .9);
   const z = t < T1 ? lerp(1.0, 1.12, io(t / T1)) : t < T1 + .25 ? 1.22 : lerp(1.16, 1.08, io((t - T1) / 3));
@@ -79,7 +108,7 @@ function rain(t) {
   const pose = t < LAND + .3 ? 'hang' : ph > 0 && ph < .65 ? (ph < .3 ? 'slashUp' : 'slashDown') : 'thrust';
   const [hx, hy] = C.handAt(DX, FY, 340, 1, pose, 12);
   const ang = ph > 0 && ph < .65 ? lerp(-2.0, 0.6, io(ph / .5)) : -0.25;
-  let d = L.floorShadow(DX, FY + 6, 280, { mood: 'mars' }) + `<g transform="translate(0 ${f(fall)})">${L.rimLight(K.darrow(DX, FY, 340, { yaw: 12, brow: 'angry', mouth: 'flat', arms: ['hang', pose], wind: t, armed: t > LAND }), 'mars')}${t > LAND ? razor(hx, hy, ang, eo((t - LAND) / .4), t, { len: 560, wave: ph > 0 && ph < .65 ? .25 : .9, trail: ph > .2 && ph < .6, col: '#f2f6fa' }) : ''}</g>`;
+  let d = L.floorShadow(DX, FY + 6, 280, { mood: 'mars' }) + `<g transform="translate(0 ${f(fall)})">${L.rimLight(K.darrow(DX, FY, 340, { yaw: 12, brow: 'angry', mouth: 'flat', arms: ['hang', pose], wind: t, armed: t > LAND }), 'mars')}${t > LAND ? razor(hx, hy, ang, eo((t - LAND) / .4), t, { len: 560, theme: GOLD, stiff: ph > .25 && ph < .7 ? 1 : .15, pulse: (ph - .25) / .12, trail: ph > .2 && ph < .6 }) : ''}</g>`;
   CUTS.forEach((c, i) => { d += swoosh(DX + 60, FY - 500, 450, -2.0, 0.7, (t - (c - .3)) / .4, i === 0 ? '#ffe6a8' : '#e9eef4'); });
   // landing impact
   d += impact(DX, FY - 10, (t - LAND) / .6, 1.3);
