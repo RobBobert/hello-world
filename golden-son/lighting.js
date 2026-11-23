@@ -214,7 +214,7 @@ function gala(t, o) {
 function space(t, o) {
   const P = MOODS.space, par = o.par || 0, g = vgrad(P.bg, 0, 1920);
   let s = `<defs>${g.def}</defs><rect x="${X0}" y="-300" width="${XW}" height="2520" fill="url(#${g.id})"/>`;
-  s += screen(G(160 + par * .2, 520, 900, '#ff4f8a', .34) + G(940 + par * .2, 300, 760, '#2fd0ff', .3) + G(520 + par * .2, 1050, 800, '#6a3aff', .32) + G(60 + par * .2, 240, 420, '#ffa040', .42));
+  s += G(160 + par * .2, 520, 900, '#ff4f8a', .36) + G(940 + par * .2, 300, 760, '#2fd0ff', .32) + G(520 + par * .2, 1050, 800, '#6a3aff', .34) + G(60 + par * .2, 240, 420, '#ffa040', .45); // painted, not additive: cheap on a dark sky
   s += stars(3, 150, [X0, -100, XW, 1700], t) + stars(8, 30, [X0, -100, XW, 1700], t, '#ffd9a0');
   // planet limb (Mars from orbit) lit from upper-left, with a cyan atmosphere line
   const pg = radial([[0, '#ff9a4a'], [.5, '#d2472a'], [.8, '#6a1626'], [1, '#2a0a2a']], 'gradientUnits="userSpaceOnUse" cx="420" cy="1560" r="1250" fx="300" fy="1420"');
@@ -239,7 +239,7 @@ function mesas(seed, y, hMin, hMax, col, topCol, par) { const r = rng(seed); let
 function mars(t, o) {
   const P = MOODS.mars, FY = o.floorY || 1260, par = o.par || 0, g = vgrad(P.bg, -100, FY), fl = vgrad(P.floor, FY, 1920), sx = (o.sunX == null ? 250 : o.sunX) + par * .1, sy = FY - (o.sunH == null ? 300 : o.sunH);
   let s = `<defs>${g.def}${fl.def}</defs><rect x="${X0}" y="-300" width="${XW}" height="${FY + 300}" fill="url(#${g.id})"/>`;
-  s += screen(G(sx, sy, 1000, '#ffd060', .75)) + `<circle cx="${f(sx)}" cy="${sy}" r="210" fill="#ffe9a0"/><circle cx="${f(sx)}" cy="${sy}" r="170" fill="#fff8de"/>`;
+  s += G(sx, sy, 1000, '#ffd060', .8) + `<circle cx="${f(sx)}" cy="${sy}" r="210" fill="#ffe9a0"/><circle cx="${f(sx)}" cy="${sy}" r="170" fill="#fff8de"/>`;
   // graphic cloud bars: dark plum up high, hot pink-orange near the sun
   const r = rng(5); let cl2 = '';
   for (let i = 0; i < 12; i++) { const y = 140 + i * 78 + r() * 30, w = 300 + r() * 620, x = X0 + r() * XW + par * .2 + t * (3 + i % 3), k = y / (FY - 200), c = mix('#8a2a90', '#ff5a4a', k), h = 18 + r() * 28; cl2 += `<rect x="${f(x)}" y="${f(y)}" width="${f(w)}" height="${f(h)}" rx="${f(h / 2)}" fill="${c}" opacity="${f((.55 + .3 * k) * 100) / 100}"/><rect x="${f(x + w * .1)}" y="${f(y + h - 6)}" width="${f(w * .6)}" height="6" rx="3" fill="#ffc46a" opacity="${f(k * .9 * 100) / 100}"/>`; }
