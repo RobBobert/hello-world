@@ -27,16 +27,16 @@ function frame(t) {
     const u = io((t - 0.6) / 3.0), z = lerp(1.0, 1.4, u), fx = lerp(560, DX + 40, u), fy = lerp(960, 860, u);
     cam = `translate(${540 + sx} ${960 + sy}) scale(${z}) translate(${-fx} ${-fy})`;
     const fall = t < LAND ? -1300 * Math.pow(1 - t / LAND, 2) : 0, sq = t > LAND ? 1 - 0.08 * Math.exp(-(t - LAND) * 10) * Math.cos((t - LAND) * 28) : 1.03;
-    const d = C.darrow(DX, TY, 340, { yaw: lerp(8, 18, io((t - 1) / 1.5)), mouth: t > 2.3 ? 'smirk' : 'flat', brow: 'angry', wind: t, arms: ['hang', 'blade'], hair: process.env.HAIR || 'long' });
-    world = room(t, -30 * u) + L.lit(C.cassius(CX, TY + 310, 330, { yaw: -18, brow: 'soft', mouth: 'flat', blink: t > 2.9 && t < 3.0 }), 'gala', { depth: 55, rim: 9 }) + table(t)
-      + L.floorShadow(DX, TY + 6, 290, { mood: 'gala' }) + `<g transform="translate(0 ${fall}) translate(${DX} ${TY}) scale(${2 - sq} ${sq}) translate(${-DX} ${-TY})">${L.lit(d, 'gala', { depth: 65, rim: 11 })}</g>`;
+    const d = C.darrow(DX, TY, 340, { yaw: lerp(8, 18, io((t - 1) / 1.5)), mouth: t > 2.3 ? 'smirk' : 'flat', brow: 'angry', wind: t, arms: ['hang', 'blade'], hair: process.env.HAIR || 'short' });
+    world = room(t, -30 * u) + L.rimLight(C.cassius(CX, TY + 310, 330, { yaw: -18, brow: 'soft', mouth: 'flat', blink: t > 2.9 && t < 3.0 }), 'gala', { depth: 55, rim: 9 }) + table(t)
+      + L.floorShadow(DX, TY + 6, 290, { mood: 'gala' }) + `<g transform="translate(0 ${fall}) translate(${DX} ${TY}) scale(${2 - sq} ${sq}) translate(${-DX} ${-TY})">${L.rimLight(d, 'gala', { rim: 11 })}</g>`;
     cap = ['HOUSE BELLONA WANTS HIM DEAD.', t > 0.62 ? 'SO HE CLIMBS ON THEIR TABLE.' : ''];
     return { svg: `<g transform="${cam}">${world}</g>` + fg(-40 * u) + L.bokeh(3, t, { count: 14, opacity: .4 }), cap };
   }
   const tt = t - CUT, u = io(tt / (DUR - CUT)), z = lerp(1.5, 1.6, u);
   cam = `translate(540 1000) scale(${z}) translate(${-CX} ${-(TY - 260)})`;
   const mix = cl((tt - 1.4) / 0.8), angry = mix > .5;
-  world = room(t, 12 * u) + L.lit(C.cassius(CX, TY + 310, 330, { yaw: lerp(-16, 12, u), brow: angry ? 'angry' : 'soft', mouth: angry ? 'frown' : 'flat', blink: tt > 1.2 && tt < 1.3, arms: angry ? ['table', 'table'] : ['table', 'table'] }), 'gala', { depth: 55, rim: 10 }) + table(t);
+  world = room(t, 12 * u) + L.rimLight(C.cassius(CX, TY + 310, 330, { yaw: lerp(-16, 12, u), brow: angry ? 'angry' : 'soft', mouth: angry ? 'frown' : 'flat', blink: tt > 1.2 && tt < 1.3, arms: angry ? ['table', 'table'] : ['table', 'table'] }), 'gala', { depth: 55, rim: 10 }) + table(t);
   cap = ['CASSIUS AU BELLONA.', tt > 1.5 ? "JULIAN'S BROTHER." : ''];
   return { svg: `<g transform="${cam}">${world}</g>` + L.bokeh(8, t, { count: 16, opacity: .45 }), cap };
 }
@@ -52,7 +52,7 @@ function frame(t) {
       await p.evaluate(h => { document.getElementById('w').innerHTML = h; }, html); await p.screenshot({ path: `${tmp}/f${String(i).padStart(4, '0')}.jpg`, type: 'jpeg', quality: 92 }); }
     await p.close(); }));
   console.log(N, 'frames', ((Date.now() - t0) / N).toFixed(0), 'ms/frame');
-  execFileSync('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS), '-i', `${tmp}/f%04d.jpg`, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '20', '-movflags', '+faststart', `${ROOT}/b2-table-${process.env.HAIR || 'long'}.mp4`]);
-  for (const [k, i] of [['a', 25], ['b', 60], ['c', 105], ['d', 140], ['e', 200], ['f', 245]]) fs.copyFileSync(`${tmp}/f${String(i).padStart(4, '0')}.jpg`, `${ROOT}/out/b2t-${process.env.HAIR || 'long'}-${k}.jpg`);
+  execFileSync('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS), '-i', `${tmp}/f%04d.jpg`, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '20', '-movflags', '+faststart', `${ROOT}/b2-table-${process.env.HAIR || 'short'}.mp4`]);
+  for (const [k, i] of [['a', 25], ['b', 60], ['c', 105], ['d', 140], ['e', 200], ['f', 245]]) fs.copyFileSync(`${tmp}/f${String(i).padStart(4, '0')}.jpg`, `${ROOT}/out/b2t-${process.env.HAIR || 'short'}-${k}.jpg`);
   await b.close();
 })();

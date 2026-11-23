@@ -34,7 +34,7 @@ function longHair(cx, cy, r, o = {}) {
   const locks = o.length === 'short' ? '' : [-1, 1].map((s, i) => { const a = P(s * 84, 4), z = a[2]; if (z < -0.1) return '';
     const tip = [a[0] + s * r * 0.18 + sway(i + 7), cy + r * 1.05]; const w = r * 0.26 * cl(z + 0.3, 0.35, 1);
     return `<path d="M${f(a[0] - w / 2)} ${f(a[1])} Q${f(a[0] + s * r * 0.12 - w)} ${f(cy + r * 0.5)} ${f(tip[0])} ${f(tip[1])} Q${f(a[0] + s * r * 0.25 + w)} ${f(cy + r * 0.45)} ${f(a[0] + w / 2)} ${f(a[1])} Z" fill="${hc}" stroke="${INK}" stroke-width="${f(sw * 0.8)}" stroke-linejoin="round"/>`; }).join('');
-  const tufts = o.length !== 'short' ? '' : [-0.55, -0.15, 0.25, 0.6].map((u, i) => { const bx0 = cx + bk * 0.6 + u * r * 0.95, by0 = cy - r * (1.42 - Math.abs(u) * 0.35); const tx = bx0 + dir * r * 0.28 + sway(i) * 0.3, ty = by0 - r * 0.32;
+  const tufts = true ? '' : [-0.55, -0.15, 0.25, 0.6].map((u, i) => { const bx0 = cx + bk * 0.6 + u * r * 0.95, by0 = cy - r * (1.42 - Math.abs(u) * 0.35); const tx = bx0 + dir * r * 0.28 + sway(i) * 0.3, ty = by0 - r * 0.32;
     return `<path d="M${f(bx0 - r * 0.2)} ${f(by0 + r * 0.06)} Q${f(bx0)} ${f(by0 - r * 0.12)} ${f(tx)} ${f(ty)} Q${f(bx0 + r * 0.08)} ${f(by0 - r * 0.02)} ${f(bx0 + r * 0.2)} ${f(by0 + r * 0.08)} Z" fill="${hc}" stroke="${INK}" stroke-width="${f(sw * 0.8)}" stroke-linejoin="round"/>`; }).join('');
   const front = `${tufts}<path d="${crown}" fill="${hc}" stroke="${INK}" stroke-width="${f(sw)}" stroke-linejoin="round"/>${sweep}${hi}${locks}${fl}`;
   return { back, front };
@@ -79,9 +79,28 @@ function body2(x, y, s, o = {}) {
   g += `<path d="M${P(0.05, 1.52)} Q${P(0.3, 1.45)} ${P(0.3, 1.15)} Q${P(0.22, 0.98)} ${P(0.23, 0.86)} L${P(0.12, 0.86)} Q${P(0.15, 1.2)} ${P(0.05, 1.52)} Z" fill="${shade}" opacity=".55"/>`;
   g += `<path d="M${P(-0.2, 1.24)} Q${P(-0.1, 1.17)} ${P(0, 1.24)} Q${P(0.1, 1.17)} ${P(0.2, 1.24)}" stroke="${shade}" stroke-width="${f(s * 0.025)}" fill="none" stroke-linecap="round"/>`;
   g += `<path d="M${P(-0.3, 1.47)} Q${P(0, 1.36)} ${P(0.3, 1.47)}" stroke="${trim}" stroke-width="${f(s * 0.05)}" fill="none" stroke-linecap="round"/>`;
-  if (o.sigil) g += `<g transform="translate(${f(x + k * 0.5)} ${f(y - 1.12 * s)}) scale(0.62) translate(${f(-x - k * 0.5)} ${f(-(y - 1.12 * s))})">${o.sigil(x + k * 0.5, y - 1.12 * s, s)}</g>`;
+  if (o.sigil) g += o.sigil(x + k * 0.5, y - 1.14 * s, s);
   g += `<rect x="${f(x - 0.12 * s + k * 0.5)}" y="${f(y - 1.62 * s)}" width="${f(0.24 * s)}" height="${f(0.14 * s)}" fill="${leg}" stroke="${INK}" stroke-width="${f(sw * 0.8)}"/>`;
   return g;
+}
+
+
+// ---------- emblems ----------
+// lion face: scalloped mane, broad muzzle, brows, nose, mouth
+function lionFace(x, y, s, col = '#c9922e', hi = '#f6dc8b', dk = '#6e4a14') {
+  const r = s, sw = r * 0.09; let mane = '';
+  for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2 - Math.PI / 2; mane += `<circle cx="${f(x + Math.cos(a) * r * 0.78)}" cy="${f(y + Math.sin(a) * r * 0.82)}" r="${f(r * 0.36)}" fill="${col}" stroke="${INK}" stroke-width="${f(sw)}"/>`; }
+  return `<g>${mane}<circle cx="${f(x)}" cy="${f(y)}" r="${f(r * 0.8)}" fill="${col}"/>
+    <path d="M${f(x - r * 0.52)} ${f(y - r * 0.3)} Q${f(x)} ${f(y - r * 0.62)} ${f(x + r * 0.52)} ${f(y - r * 0.3)} Q${f(x + r * 0.56)} ${f(y + r * 0.35)} ${f(x)} ${f(y + r * 0.66)} Q${f(x - r * 0.56)} ${f(y + r * 0.35)} ${f(x - r * 0.52)} ${f(y - r * 0.3)} Z" fill="${hi}" stroke="${INK}" stroke-width="${f(sw)}" stroke-linejoin="round"/>
+    <path d="M${f(x - r * 0.4)} ${f(y - r * 0.12)} l${f(r * 0.26)} ${f(r * 0.08)} M${f(x + r * 0.4)} ${f(y - r * 0.12)} l${f(-r * 0.26)} ${f(r * 0.08)}" stroke="${INK}" stroke-width="${f(sw * 1.1)}" stroke-linecap="round"/>
+    <path d="M${f(x - r * 0.14)} ${f(y + r * 0.14)} h${f(r * 0.28)} l${f(-r * 0.14)} ${f(r * 0.16)} Z" fill="${dk}" stroke="${INK}" stroke-width="${f(sw * 0.7)}" stroke-linejoin="round"/>
+    <path d="M${f(x)} ${f(y + r * 0.3)} v${f(r * 0.1)} M${f(x - r * 0.2)} ${f(y + r * 0.46)} Q${f(x)} ${f(y + r * 0.36)} ${f(x + r * 0.2)} ${f(y + r * 0.46)}" stroke="${INK}" stroke-width="${f(sw * 0.8)}" fill="none" stroke-linecap="round"/></g>`;
+}
+// sun: disc with alternating long/short rays (Morning Knight)
+function sunEmblem(x, y, s, col = '#fff2c4', core = '#f0b63c') {
+  let rays = ''; for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, L = i % 2 ? 0.95 : 1.35, w = 0.13;
+    rays += `<path d="M${f(x + Math.cos(a - w) * s * 0.55)} ${f(y + Math.sin(a - w) * s * 0.55)} L${f(x + Math.cos(a) * s * L)} ${f(y + Math.sin(a) * s * L)} L${f(x + Math.cos(a + w) * s * 0.55)} ${f(y + Math.sin(a + w) * s * 0.55)} Z" fill="${col}" stroke="${INK}" stroke-width="${f(s * 0.07)}" stroke-linejoin="round"/>`; }
+  return `<g>${rays}<circle cx="${f(x)}" cy="${f(y)}" r="${f(s * 0.58)}" fill="${core}" stroke="${INK}" stroke-width="${f(s * 0.09)}"/><circle cx="${f(x - s * 0.16)}" cy="${f(y - s * 0.16)}" r="${f(s * 0.17)}" fill="#fff" opacity=".7"/></g>`;
 }
 
 // ---------- assembled characters ----------
@@ -96,23 +115,27 @@ function build(x, y, s, o, kit) {
   const bodySvg = body2(x, y, s, { ...kit.body, yaw });
   const armSvg = side => arm(x + k + side * sx, sy, s, side, side < 0 ? arms[0] : arms[1], kit.armCol, o);
   // left arm behind body when crossing, otherwise in front
-  const hairObj = kit.hair === 'long' ? longHair(hx, hy, r, { ...kit.hairOpts, yaw, wind: o.wind, length: o.hair || 'long' }) : null;
+  const hairObj = kit.hair === 'long' ? longHair(hx, hy, r, { ...kit.hairOpts, yaw, wind: o.wind, length: o.hair || 'short' }) : null;
   const headSvg = R.head(hx, hy, r, { ...kit.headOpts, ...(kit.hair === 'long' ? { hair: 'none' } : {}), yaw, pitch: o.pitch, brow: o.brow ?? kit.headOpts.brow, mouth: o.mouth ?? kit.headOpts.mouth, blink: o.blink });
   // for long hair: suppress rig's own hair by drawing face only (strip hair groups is not possible), so draw rig head then cover with crown
   return `<g>${hairObj ? hairObj.back : ''}${bodySvg}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${armSvg(-1)}${armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${headSvg}${hairObj ? hairObj.front : ''}</g>`;
 }
 
+const lionPauldrons = (x, y, s) => [-1, 1].map(d => { const px = x + d * s * 0.36, py = y - s * 1.47;
+  return `<path d="M${f(px - d * s * 0.2)} ${f(py - s * 0.04)} Q${f(px)} ${f(py - s * 0.2)} ${f(px + d * s * 0.17)} ${f(py + s * 0.02)} Q${f(px + d * s * 0.12)} ${f(py + s * 0.12)} ${f(px - d * s * 0.06)} ${f(py + s * 0.1)} Z" fill="#b8862a" stroke="${INK}" stroke-width="${f(s * 0.04)}" stroke-linejoin="round"/>${lionFace(px + d * s * 0.01, py - s * 0.02, s * 0.085, '#a87a26', '#e2b65a', '#5a3a10')}`; }).join('');
+const longSash = (x, y, s) => sash(x, y, s) + `<path d="M${f(x + s * 0.2)} ${f(y - s * 0.86)} l${f(s * 0.05)} ${f(s * 0.62)} l${f(s * 0.08)} ${f(-s * 0.01)} l${f(-s * 0.04)} ${f(-s * 0.62)} Z" fill="#8f1a16" stroke="${INK}" stroke-width="${f(s * 0.03)}"/>`;
 const DARROW = { yaw: 15, hair: 'long', arms: ['hang', 'blade'],
-  hairOpts: { hairCol: '#e8b53a', hairHi: '#fff2b8', hairShade: '#b8862a' },
-  headOpts: { hairCol: '#e8b53a', hairHi: '#fff0b0', brow: 'angry', mouth: 'smirk', iris: '#e0a326' },
-  body: { fill: '#d9a441', shade: '#8e6420', trim: '#f6dc8b', sigil: R.lion, leg: '#1e1a1f', greave: '#d9a441' },
-  armCol: { sleeve: '#1e1a1f', fore: '#d9a441', cuff: '#f6dc8b', hand: '#e2a93b' },
-  extra: sash, top: (x, y, s) => pauldrons(x, y, s, '#e2a93b', '#fff2b8') };
+  hairOpts: { hairCol: '#e3ad3e', hairHi: '#fff2b8', hairShade: '#a8782a' },
+  headOpts: { hairCol: '#e3ad3e', hairHi: '#fff0b0', brow: 'angry', mouth: 'smirk', iris: '#e0a326' },
+  body: { fill: '#b8862a', shade: '#6e4a14', trim: '#e2b65a', leg: '#141218', greave: '#9a6f22', boot: '#141218', sigil: (x, y, s) => lionFace(x, y + s * 0.02, s * 0.2, '#a87a26', '#e2b65a', '#5a3a10') },
+  armCol: { sleeve: '#141218', fore: '#b8862a', cuff: '#e2b65a', hand: '#e9c3a0' },
+  extra: longSash, top: lionPauldrons };
+const sunPauldrons = (x, y, s) => pauldrons(x, y, s, '#f0c04a', '#fff6d0');
 const CASSIUS = { yaw: -15, hair: 'curls', arms: ['table', 'table'],
   headOpts: { hair: 'curls', hairCol: '#d6a23c', hairHi: '#f8e09a', brow: 'soft', mouth: 'flat', iris: '#e8b53a' },
-  body: { fill: '#d8e0ea', shade: '#8d9bb0', trim: '#2b4a8a', cape: '#2b4a8a', leg: '#1b2f5c', greave: '#d8e0ea', boot: '#1b2f5c', sigil: (a, b, c) => R.eagle(a, b, c, '#2b4a8a') },
-  armCol: { sleeve: '#2b4a8a', fore: '#d8e0ea', cuff: '#ffffff', hand: '#e9eef5' },
-  top: (x, y, s) => pauldrons(x, y, s, '#eef2f7', '#ffffff') };
+  body: { fill: '#f0c04a', shade: '#b07e1e', trim: '#ffffff', cape: '#f4f1ea', leg: '#2b4a8a', greave: '#f0c04a', boot: '#1b2f5c', sigil: (x, y, s) => sunEmblem(x, y, s * 0.17) },
+  armCol: { sleeve: '#2b4a8a', fore: '#f0c04a', cuff: '#ffffff', hand: '#d9a777' },
+  top: sunPauldrons };
 const darrow = (x, y, s, o = {}) => build(x, y, s, o, DARROW);
 const cassius = (x, y, s, o = {}) => build(x, y, s, o, CASSIUS);
-module.exports = { darrow, cassius, longHair, arm, build };
+module.exports = { darrow, cassius, longHair, arm, build, lionFace, sunEmblem };
