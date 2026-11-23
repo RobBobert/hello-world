@@ -116,15 +116,30 @@ function build(x, y, s, o, kit) {
   const armSvg = side => arm(x + k + side * sx, sy, s, side, side < 0 ? arms[0] : arms[1], kit.armCol, o);
   // left arm behind body when crossing, otherwise in front
   const hairObj = kit.hair === 'long' ? longHair(hx, hy, r, { ...kit.hairOpts, yaw, wind: o.wind, length: o.hair || 'short' }) : null;
+  if (o.back) { // seen from behind: plain armour back, head as a hair-covered skull
+    const backHead = `<circle cx="${f(hx)}" cy="${f(hy)}" r="${f(r)}" fill="${kit.headOpts.hairCol || '#d6a23c'}" stroke="${INK}" stroke-width="${f(r * .085)}"/>`
+      + (kit.hair === 'curls' || kit.headOpts.hair === 'curls' ? (() => { let c = ''; const hc = kit.headOpts.hairCol, hh = kit.headOpts.hairHi || '#f8e09a';
+          const pts = []; for (let ring = 0; ring < 3; ring++) { const rr = r * [0.95, 0.62, 0.25][ring], n = [11, 7, 3][ring]; for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2 + ring * .4; pts.push([hx + Math.cos(a) * rr, hy + Math.sin(a) * rr * .95 - r * .05, r * .34]); } }
+          for (const [cx2, cy2, rr] of pts) c += `<circle cx="${f(cx2)}" cy="${f(cy2)}" r="${f(rr)}" fill="${hc}" stroke="${INK}" stroke-width="${f(r * .07)}"/><path d="M${f(cx2 - rr * .4)} ${f(cy2)} a${f(rr * .45)} ${f(rr * .45)} 0 1 1 ${f(rr * .6)} ${f(rr * .3)}" stroke="${hh}" stroke-width="${f(r * .045)}" fill="none" opacity=".7"/>`;
+          return c; })() : `<path d="M${f(hx - r * .8)} ${f(hy - r * .5)} Q${f(hx)} ${f(hy - r * .2)} ${f(hx + r * .8)} ${f(hy - r * .5)} M${f(hx - r * .7)} ${f(hy)} Q${f(hx)} ${f(hy + r * .25)} ${f(hx + r * .7)} ${f(hy)}" stroke="${kit.hairOpts ? kit.hairOpts.hairShade : '#8a6a2a'}" stroke-width="${f(r * .06)}" fill="none"/>`)
+      + `<ellipse cx="${f(hx - r * .98)}" cy="${f(hy + r * .05)}" rx="${f(r * .12)}" ry="${f(r * .2)}" fill="#f2d3b3" stroke="${INK}" stroke-width="${f(r * .06)}"/><ellipse cx="${f(hx + r * .98)}" cy="${f(hy + r * .05)}" rx="${f(r * .12)}" ry="${f(r * .2)}" fill="#f2d3b3" stroke="${INK}" stroke-width="${f(r * .06)}"/>`;
+    const bodyB = body2(x, y, s, { ...kit.body, sigil: null, yaw });
+    return `<g>${bodyB}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${kit.hipBlade ? kit.hipBlade(x, y, s) : ''}${armSvg(-1)}${armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${backHead}</g>`;
+  }
   const headSvg = R.head(hx, hy, r, { ...kit.headOpts, ...(kit.hair === 'long' ? { hair: 'none' } : {}), yaw, pitch: o.pitch, brow: o.brow ?? kit.headOpts.brow, mouth: o.mouth ?? kit.headOpts.mouth, blink: o.blink });
   // for long hair: suppress rig's own hair by drawing face only (strip hair groups is not possible), so draw rig head then cover with crown
-  return `<g>${hairObj ? hairObj.back : ''}${bodySvg}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${armSvg(-1)}${armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${headSvg}${hairObj ? hairObj.front : ''}</g>`;
+  const sheathed = kit.hipBlade && !arms.includes('blade') ? kit.hipBlade(x + k * .5, y, s) : '';
+  return `<g>${hairObj ? hairObj.back : ''}${bodySvg}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${sheathed}${armSvg(-1)}${armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${headSvg}${hairObj ? hairObj.front : ''}</g>`;
 }
 
 const lionPauldrons = (x, y, s) => [-1, 1].map(d => { const px = x + d * s * 0.36, py = y - s * 1.47;
   return `<path d="M${f(px - d * s * 0.2)} ${f(py - s * 0.04)} Q${f(px)} ${f(py - s * 0.2)} ${f(px + d * s * 0.17)} ${f(py + s * 0.02)} Q${f(px + d * s * 0.12)} ${f(py + s * 0.12)} ${f(px - d * s * 0.06)} ${f(py + s * 0.1)} Z" fill="#b8862a" stroke="${INK}" stroke-width="${f(s * 0.04)}" stroke-linejoin="round"/>${lionFace(px + d * s * 0.01, py - s * 0.02, s * 0.085, '#a87a26', '#e2b65a', '#5a3a10')}`; }).join('');
 const longSash = (x, y, s) => sash(x, y, s) + `<path d="M${f(x + s * 0.2)} ${f(y - s * 0.86)} l${f(s * 0.05)} ${f(s * 0.62)} l${f(s * 0.08)} ${f(-s * 0.01)} l${f(-s * 0.04)} ${f(-s * 0.62)} Z" fill="#8f1a16" stroke="${INK}" stroke-width="${f(s * 0.03)}"/>`;
-const DARROW = { yaw: 15, hair: 'long', arms: ['hang', 'blade'],
+const hipSickle = (x, y, s) => { const hx = x - s * 0.3, hy = y - s * 0.86;
+  return `<g><rect x="${f(hx - s * 0.035)}" y="${f(hy - s * 0.02)}" width="${f(s * 0.07)}" height="${f(s * 0.22)}" rx="${f(s * 0.02)}" fill="#3a2418" stroke="${INK}" stroke-width="${f(s * 0.03)}" transform="rotate(14 ${f(hx)} ${f(hy)})"/>
+    <path d="M${f(hx - s * 0.05)} ${f(hy + s * 0.18)} q${f(-s * 0.2)} ${f(s * 0.06)} ${f(-s * 0.22)} ${f(s * 0.42)} q${f(s * 0.1)} ${f(-s * 0.2)} ${f(s * 0.24)} ${f(-s * 0.38)} Z" fill="#e6ebf1" stroke="${INK}" stroke-width="${f(s * 0.03)}" stroke-linejoin="round"/>
+    <circle cx="${f(hx)}" cy="${f(hy - s * 0.02)}" r="${f(s * 0.035)}" fill="#e2b65a" stroke="${INK}" stroke-width="${f(s * 0.025)}"/></g>`; };
+const DARROW = { yaw: 15, hair: 'long', arms: ['hang', 'blade'], hipBlade: hipSickle,
   hairOpts: { hairCol: '#e3ad3e', hairHi: '#fff2b8', hairShade: '#a8782a' },
   headOpts: { hairCol: '#e3ad3e', hairHi: '#fff0b0', brow: 'angry', mouth: 'smirk', iris: '#e0a326' },
   body: { fill: '#b8862a', shade: '#6e4a14', trim: '#e2b65a', leg: '#141218', greave: '#9a6f22', boot: '#141218', sigil: (x, y, s) => lionFace(x, y + s * 0.02, s * 0.2, '#a87a26', '#e2b65a', '#5a3a10') },

@@ -101,6 +101,7 @@ function head(cx, cy, r, o = {}) {
     face += `<path d="M${f(a.x)} ${f(a.y)} Q${f(top.x)} ${f(top.y)} ${f(b2.x)} ${f(b2.y)} Q${f(bot.x)} ${f(bot.y)} ${f(a.x)} ${f(a.y)} Z" fill="#fff" stroke="${INK}" stroke-width="${f(r * 0.07)}" stroke-linejoin="round"/>
       <path d="M${f(a.x + (mid.x - a.x) * 0.3)} ${f(mid.y)} L${f(b2.x + (mid.x - b2.x) * 0.3)} ${f(mid.y)}" stroke="${INK}" stroke-width="${f(r * 0.035)}" opacity=".5"/>`; }
   else face += `<path d="M${f(ml.x)} ${f(ml.y)} Q${f(mc.x)} ${f(mc.y)} ${f(mr.x)} ${f(mr.y)}" stroke="${INK}" stroke-width="${f(r * 0.075)}" fill="none" stroke-linecap="round"/>`;
+  if (Math.cos(yaw) < -0.15) face = ''; // looking away: no face
   // scar / extras hook
   const extra = o.extra ? o.extra(P, f) : '';
   // shade crescent on the side turned away
