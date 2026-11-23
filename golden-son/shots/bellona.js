@@ -39,12 +39,12 @@ function camera(t, A) {
   const yFor = (top, z) => top + (H / 2 - FACE_TOP) / z;
   const Z = { b0: 2.5, b1: 2.8, f0: 2.75, f1: 3.0, c0: 2.7, c1: 3.5 };
   const c = {
-    x: kf(t, [[0, 30], [LAND, 30], [RISE0, 12], [RISE1, -30], [DROP0, -18], [DROP1, CAS.x - 55], [DUR, CAS.x + 40]]),
+    x: kf(t, [[0, 62], [LAND, 62], [RISE0, 48], [RISE1, -30], [DROP0, -18], [DROP1, CAS.x - 55], [DUR, CAS.x + 40]]),
     y: kf(t, [[0, -194], [LAND, -194], [RISE0, -172], [RISE1, yFor(dTop, Z.f0)], [DROP0, yFor(dTop, Z.f1)], [DROP1, yFor(cTop, Z.c0)], [DUR, yFor(cTop, Z.c1)]]),
     z: kf(t, [[0, Z.b0], [LAND, Z.b0], [RISE0, Z.b1], [RISE1, Z.f0], [DROP0, Z.f1], [DROP1, Z.c0], [DUR, Z.c1]]),
     roll: kf(t, [[0, -8], [LAND, -8], [RISE0, -5], [RISE1, 5], [DROP0, 3], [DROP1, -4], [DUR, 3]]),
     tilt: kf(t, [[0, 14], [RISE0, 14], [RISE1, 20], [DROP0, 20], [DROP1, -3], [DUR, -3]]),          // far wall leans back = low angle
-    yaw: t < DROP0 ? 0 : t < DROP1 + 0.25 ? -45 * io((t - DROP0) / (DROP1 - DROP0)) : -45 + 87 * sm((t - DROP1 - 0.25) / (DUR - 0.1 - DROP1 - 0.25)),        // orbit round Cassius
+    yaw: t < DROP0 ? 0 : t < DROP1 + 0.25 ? -45 * io((t - DROP0) / (DROP1 - DROP0)) : -45 + 87 * (u => 0.55 * cl(u) + 0.45 * sm(u))((t - DROP1 - 0.25) / (DUR - 0.1 - DROP1 - 0.25)),        // orbit round Cassius
   };
   if (t > LAND) { const d = t - LAND, a = Math.exp(-d * 7); c.z += 0.14 * a; c.sx = 34 * a * Math.sin(d * 95); c.sy = 46 * a * Math.cos(d * 78); c.roll += 2.2 * a * Math.sin(d * 60); } else { c.sx = c.sy = 0; }
   if (t > FURY) c.z += 0.13 * (1 - Math.exp(-(t - FURY) * 9));
@@ -78,7 +78,7 @@ function frame(t, deps = {}) {
   const A = { ...ANCHORS, ...(deps.anchors || {}) };
   const c = camera(t, A), c2 = camera(Math.min(DUR, t + 1 / 30), A);
   const beat = t < RISE0 ? 'slam' : t < DROP0 ? 'rise' : 'cassius';
-  const set = gala(t, { x: c.x, y: c.y, zoom: c.z, yaw: c.yaw }, { impact: LAND, impactX: DAR.x, stations: { boots: [25, -185], face: [-20, -940], cassius: [CAS.x, -275] } });
+  const set = gala(t, { x: c.x, y: c.y, zoom: c.z, yaw: c.yaw }, { impact: LAND, impactX: DAR.x, stations: { boots: [55, -185], face: [-20, -940], cassius: [CAS.x, -275] } });
   const D = gala.DEPTH, K = 5.2; // K: px of slide per degree of orbit, per unit of depth difference
   const T = (p, e, x0 = W / 2, y0 = H / 2) => `translate(${f(x0 + c.sx * p + (p - 1) * c.yaw * K)} ${f(y0 + c.sy * p)}) rotate(${f(c.roll)}) scale(${f(Math.pow(c.z, e))}) translate(${f(-c.x * p)} ${f(-c.y * p)})`;
 

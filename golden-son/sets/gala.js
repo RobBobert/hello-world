@@ -138,7 +138,7 @@ function ware(type, x, y, sc, t, dt, a, i) {
   if (type === 'spill') { // the goblet that goes over
     const k = live ? cl(dt / 0.32) : 0, tip = live ? 98 * (1 - Math.pow(1 - k, 2)) + 7 * Math.exp(-dt * 5) * Math.sin(dt * 22) : 0;
     let s = shadow;
-    if (live) { const u = cl((dt - 0.15) / 1.6), e = 1 - Math.pow(1 - u, 3), px = x + 95 * sc; // pool on the cloth, then runs over the lip
+    if (live) { const u = cl((dt - 0.15) / 1.6), e = 1 - Math.pow(1 - u, 3), px = x + 50 * sc; // pool on the cloth, then runs over the lip
       s += `<path d="M${f(px - 70)} ${f(y - 2)} Q${f(px - 40 + 10 * e)} ${f(y - 16 - 6 * e)} ${f(px + 60 * e)} ${f(y - 12 - 6 * e)} Q${f(px + 150 * e)} ${f(y - 6)} ${f(px + 120 * e)} ${f(y + 8)} L${f(px - 60)} ${f(y + 8)}Z" fill="${WINE}" ${ol}/>`; }
     return s + g(gobletSvg(!live), tip, hop * 0.6);
   }
@@ -168,7 +168,7 @@ function tableLayer(t, cam, o) {
     s += ware(type, x, y, 1.15 + d * 0.4, t, dt, a, i); }
   if (live) {
     // wine running over the lip and down the cloth
-    const px = ix + 158 + 150, u = cl((dt - 0.5) / 2.4), e = 1 - Math.pow(1 - u, 2);
+    const px = ix + 158 + 78, u = cl((dt - 0.5) / 2.4), e = 1 - Math.pow(1 - u, 2);
     [[0, 330, 26], [44, 190, 20], [-38, 120, 16], [80, 80, 14]].forEach(([dx, len, w], k) => { const L = len * cl(e * 1.3 - k * 0.12); if (L > 2)
       s += `<path d="M${px + dx - w / 2} 6 V${f(14 + L)} a${w / 2} ${w / 2 + 3} 0 0 0 ${w} 0 V6 Z" fill="${WINE}" ${ol}/><path d="M${px + dx - w / 4} 18 V${f(10 + L)}" stroke="${WINE_HI}" stroke-width="4" stroke-linecap="round"/>`; });
     // thrown droplets + shards of the plate under his heel

@@ -106,7 +106,7 @@ function darrow(x, y, h, opts = {}) {
   const sx = (e, phi) => e.c + e.w * Math.sin(cl(phi * D + by, -Math.PI / 2, Math.PI / 2)); // point fixed on the body surface
   const wx = (e, psi) => e.c + e.w * Math.sin(psi * D);                                       // point fixed in the world (lighting)
   const gust = Math.sin(wind * 1.3) * 0.5 + Math.sin(wind * 2.9 + 1) * 0.5;
-  const stream = -(Math.sin(yaw * D) * 0.6 + 0.32 * Math.cos(yaw * D)) + 0.06 * gust;        // hair/cloak trail direction (x per unit drop)
+  const stream = -(Math.sin(yaw * D) * 0.45 + 0.3 * Math.cos(yaw * D)) + 0.06 * gust;        // hair/cloak trail direction (x per unit drop)
 
   // ---------- CLOAK (back panel behind everything + a front drape over his left shoulder) ----------
   let cloak = '', drape = '';
@@ -175,7 +175,7 @@ function darrow(x, y, h, opts = {}) {
     ];
     o += form(shaft, { fill: LEATHER, in: sIn, rim: rimW });
     // greave plate + knee cop
-    const gr = [[0, 0.335], [30, 0.31], [52, 0.278], [45, 0.25], [52, 0.222], [47, 0.14], [34, 0.096], [0, 0.08], [-34, 0.096], [-47, 0.14], [-52, 0.222], [-45, 0.25], [-52, 0.278], [-30, 0.31]].map(([p, py]) => M(fx(py, p), py));
+    const gr = [[0, 0.318], [26, 0.303], [52, 0.278], [45, 0.25], [52, 0.222], [47, 0.14], [34, 0.096], [0, 0.08], [-34, 0.096], [-47, 0.14], [-52, 0.222], [-45, 0.25], [-52, 0.278], [-26, 0.303]].map(([p, py]) => M(fx(py, p), py));
     const grIn = [
       poly([M(wx(E(0.33), 10), 0.34), M(wx(E(0.26), 22), 0.26), M(wx(E(0.2), 14), 0.2), M(wx(E(0.08), 12), 0.07), M(1, 0.07), M(1, 0.34)], C.armorShade),
       poly([M(wx(E(0.225), -40), 0.228), M(wx(E(0.225), -22), 0.234), M(wx(E(0.12), -20), 0.115), M(wx(E(0.12), -34), 0.12)], C.armorHi),
@@ -189,7 +189,7 @@ function darrow(x, y, h, opts = {}) {
   }
 
   // ---------- TORSO ----------
-  const TV = [[0.758, 0.112, 0.068], [0.705, 0.134, 0.086], [0.645, 0.124, 0.083], [0.55, 0.094, 0.068], [0.5, 0.1, 0.072], [0.45, 0.108, 0.078]];
+  const TV = [[0.758, 0.114, 0.068], [0.705, 0.14, 0.088], [0.645, 0.126, 0.084], [0.55, 0.089, 0.066], [0.5, 0.097, 0.07], [0.45, 0.106, 0.077]];
   const TE = py => { let i = 0; while (i < TV.length - 2 && py < TV[i + 1][0]) i++; const a = TV[i], b = TV[i + 1], t = cl((a[0] - py) / (a[0] - b[0])); return ell(0, 0, lerp(a[1], b[1], t), lerp(a[2], b[2], t)); };
   const tx = (py, phi) => sx(TE(py), phi), twx = (py, psi) => wx(TE(py), psi);
   let torso = '', tassets = '';
@@ -207,7 +207,7 @@ function darrow(x, y, h, opts = {}) {
     const lines = [
       line(smooth(pecL, false, 4), sw * 0.8), line(smooth(pecR, false, 4), sw * 0.8),
       line([0.75, 0.7, 0.652, 0.6, 0.55, 0.5].map(py => M(tx(py, 0), py)), sw * 0.7),
-      ...[0.61, 0.573, 0.537].map(py => line([M(tx(py + 0.008, -52), py + 0.008), M(tx(py, 0), py - 0.004), M(tx(py + 0.008, 52), py + 0.008)], sw * 0.6)),
+      ...[0.61, 0.573, 0.537].map(py => line([M(tx(py + 0.007, -40), py + 0.007), M(tx(py, 0), py - 0.004), M(tx(py + 0.007, 40), py + 0.007)], sw * 0.6)),
     ];
     const PEc = ell(0, 0, 0.212, 0.125), cpx = phi => sx(PEc, phi);
     const cast = poly([M(-1, 0.8), M(1, 0.8), M(1, 0.62), M(cpx(50) + 0.01, 0.598), M(cpx(17) + 0.008, 0.63), M(cpx(0) + 0.006, 0.7), M(cpx(-17) + 0.008, 0.636), M(cpx(-50) + 0.012, 0.602), M(-1, 0.625)], C.armorShade);
@@ -268,7 +268,7 @@ function darrow(x, y, h, opts = {}) {
   // ---------- WOLF PELT (two fur layers) ----------
   let pelt = '';
   {
-    const PE = ell(0, 0, 0.212, 0.125), W = PE.w, px = phi => sx(PE, phi);
+    const PE = ell(0, 0, 0.212, 0.125), W = PE.w, px = phi => cl(sx(PE, phi), -0.84 * W, 0.84 * W);
     const tuft = i => h * (i >= 3 && i <= 10 ? 0.022 : 0.011);
     const under = [[-0.5 * W, 0.78], [-0.98 * W, 0.74], [-1.07 * W, 0.685], [-0.98 * W, 0.625], [px(-52), 0.598], [px(-20), 0.63], [px(-4), 0.7], [px(4), 0.7], [px(20), 0.63], [px(52), 0.598], [0.98 * W, 0.625], [1.07 * W, 0.685], [0.98 * W, 0.74], [0.5 * W, 0.78]].map(p => M(p[0], p[1]));
     const up = fur(under, i => [2, 3, 4, 5, 4, 3, 1, 3, 4, 5, 4, 3, 2, 2][i], i => h * (i >= 1 && i <= 11 ? 0.022 : 0.01), 3);
@@ -305,8 +305,8 @@ function darrow(x, y, h, opts = {}) {
   // skull + jaw hull
   const hp = [];
   for (let la = -60; la <= 90; la += 15) for (let lo = 0; lo < 360; lo += 20) { const A = la * D, L = lo * D; hp.push(P(0.9 * Math.cos(A) * Math.sin(L), 0.05 + Math.sin(A), -0.08 + 1.05 * Math.cos(A) * Math.cos(L))); }
-  for (const s of [-1, 1]) hp.push(P(s * 0.75, -0.8, -0.05), P(s * 0.81, -0.3, 0.42), P(s * 0.27, -1.45, 0.66), P(s * 0.54, -1.2, 0.38), P(s * 0.3, 0.02, 0.93), P(s * 0.42, -0.55, 0.74));
-  hp.push(P(0, -1.48, 0.7), P(0, 0.05, 0.97), P(0, 0.5, 0.86), P(0, -0.98, 0.9), P(0, -1.3, 0.8));
+  for (const s of [-1, 1]) hp.push(P(s * 0.75, -0.8, -0.05), P(s * 0.81, -0.3, 0.42), P(s * 0.29, -1.37, 0.66), P(s * 0.57, -1.12, 0.38), P(s * 0.3, 0.02, 0.93), P(s * 0.42, -0.55, 0.74));
+  hp.push(P(0, -1.4, 0.7), P(0, 0.05, 0.97), P(0, 0.5, 0.86), P(0, -0.98, 0.9), P(0, -1.24, 0.8));
   const headHull = hull(hp.map(p => [p[0], p[1]]));
 
   // hair volume hull (swept-back mass + nape)
@@ -315,12 +315,12 @@ function darrow(x, y, h, opts = {}) {
   const dir = (lo, la) => { const A = la * D, L = lo * D; return [Math.cos(A) * Math.sin(L), Math.sin(A), Math.cos(A) * Math.cos(L)]; };
   const hh = [];
   for (let la = -45; la <= 90; la += 15) for (let lo = 0; lo < 360; lo += 20) hh.push(HP(dir(lo, la)));
-  hh.push(P(0, -1.3, -1.0), P(-0.5, -1.15, -0.85), P(0.5, -1.15, -0.85), P(0, 0.9, -1.2));
+  hh.push(P(0, 0.9, -1.2));
   const hairHull = hull(hh.map(p => [p[0], p[1]]));
   // hairline: 3D points from behind the viewer-left ear, over the forehead (widow's peak), to behind the right ear
   const sk = (lo, la) => { const v = dir(lo, la); return [0.9 * v[0], 0.05 + v[1], -0.08 + 1.05 * v[2]]; };
-  const half = [[0.8, -0.9, -0.3], [0.88, -0.5, -0.36], [0.93, -0.12, -0.2], sk(86, -6), sk(76, -14), sk(72, 4), sk(66, 22), sk(56, 38), sk(40, 49), sk(22, 54), sk(8, 50)];
-  const HL3 = half.map(v => [-v[0], v[1], v[2]]).concat([sk(0, 45)], half.slice().reverse());
+  const half = [[0.8, -0.9, -0.3], [0.88, -0.5, -0.36], [0.93, -0.12, -0.2], sk(86, -6), sk(76, -14), sk(72, 4), sk(66, 20), sk(57, 35), sk(41, 45), sk(22, 49), sk(8, 45)];
+  const HL3 = half.map(v => [-v[0], v[1], v[2]]).concat([sk(0, 40)], half.slice().reverse());
   const cut = HL3.map(v => { const q = P(v[0], v[1], v[2]); return [q[0] + ss(0, -0.35, q[2]) * 0.9 * r * Math.sign(v[0] || 1), q[1]]; });
   const cutPoly = [[cut[0][0], cut[0][1] + 3 * r]].concat(cut, [[cut[cut.length - 1][0], cut[cut.length - 1][1] + 3 * r]]);
 
@@ -360,7 +360,7 @@ function darrow(x, y, h, opts = {}) {
     for (const s of [-1, 1]) {
       const v = sk(s * 63, 25), q = P(v[0] * 1.04, v[1] * 1.03, v[2] * 1.04), vis = ss(-0.05, 0.3, q[2]);
       if (vis <= 0) continue;
-      const ph = s * 2.1, side = 1 - 0.55 * ss(0.7, 1.0, q[2]), len = (2.25 - 0.5 * ss(0.7, 1.0, q[2])) * r;
+      const ph = s * 2.1, side = 1 - 0.75 * ss(0.72, 1.0, q[2]), len = (2.25 - 0.5 * ss(0.7, 1.0, q[2])) * r;
       const T = [q[0] + (s * 0.1 + stream * 0.7) * r + 0.12 * r * Math.sin(wind * 2.3 + ph), q[1] + len], Cq = [q[0] + s * 0.42 * r + 0.05 * r * Math.sin(wind * 2.3 + ph + 1), q[1] + 0.42 * len];
       sideLocks += ribbon([q[0], q[1]], Cq, T, 0.12 * r * vis * side, s > 0 ? 2 : 0, false, true);
     }
@@ -398,7 +398,7 @@ function darrow(x, y, h, opts = {}) {
     feat += line([[c1[0], c1[1]], [c2[0], c2[1]]], fw * 0.55, SKIN_LINE, ` opacity="${f(ss(0.05, 0.35, c1[2]) * 0.8)}"`);
   }
   // under-lip + chin shade
-  faceShade.push(poly([p2(-0.2, -1.14, 0.88), p2(0.2, -1.14, 0.88), p2(0.1, -1.22, 0.88), p2(-0.1, -1.22, 0.88)], C.skinShade));
+  faceShade.push(poly([p2(-0.2, -1.12, 0.88), p2(0.2, -1.12, 0.88), p2(0.1, -1.19, 0.88), p2(-0.1, -1.19, 0.88)], C.skinShade));
   // eyes
   for (const s of [-1, 1]) {
     const I = P(s * 0.17, -0.155, 0.88), O = P(s * 0.6, -0.105, 0.67);
@@ -424,14 +424,15 @@ function darrow(x, y, h, opts = {}) {
   // nose: two planes, far one first (drawn over the head outline so it can project past the cheek)
   let noseOver = '';
   { const keep = feat; feat = '';
-    const bt = p2(0, 0.0, 0.92), bm = p2(0, -0.36, 1.12), tip = p2(0, -0.67, 1.38), ut = p2(0, -0.78, 1.18), nb = p2(0, -0.84, 0.92);
+    const bt = p2(0, 0.0, 0.92), bm = p2(0, -0.36, 1.1), tip = p2(0, -0.68, 1.3), ut = p2(0, -0.79, 1.15), nb = p2(0, -0.84, 0.92);
     const plane = s => [bt, bm, tip, ut, nb, p2(s * 0.215, -0.76, 0.9), p2(s * 0.25, -0.5, 0.86), p2(s * 0.12, -0.06, 0.88)];
     const far = yaw >= 0 ? 1 : -1;
     const drawPlane = s => poly(plane(s), s > 0 ? C.skinShade : C.skin);
     feat += poly([nb, p2(0.215, -0.76, 0.9), p2(0.3, -0.93, 0.85), p2(0.06, -0.9, 0.92)], C.skinShade); // cast shadow
     feat += drawPlane(far) + drawPlane(-far);
     const prot = Math.abs(tip[0] - nb[0]) / r;
-    feat += line(smooth([bt, bm, tip], false, 4).concat([ut, nb]), fw * (0.15 + 0.85 * ss(0.03, 0.3, prot)), INK, ` opacity="${f(ss(0.0, 0.12, prot))}"`);
+    feat += line([bt, bm], fw * 0.8 * ss(0.3, 0.6, prot), INK, ` opacity="${f(ss(0.25, 0.5, prot))}"`);
+    feat += line(smooth([[lerp(bt[0], bm[0], 0.55), lerp(bt[1], bm[1], 0.55)], bm, tip], false, 4).concat([ut, nb]), fw * (0.15 + 0.85 * ss(0.03, 0.3, prot)), INK, ` opacity="${f(ss(0.0, 0.12, prot))}"`);
     feat += line(smooth([p2(-0.215, -0.76, 0.9), p2(-0.12, -0.815, 0.98), ut, p2(0.12, -0.815, 0.98), p2(0.215, -0.76, 0.9)], false, 4), fw * 0.75);
     feat += line([p2(-0.215, -0.76, 0.9), p2(-0.235, -0.68, 0.9)], fw * 0.6) + line([p2(0.215, -0.76, 0.9), p2(0.235, -0.68, 0.9)], fw * 0.6);
     noseOver = feat; feat = keep;
