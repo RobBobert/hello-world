@@ -77,7 +77,7 @@ function fur(base, nPer, amp, seed) {
 
 const SKIN_LINE = '#6e3f31', BROW = '#4a3010', SCLERA = '#f1e6d2', TEETH = '#f6f0e2';
 const LEATHER = '#3f2a25', LEATHER_HI = '#6e4a39', LEATHER_SH = '#221615', SOLE = '#0f0b0b';
-const CLOTH = '#2f2835', CLOTH_SH = '#1b1620', CLOTH_HI = '#4b4057', CLOAK_HI = '#2e2437', CLOAK_LINE = '#3d3149', PELT_MID = '#b3b9c8';
+const CLOTH = '#332b3b', CLOTH_SH = '#1d1722', CLOTH_HI = '#50445d', CLOAK_HI = '#2e2437', CLOAK_LINE = '#3d3149', PELT_MID = '#b3b9c8';
 const STEEL = ST.silver, STEEL_SH = ST.silverShade, GOLD = ST.gold, GOLD_HI = ST.goldHi;
 
 function darrow(x, y, h, opts = {}) {
@@ -141,9 +141,6 @@ function darrow(x, y, h, opts = {}) {
     const thigh = ys.map(py => M(E(py).c - E(py).w, py)).concat(ys.slice().reverse().map(py => M(E(py).c + E(py).w, py)));
     let o = form(thigh, { fill: CLOTH, in: [poly([M(wx(E(0.475), 8), 0.5), M(wx(E(0.25), 14), 0.24), M(1, 0.24), M(1, 0.5)], CLOTH_SH), poly([M(wx(E(0.44), -58), 0.5), M(wx(E(0.44), -38), 0.5), M(wx(E(0.3), -40), 0.29), M(wx(E(0.3), -56), 0.29)], CLOTH_HI),
       poly([M(-1, 0.5), M(1, 0.5), M(1, 0.4), M(E(0.4).c + 0.02, 0.385), M(E(0.4).c - 0.02, 0.37), M(-1, 0.385)], CLOTH_SH)], rim: rimW });
-    const cu = [[-42, 0.445], [42, 0.445], [46, 0.375], [27, 0.328], [0, 0.312], [-27, 0.328], [-46, 0.375]].map(([p, py]) => M(fx(py, p), py));
-    o += form(cu, { fill: C.armor, sw: sw * 0.85, in: [poly([M(wx(E(0.44), 10), 0.46), M(wx(E(0.3), 18), 0.3), M(1, 0.3), M(1, 0.46)], C.armorShade), poly([M(wx(E(0.43), -34), 0.435), M(wx(E(0.43), -18), 0.435), M(wx(E(0.34), -20), 0.345), M(wx(E(0.34), -32), 0.352)], C.armorHi),
-      poly([M(-1, 0.5), M(1, 0.5), M(1, 0.415), M(E(0.4).c + 0.02, 0.4), M(E(0.4).c - 0.02, 0.385), M(-1, 0.4)], C.armorShade)] });
     // boot shaft
     const bys = [0.262, 0.245, 0.215, 0.17, 0.13, 0.095, 0.07];
     const infl = py => (py > 0.24 ? 0.011 : 0.006);
@@ -162,12 +159,12 @@ function darrow(x, y, h, opts = {}) {
     const footIn = [
       poly([M(wx(ea, 12) + 0.1 * Math.max(0, sa), 0.12), M(wx(ea, 26) + 0.1 * Math.max(0, sa), -0.04), M(1, -0.04), M(1, 0.12)], LEATHER_SH),
       poly([M(xa - 0.027, 0.098), M(xa - 0.015, 0.098), at(0.5, -0.004 - trx * 0.5), at(0.5, -0.014 - trx * 0.5)], LEATHER_HI),
-      poly([at(0.6, -0.1), at(0.6, 0.1), at(2, 0.1), at(2, -0.1)], C.armor),
-      poly([at(0.6, 0.006), at(0.6, 0.1), at(2, 0.1), at(2, 0.012)], C.armorShade),
-      poly([at(0.68, -trx * 0.75), at(0.68, -trx * 0.3), at(0.86, -trx * 0.25), at(0.9, -trx * 0.7)], C.armorHi),
-      line([at(0.6, -0.1), at(0.6, 0.1)], sw * 0.8),
-      poly([at(0.26, -0.1), at(0.26, 0.1), at(0.4, 0.1), at(0.4, -0.1)], LEATHER_SH, ` stroke="${INK}" stroke-width="${f(sw * 0.6)}"`),
-      poly([at(0.24, -0.008), at(0.24, 0.008), at(0.42, 0.008), at(0.42, -0.008)], GOLD, ` stroke="${INK}" stroke-width="${f(sw * 0.5)}"`),
+      poly([at(0.7, -0.1), at(0.7, 0.1), at(2, 0.1), at(2, -0.1)], C.armor),
+      poly([at(0.7, 0.006), at(0.7, 0.1), at(2, 0.1), at(2, 0.012)], C.armorShade),
+      poly([at(0.77, -trx * 0.75), at(0.77, -trx * 0.3), at(0.92, -trx * 0.25), at(0.95, -trx * 0.7)], C.armorHi),
+      line([at(0.7, -0.1), at(0.7, 0.1)], sw * 0.8),
+      poly([at(0.3, -0.1), at(0.3, 0.1), at(0.46, 0.1), at(0.46, -0.1)], LEATHER_SH, ` stroke="${INK}" stroke-width="${f(sw * 0.6)}"`),
+      poly([at(0.28, -0.008), at(0.28, 0.008), at(0.48, 0.008), at(0.48, -0.008)], GOLD, ` stroke="${INK}" stroke-width="${f(sw * 0.5)}"`),
     ];
     o += form(up, { fill: LEATHER, in: footIn, rim: rimW });
     // shaft over foot
@@ -346,36 +343,26 @@ function darrow(x, y, h, opts = {}) {
     const shade = poly(Sh1.map(p => [p[0], p[1]]).concat(Sh1.slice().reverse().map(p => [p[0] - p[2] * 4 * w0, p[1] - p[3] * 4 * w0])), C.hairShade);
     return form(pts, { fill: C.hair, sw: sw * 0.8, in: [shade, tone === 0 ? poly(Hi1.concat(Hi2.reverse()), C.hairHi) : ''], rim: rim ? rimW * 0.8 : 0 });
   }
-  let backHair = '', sideLocks = '', frontLocks = '';
+  let backHair = '', sideLocks = '';
   {
     // lon, lat, length, root width, wind gain, tone   (all in skull radii)
-    const LOCKS = [[180, -25, 2.5, 0.75, 0.45, 1], [-140, -18, 2.8, 0.52, 0.8, 1], [140, -18, 2.8, 0.52, 0.8, 1],
-      [-150, 22, 1.3, 0.34, 2.2, 1], [150, 22, 1.3, 0.34, 2.2, 1], [180, 55, 1.0, 0.3, 2.6, 1],
-      [-112, -8, 2.7, 0.38, 1.0, 0], [112, -8, 2.7, 0.38, 1.0, 0], [-94, -2, 2.3, 0.3, 0.75, 0], [94, -2, 2.3, 0.3, 0.75, 0],
-      [-122, 8, 3.2, 0.13, 2.1, 0], [122, 8, 3.2, 0.13, 2.1, 0], [-150, 14, 2.9, 0.1, 3.0, 0], [150, 14, 2.9, 0.1, 3.0, 0]];
+    const LOCKS = [[180, -25, 2.7, 0.8, 0.4, 1], [-140, -18, 3.0, 0.55, 0.65, 1], [140, -18, 3.0, 0.55, 0.65, 1],
+      [-150, 25, 1.2, 0.32, 1.5, 1], [150, 25, 1.2, 0.32, 1.5, 1], [180, 55, 0.9, 0.3, 1.8, 1],
+      [-125, -12, 3.1, 0.42, 0.85, 0], [125, -12, 3.1, 0.42, 0.85, 0], [-104, -6, 2.7, 0.36, 0.6, 0], [104, -6, 2.7, 0.36, 0.6, 0],
+      [-118, 6, 3.3, 0.14, 1.45, 0], [118, 6, 3.3, 0.14, 1.45, 0], [-150, 12, 3.0, 0.1, 1.9, 0], [150, 12, 3.0, 0.1, 1.9, 0]];
     LOCKS.forEach(([lo, la, len, w0, gain, tone], i) => {
       const R0 = HP(dir(lo, la), 0.85), rel = (R0[0] - hcx) / r, vx = stream * gain + rel * 0.18, nl = Math.hypot(vx, 1), ph = i * 1.7, ln = len * r;
       const T = [R0[0] + ln * vx / nl + ln * 0.06 * Math.sin(wind * 2.3 + ph), R0[1] + ln / nl + ln * 0.025 * Math.cos(wind * 1.9 + ph)];
       const Cq = [R0[0] + ln * 0.62 * vx / nl + rel * r * 0.3 + ln * 0.03 * Math.sin(wind * 2.3 + ph + 1), R0[1] + ln * 0.3 / nl];
       backHair += ribbon(R0, Cq, T, w0 * r, tone === 0 && T[0] > hcx + r * 0.2 ? 0 : tone, w0 > 0.25);
     });
-    // near-side locks that lie over the lower edge of the hair mass once the head turns (fade in by width)
-    [[104, 6, 2.6, 0.3, 0.9], [126, 0, 2.9, 0.26, 1.2], [112, 22, 2.2, 0.16, 1.9]].forEach(([lo0, la, len, w0, gain], i) => {
-      for (const s of [-1, 1]) {
-        const R0 = HP(dir(s * lo0, la), 0.97), vis = ss(0.0, 0.45, R0[2]);
-        if (vis <= 0) continue;
-        const rel = (R0[0] - hcx) / r, vx = stream * gain + rel * 0.15, nl = Math.hypot(vx, 1), ph = i * 2.3 + s, ln = len * r;
-        const T = [R0[0] + ln * vx / nl + ln * 0.06 * Math.sin(wind * 2.3 + ph), R0[1] + ln / nl + ln * 0.025 * Math.cos(wind * 1.9 + ph)];
-        const Cq = [R0[0] + ln * 0.62 * vx / nl + ln * 0.03 * Math.sin(wind * 2.3 + ph + 1), R0[1] + ln * 0.3 / nl];
-        frontLocks += ribbon(R0, Cq, T, w0 * r * vis, R0[0] > hcx ? 2 : 0, false, true);
-      }
-    });
     // thin strands from the temples that frame the face
     for (const s of [-1, 1]) {
       const v = sk(s * 63, 25), q = P(v[0] * 1.04, v[1] * 1.03, v[2] * 1.04), vis = ss(-0.05, 0.3, q[2]);
       if (vis <= 0) continue;
-      const ph = s * 2.1, T = [q[0] + (s * 0.1 + stream * 0.7) * r + 0.12 * r * Math.sin(wind * 2.3 + ph), q[1] + 2.25 * r], Cq = [q[0] + s * 0.42 * r + 0.05 * r * Math.sin(wind * 2.3 + ph + 1), q[1] + 0.95 * r];
-      sideLocks += ribbon([q[0], q[1]], Cq, T, 0.12 * r * vis, s > 0 ? 2 : 0, false, true);
+      const ph = s * 2.1, side = 1 - 0.55 * ss(0.7, 1.0, q[2]), len = (2.25 - 0.5 * ss(0.7, 1.0, q[2])) * r;
+      const T = [q[0] + (s * 0.1 + stream * 0.7) * r + 0.12 * r * Math.sin(wind * 2.3 + ph), q[1] + len], Cq = [q[0] + s * 0.42 * r + 0.05 * r * Math.sin(wind * 2.3 + ph + 1), q[1] + 0.42 * len];
+      sideLocks += ribbon([q[0], q[1]], Cq, T, 0.12 * r * vis * side, s > 0 ? 2 : 0, false, true);
     }
   }
 
@@ -434,8 +421,9 @@ function darrow(x, y, h, opts = {}) {
     feat += `<g opacity="${f(vis)}"><path d="${pathD(brow)}" fill="${BROW}" stroke="${INK}" stroke-width="${f(fw * 0.5)}" stroke-linejoin="round"/></g>`;
   }
   if (expr === 'angry') feat += line([p2(-0.045, EX.bi + 0.1, 0.96), p2(-0.03, EX.bi - 0.02, 0.96)], fw * 0.6, SKIN_LINE) + line([p2(0.045, EX.bi + 0.1, 0.96), p2(0.03, EX.bi - 0.02, 0.96)], fw * 0.6, SKIN_LINE);
-  // nose: two planes, far one first
-  {
+  // nose: two planes, far one first (drawn over the head outline so it can project past the cheek)
+  let noseOver = '';
+  { const keep = feat; feat = '';
     const bt = p2(0, 0.0, 0.92), bm = p2(0, -0.36, 1.12), tip = p2(0, -0.67, 1.38), ut = p2(0, -0.78, 1.18), nb = p2(0, -0.84, 0.92);
     const plane = s => [bt, bm, tip, ut, nb, p2(s * 0.215, -0.76, 0.9), p2(s * 0.25, -0.5, 0.86), p2(s * 0.12, -0.06, 0.88)];
     const far = yaw >= 0 ? 1 : -1;
@@ -446,6 +434,7 @@ function darrow(x, y, h, opts = {}) {
     feat += line(smooth([bt, bm, tip], false, 4).concat([ut, nb]), fw * (0.15 + 0.85 * ss(0.03, 0.3, prot)), INK, ` opacity="${f(ss(0.0, 0.12, prot))}"`);
     feat += line(smooth([p2(-0.215, -0.76, 0.9), p2(-0.12, -0.815, 0.98), ut, p2(0.12, -0.815, 0.98), p2(0.215, -0.76, 0.9)], false, 4), fw * 0.75);
     feat += line([p2(-0.215, -0.76, 0.9), p2(-0.235, -0.68, 0.9)], fw * 0.6) + line([p2(0.215, -0.76, 0.9), p2(0.235, -0.68, 0.9)], fw * 0.6);
+    noseOver = feat; feat = keep;
   }
   // mouth
   {
@@ -469,7 +458,7 @@ function darrow(x, y, h, opts = {}) {
     }
   }
   if (scar) feat += line([p2(-0.52, 0.2, 0.74), p2(-0.47, -0.02, 0.8)], fw * 0.7, '#b9705f') + line([p2(-0.47, -0.24, 0.8), p2(-0.44, -0.46, 0.8)], fw * 0.7, '#b9705f');
-  const head = form(headHull, { fill: C.skin, sw: sw, in: faceShade.concat([feat]), rim: rimW });
+  const head = form(headHull, { fill: C.skin, sw: sw, in: faceShade.concat([feat]), rim: rimW, over: noseOver });
 
   // ---------- HAIR CAP ----------
   let hairCap = '';
@@ -488,9 +477,14 @@ function darrow(x, y, h, opts = {}) {
     for (const [lo, la, a, b, w] of [[30, 52, 0.12, 0.4, 0.07]]) { const pp = flow(lo, la, a, b); if (pp.length > 2) inner += line(pp, r * w, C.hair); }
     for (const [lo, la] of [[-70, 18], [-46, 44], [-14, 50], [20, 52], [50, 42], [72, 14]]) { const pp = flow(lo, la, 0.03, 0.55 + 0.2 * hash(lo)); if (pp.length > 2) inner += line(pp, fw * 0.75, INK); }
     inner += rimPath(hairHull, rimW, sw * 0.5);
+    let capStroke = ''; { const N = hairHull.length, sg = area(hairHull) > 0 ? 1 : -1; let run = [], rw = 0;
+      const flush = () => { if (run.length > 1) capStroke += line(run, rw); run = []; };
+      for (let i = 0; i < N; i++) { const a = hairHull[i], b = hairHull[(i + 1) % N], l = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1, ny = -(b[0] - a[0]) / l * sg, w = sw * ss(0.55, 0.15, ny);
+        if (w <= 0.01) { flush(); continue; } if (run.length && Math.abs(w - rw) > 0.01) flush(); if (!run.length) { run.push(a); rw = w; } run.push(b); }
+      flush(); }
     hairCap = `<mask id="${mid}" maskUnits="userSpaceOnUse" x="${bb[0]}" y="${bb[1]}" width="${bb[2]}" height="${bb[3]}"><rect x="${bb[0]}" y="${bb[1]}" width="${bb[2]}" height="${bb[3]}" fill="#fff"/><path d="${pathD(cutPoly)}" fill="#000"/></mask>`
       + `<clipPath id="${cid}"><path d="${pathD(hairHull)}"/></clipPath>`
-      + `<g mask="url(#${mid})"><g clip-path="url(#${cid})"><path d="${pathD(hairHull)}" fill="${C.hair}"/>${inner}</g><path d="${pathD(hairHull)}" fill="none" stroke="${INK}" stroke-width="${f(sw)}" stroke-linejoin="round"/></g>`
+      + `<g mask="url(#${mid})"><g clip-path="url(#${cid})"><path d="${pathD(hairHull)}" fill="${C.hair}"/>${inner}</g>${capStroke}</g>`
       + `<g clip-path="url(#${cid})"><path d="${pathD(cutPoly, false)}" fill="none" stroke="${INK}" stroke-width="${f(sw * 0.8)}" stroke-linejoin="round"/></g>`;
   }
   // ---------- EARS ----------
@@ -505,7 +499,7 @@ function darrow(x, y, h, opts = {}) {
   // ---------- ASSEMBLE ----------
   // his left arm (s = +1) is under the cloak drape, so only the blade arm is drawn
   let body = (yaw >= 0 ? '' : '') + (bust ? '' : leg(yaw >= 0 ? 1 : -1) + leg(yaw >= 0 ? -1 : 1)) + torso + (bust ? '' : tassets) + drape + arm(-1, blade);
-  let out = (bust ? '' : cloak) + body + pelt + backHair + neck + head + hairCap + frontLocks + ears + sideLocks;
+  let out = (bust ? '' : cloak) + body + pelt + backHair + neck + head + hairCap + ears + sideLocks;
   if (bust) { const c = nid(); out = `<clipPath id="${c}"><rect x="${f(x - h)}" y="${f(y - 1.4 * h)}" width="${f(2 * h)}" height="${f(0.93 * h)}"/></clipPath><g clip-path="url(#${c})">${out}</g>`; }
   return `<g class="darrow">${out}</g>`;
 }

@@ -45,7 +45,7 @@ function palette(mood, turn = 0) {
 // ---------------------------------------------------------------- film grain (one tiny PNG tile, built once)
 const GRAIN = (() => {
   const N = 128, r = rng(77), raw = Buffer.alloc((N * 2 + 1) * N);
-  for (let y = 0; y < N; y++) { raw[y * (N * 2 + 1)] = 0; for (let x = 0; x < N; x++) { const v = (r() + r() + r()) / 3; const i = y * (N * 2 + 1) + 1 + x * 2; raw[i] = v > .5 ? 215 : 40; raw[i + 1] = Math.round(cl(Math.abs(v - .5) * 2 * 150, 0, 255)); } }
+  for (let y = 0; y < N; y++) { raw[y * (N * 2 + 1)] = 0; for (let x = 0; x < N; x++) { const v = (r() + r() + r()) / 3; const i = y * (N * 2 + 1) + 1 + x * 2; raw[i] = v > .5 ? 215 : 40; raw[i + 1] = Math.round(cl(Math.abs(v - .5) * 2 * 95, 0, 255)); } }
   const crcT = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
   const crc = b => { let c = 0xFFFFFFFF; for (const v of b) c = crcT[(c ^ v) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
   const chunk = (t, d) => { const len = Buffer.alloc(4); len.writeUInt32BE(d.length); const td = Buffer.concat([Buffer.from(t), d]); const c = Buffer.alloc(4); c.writeUInt32BE(crc(td)); return Buffer.concat([len, td, c]); };
@@ -147,7 +147,7 @@ function celFilter(P, o) {
   return { id, def: s + `<feMerge>${merge}</feMerge></filter>` };
 }
 // Full cel lighting on any group: hard coloured shadow on the side away from the key + warm key edge + cool rim edge.
-// opts: turn, depth (px, how much of the form the key side keeps lit, ~25-35% of its width), rim (px), key (px)
+// opts: turn, depth (px width of the shadow band on the far side; ~30% of the form's width), rim (px), key (px), shadowOpacity
 function lit(svg, mood = 'gala', opts = {}) { const F = celFilter(palette(mood, opts.turn), opts); return `<defs>${F.def}</defs><g filter="url(#${F.id})">${svg}</g>`; }
 // Rim + key edge only (for characters that already draw their own shadow shapes).
 function rimLight(svg, mood = 'gala', opts = {}) { return lit(svg, mood, { ...opts, shadow: false }); }
@@ -164,9 +164,9 @@ const roomBlur = (svg, y0, y1, sd = 3.2) => { const id = 'gsl-rb' + hash([y0, y1
 function gala(t, o) {
   const P = MOODS.gala, FY = o.floorY || 1260, par = o.par || 0, INK = '#0b052c';
   const [chx, chy, chs] = o.chandelier || [290, 205, 1.3], cx = chx + par * .8;
-  const wall = vgrad(P.bg, 0, FY), sky = vgrad(['#0c1560', '#1b40b0', '#3d96ee', '#9be8ff'], 300, FY - 150), fl = vgrad(P.floor, FY, 1920);
+  const wall = vgrad(P.bg, 0, FY), sky = vgrad(['#0a1258', '#1a3cae', '#3688e6', '#6fd0f8'], 300, FY - 150), fl = vgrad(P.floor, FY, 1920);
   const warmth = x => cl(Math.max(1 - Math.abs(x - chx) / 720, .7 * (1 - Math.abs(x - 900) / 520)), .12, 1); // light falls off away from the chandeliers
-  const pil = w => linear([[0, mix('#3a2590', '#ffb04e', w)], [.3, mix('#30208a', '#ee6a34', w)], [.3, '#24157a'], [.88, '#190e5c'], [.88, '#56b4ff'], [1, '#56b4ff']], 'x1="0" y1="0" x2="1" y2="0"');
+  const pil = w => linear([[0, mix('#3a2590', '#ffb04e', w)], [.3, mix('#30208a', '#ee6a34', w)], [.3, '#24157a'], [.92, '#190e5c'], [.92, '#4a9cf0'], [1, '#4a9cf0']], 'x1="0" y1="0" x2="1" y2="0"');
   let pdefs = '';
   let far = `<rect x="${X0}" y="-300" width="${XW}" height="${FY + 300}" fill="url(#${wall.id})"/>`;
   // tall arched windows: Luna night (stars, Earth, city towers), the cold shapes of the frame
@@ -183,7 +183,7 @@ function gala(t, o) {
   winX.forEach((wx0, i) => {
     const px = wx0 + par * .5 - 137, pw = 130, bc = [P.accent, '#ff6f5e', '#8a1230'], w = warmth(wx0 - 72), pl = pil(f(w * 10) / 10); pdefs += pl.def;
     far += `<rect x="${f(px)}" y="-300" width="${pw}" height="${FY + 300}" fill="url(#${pl.id})"/><rect x="${f(px - 16)}" y="${FY - 100}" width="${pw + 32}" height="100" fill="#190e5c"/><rect x="${f(px - 16)}" y="${FY - 100}" width="48" height="100" fill="${mix('#30208a', '#ee6a34', w)}"/><rect x="${f(px - 16)}" y="${FY - 100}" width="${pw + 32}" height="12" fill="${mix('#6a4ad0', P.key, w)}"/>`
-      + (i % 2 ? '' : `<path d="M${f(px + 14)} 40 h102 v500 l-51 -60 l-51 60z" fill="${bc[0]}"/><path d="M${f(px + 14)} 40 h36 v464 l-36 36z" fill="${bc[1]}"/><path d="M${f(px + 88)} 40 h28 v500 l-28 -32z" fill="${bc[2]}"/><path d="M${f(px + 14)} 40 h102 v24 h-102z" fill="${P.key}"/><path d="M${f(px + 65)} 232 l26 42 l-26 42 l-26 -42z" fill="${P.key}"/>`);
+      + (i % 2 === 0 ? '' : `<path d="M${f(px + 14)} 40 h102 v500 l-51 -60 l-51 60z" fill="${bc[0]}"/><path d="M${f(px + 14)} 40 h36 v464 l-36 36z" fill="${bc[1]}"/><path d="M${f(px + 88)} 40 h28 v500 l-28 -32z" fill="${bc[2]}"/><path d="M${f(px + 14)} 40 h102 v24 h-102z" fill="${P.key}"/><path d="M${f(px + 65)} 232 l26 42 l-26 42 l-26 -42z" fill="${P.key}"/>`);
   });
   // far crowd: lighter-violet atmospheric silhouettes, warm on the key side
   let crowd = ''; const r = rng(9);
@@ -196,19 +196,19 @@ function gala(t, o) {
   [40, 110, 220, 390, 640].forEach(d => floor += `<path d="M${X0} ${FY + d} h${XW}" stroke="#8a66f0" stroke-width="${f(2 + d / 160)}" opacity=".26"/>`);
   floor += `<rect x="${X0}" y="${FY - 5}" width="${XW}" height="10" fill="${P.key}" opacity=".8"/>`;
   // chandelier = the practical key source (upper-left by default; move with opts.chandelier [x,y,scale])
-  const chand = (x, y, s) => { let c = `<path d="M${x} -60 V${f(y - 120 * s)}" stroke="${INK}" stroke-width="${f(8 * s)}"/><path d="M${x} ${f(y - 128 * s)} l${f(-22 * s)} ${f(36 * s)} l${f(22 * s)} ${f(30 * s)} l${f(22 * s)} ${f(-30 * s)}z" fill="#b5651a"/>`;
+  const chand = (x, y, s) => { let c = `<path d="M${x} -60 V${f(y - 120 * s)}" stroke="${INK}" stroke-width="${f(8 * s)}"/><path d="M${x} ${f(y - 128 * s)} l${f(-22 * s)} ${f(36 * s)} l${f(22 * s)} ${f(30 * s)} l${f(22 * s)} ${f(-30 * s)}z" fill="#3a1408"/>`;
     [[62, -88, 5], [112, -46, 7], [160, 0, 10]].forEach(([rx, dy, n]) => { const ry = rx * .22 * s, yy = y + dy * s;
-      c += `<ellipse cx="${x}" cy="${f(yy)}" rx="${f(rx * s)}" ry="${f(ry)}" fill="none" stroke="#8a4a12" stroke-width="${f(15 * s)}"/><path d="M${f(x - rx * s)} ${f(yy)} a${f(rx * s)} ${f(ry)} 0 0 0 ${f(rx * 2 * s)} 0" fill="none" stroke="${P.key}" stroke-width="${f(15 * s)}"/><path d="M${f(x - rx * s)} ${f(yy)} a${f(rx * s)} ${f(ry)} 0 0 0 ${f(rx * .9 * s)} ${f(ry * .98)}" fill="none" stroke="${P.hot}" stroke-width="${f(7 * s)}"/>`;
+      c += `<ellipse cx="${x}" cy="${f(yy)}" rx="${f(rx * s)}" ry="${f(ry)}" fill="none" stroke="#3a1408" stroke-width="${f(15 * s)}"/><path d="M${f(x - rx * s)} ${f(yy)} a${f(rx * s)} ${f(ry)} 0 0 0 ${f(rx * 2 * s)} 0" fill="none" stroke="#6a2a0c" stroke-width="${f(15 * s)}"/><path d="M${f(x - rx * s)} ${f(yy)} a${f(rx * s)} ${f(ry)} 0 0 0 ${f(rx * .9 * s)} ${f(ry * .98)}" fill="none" stroke="${P.hot}" stroke-width="${f(7 * s)}"/>`;
       for (let i = 0; i < n; i++) { const a = i / n * 6.283 + .3 + dy; c += candle(x + Math.cos(a) * rx * s, yy + Math.sin(a) * ry - 5 * s, 30 * s, t + i * 1.7, { halo: false }); } });
     return c + `<path d="M${x} ${f(y + 30 * s)} l${f(-17 * s)} ${f(34 * s)} l${f(17 * s)} ${f(44 * s)} l${f(17 * s)} ${f(-44 * s)}z" fill="${P.hot}"/>`; };
   const fk = 1 + .03 * Math.sin(t * 9) * Math.sin(t * 4.1), c2x = f(900 + par * .6);
   const moon = lightShafts(1250 + par * .5, 470, 152, t, { count: 4, spread: 20, length: 1500, width: 120, color: '#8fdcff', opacity: .15, seed: 4, blend: false });
   // painted (alpha) orange pools first so the warm areas stay saturated, then one additive layer for the hot cores
   const lights = G(cx, chy - 30, 760 * fk, '#f2601c', .62) + G(c2x, 130, 360, '#f2601c', .5) + G(cx + 60, FY + 230, 620, '#f2601c', .5, { squash: .32 })
-    + screen(moon + G(cx, chy - 30, 520 * fk, '#ffae3c', .7) + G(cx, chy - 40, 200 * chs, P.hot, .85) + G(c2x, 140, 200, '#ffae3c', .7))
+    + screen(moon + G(cx, chy - 30, 520 * fk, '#ffae3c', .7) + G(cx, chy - 40, 250 * chs, P.hot, 1) + G(c2x, 140, 200, '#ffae3c', .7))
     + chand(f(cx), chy, chs) + chand(c2x, 150, chs * .42);
   // moonlight slanting in from the windows on the right (the rim source)
-  return `<defs>${wall.def}${sky.def}${fl.def}${pdefs}${refl.def}</defs>` + (o.blur === false ? far + crowd : roomBlur(far + crowd, -40, FY + 60)) + floor + lights;
+  return `<defs>${wall.def}${sky.def}${fl.def}${pdefs}${refl.def}</defs>` + (o.blur === false ? far + crowd : roomBlur(far + crowd, -40, FY + 60, 4)) + floor + lights;
 }
 
 function space(t, o) {
@@ -227,7 +227,7 @@ function space(t, o) {
   for (let i = 0; i < 9; i++) { const x1 = X0 + r() * XW, y1 = 200 + r() * 1200, a = (r() - .5) * 1.2 + (i % 2 ? Math.PI : 0), L = 260 + r() * 420, on = Math.sin(t * (5 + i) + i * 2.1) > -.2, c = i % 2 ? P.accent : P.rim;
     if (on) fx += `<path d="M${f(x1)} ${f(y1)} l${f(Math.cos(a) * L)} ${f(Math.sin(a) * L)}" stroke="${c}" stroke-width="9" stroke-linecap="round" opacity=".9"/><path d="M${f(x1)} ${f(y1)} l${f(Math.cos(a) * L)} ${f(Math.sin(a) * L)}" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`; }
   [[250, 760, 150], [840, 560, 100], [600, 1130, 80]].forEach(([x, y, rad], i) => { const k = .7 + .3 * Math.sin(t * 6 + i * 2); fx += G(x + par * .5, y, rad * 3.2 * k, '#ff7a2a', .75) + G(x + par * .5, y, rad * k, '#fff0c0', .95) + `<path d="M${f(x + par * .5)} ${f(y - rad * .9 * k)} l${f(rad * .22)} ${f(rad * .6 * k)} l${f(rad * .7 * k)} ${f(rad * .3)} l${f(-rad * .7 * k)} ${f(rad * .25)} l${f(-rad * .22)} ${f(rad * .7 * k)} l${f(-rad * .22)} ${f(-rad * .7 * k)} l${f(-rad * .7 * k)} ${f(-rad * .25)} l${f(rad * .7 * k)} ${f(-rad * .3)}z" fill="#fff6d8"/>`; });
-  s += (o.blur === false ? ships : roomBlur(ships, 120, 1500, 2.6)) + `<g ${SCREEN}>${fx}</g>`;
+  s += ships + `<g ${SCREEN}>${fx}</g>`;
   if (o.deck) { const FY = o.floorY || 1300, d = vgrad(P.floor, FY, 1920); // bridge: viewport struts + deck
     s += `<defs>${d.def}</defs><path d="M${X0} -300 H${X0 + XW} V${FY} H${X0}Z M70 150 H1010 L1040 ${FY - 110} H40Z" fill="#070a2a" fill-rule="evenodd"/><path d="M70 150 H1010 L1040 ${FY - 110} H40Z" fill="none" stroke="#2c48b8" stroke-width="10"/><path d="M40 ${FY - 110} L70 150 H400" fill="none" stroke="${P.key}" stroke-width="6" opacity=".8"/><path d="M360 150 L330 ${FY - 110} M720 150 L750 ${FY - 110}" stroke="#070a2a" stroke-width="30"/>`
       + `<rect x="${X0}" y="${FY}" width="${XW}" height="900" fill="url(#${d.id})"/><rect x="${X0}" y="${FY - 4}" width="${XW}" height="8" fill="${P.rim}" opacity=".8"/>` + G(540, FY + 40, 760, P.rim, .3, { squash: .3 }) + G(200, FY + 220, 520, P.key, .3, { squash: .35 });
@@ -246,7 +246,7 @@ function mars(t, o) {
   s += cl2;
   const far = mesas(31, FY - 60, 90, 260, '#e0562c', '#ffb060', par * .3) + `<path d="M${f(760 + par * .3)} ${FY - 60} v-420 l26 -70 l26 70 v130 h40 v-250 l30 -90 l30 90 v540z" fill="#d04a2a"/><path d="M${f(760 + par * .3)} ${FY - 60} v-420 l26 -70 v490z M${f(852 + par * .3)} ${FY - 60} v-540 l30 -90 v630z" fill="#ffb060" opacity=".8"/>`;
   const mid = mesas(47, FY + 10, 70, 210, '#7a1f2c', '#ff8a3a', par * .6);
-  s += (o.blur === false ? far : roomBlur(far, FY - 760, FY + 40, 3.6)) + G(540, FY - 40, 900, '#ff7a3a', .4, { squash: .22 }) + mid;
+  s += (o.blur === false ? far : roomBlur(far, FY - 660, FY + 30, 3.6)) + G(540, FY - 40, 900, '#ff7a3a', .4, { squash: .22 }) + mid;
   s += `<rect x="${X0}" y="${FY}" width="${XW}" height="900" fill="url(#${fl.id})"/>` + G(sx, FY + 30, 800, '#ffb050', .6, { squash: .2 });
   const r2 = rng(12); for (let i = 0; i < 16; i++) { const y = FY + 30 + Math.pow(r2(), 1.5) * 620, w = 120 + r2() * 420, x = X0 + r2() * XW + par; s += `<path d="M${f(x)} ${f(y)} h${f(w)} l${f(w * .2)} ${f(8 + (y - FY) / 30)} h${f(-w * 1.1)}z" fill="${i % 3 ? '#4a1226' : '#c8452a'}" opacity=".6"/>`; }
   return s + `<rect x="${X0}" y="${FY - 4}" width="${XW}" height="8" fill="#ffb060" opacity=".7"/>`;
