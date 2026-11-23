@@ -130,7 +130,7 @@ function build(x, y, s, o, kit) {
   const headSvg = R.head(hx, hy, r, { ...kit.headOpts, ...(kit.hair === 'long' ? { hair: 'none' } : {}), yaw, pitch: o.pitch, brow: o.brow ?? kit.headOpts.brow, mouth: o.mouth ?? kit.headOpts.mouth, blink: o.blink });
   // for long hair: suppress rig's own hair by drawing face only (strip hair groups is not possible), so draw rig head then cover with crown
   const sheathed = kit.hipBlade && !arms.includes('blade') && !o.armed ? kit.hipBlade(x + k * .5, y, s) : '';
-  return `<g>${hairObj ? hairObj.back : ''}${bodySvg}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${sheathed}${armSvg(-1)}${armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${headSvg}${hairObj ? hairObj.front : ''}</g>`;
+  return `<g>${hairObj ? hairObj.back : ''}${bodySvg}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${sheathed}${o.noArm === -1 ? `<circle cx="${f(x + k - sx)}" cy="${f(sy + s * 0.02)}" r="${f(s * 0.085)}" fill="#3a3a44" stroke="${INK}" stroke-width="${f(s * 0.04)}"/>` : armSvg(-1)}${o.noArm === 1 ? `<circle cx="${f(x + k + sx)}" cy="${f(sy + s * 0.02)}" r="${f(s * 0.085)}" fill="#3a3a44" stroke="${INK}" stroke-width="${f(s * 0.04)}"/>` : armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${headSvg}${hairObj ? hairObj.front : ''}</g>`;
 }
 
 const lionPauldrons = (x, y, s) => [-1, 1].map(d => { const px = x + d * s * 0.36, py = y - s * 1.47;

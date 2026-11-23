@@ -78,13 +78,20 @@ function duel(t) {
   let s = `<g filter="url(#mono)">${L.skyOrRoom('gala', t, { floorY: 1500 })}</g>`;
   for (let i = 0; i < 12; i++) { const x = ((i * 191 + 40) % 1300) - 110, sc = 110 * (0.85 + ((i * 7) % 5) / 15); s += `<circle cx="${x}" cy="${1500 - sc * 1.9}" r="${sc * .38}" fill="#14141c"/><path d="M${x - sc * .5} 1500 Q${x - sc * .5} ${1500 - sc * 1.5} ${x} ${1500 - sc * 1.55} Q${x + sc * .5} ${1500 - sc * 1.5} ${x + sc * .5} 1500Z" fill="#14141c"/>`; }
   s += L.floorShadow(DX, FY + 6, 280, { mood: 'gala' }) + L.floorShadow(CX, FY + 6, 280, { mood: 'gala' });
-  s += `<g transform="translate(0 ${f(sink)})">` + L.rimLight(K.cassius(CX, FY, 320, { yaw: -14, brow: casDown ? 'sad' : 'angry', mouth: 'frown', arms: casDown ? ['cross', 'hang'] : [cPose, 'hang'], armed: true }), 'gala') + razor(chx, chy, cAng, cExt, t, { len: cLen, theme: STEEL, stiff: t < T1 - .18 ? 0 : t < T2 - .3 ? 1 : t < T2 ? cl((t - (T2 - .3)) / .3) * 0 + .2 : 1, pulse: (t - (T1 - .18)) / .18 }) + '</g>';
-  if (casDown) s += `<g transform="translate(${f(CX + 60)} ${f(FY - 20 + 60 * eo((t - T3 - .1) / .4))}) rotate(${f(80 * eo((t - T3) / .5))})">${razor(0, 0, 0, .3, t, { len: 300, stiff: 1, theme: STEEL })}</g>`;
+  s += `<g transform="translate(0 ${f(sink)})">` + L.rimLight(K.cassius(CX, FY, 320, { yaw: -14, brow: casDown ? 'sad' : 'angry', mouth: 'frown', arms: casDown ? ['cross', 'hang'] : [cPose, 'hang'], armed: true, noArm: t >= T3 ? 1 : 0 }), 'gala') + (t >= T3 ? '' : razor(chx, chy, cAng, cExt, t, { len: cLen, theme: STEEL, stiff: t < T1 - .18 ? 0 : t < T2 - .3 ? 1 : t < T2 ? cl((t - (T2 - .3)) / .3) * 0 + .2 : 1, pulse: (t - (T1 - .18)) / .18 })) + '</g>';
+  if (t >= T3) { // the severed sword arm (still gripping its razor) flies off and lands; bloodless, sparks at the cut
+    const u = cl((t - T3) / .8), land = u >= 1, sx0 = CX + 14 * 320 * 0.0016 + 320 * 0.33, sy0 = FY - 320 * 1.55 + 320 * 0.1;
+    const ax = lerp(sx0, CX + 300, eo(u)), ay = land ? FY + 40 : sy0 - 340 * Math.sin(Math.PI * u) + (FY + 40 - sy0) * u, rot = land ? 95 : 400 * u;
+    const armG = C.arm(0, 0, 320, -1, 'slashUp', { sleeve: '#2b4a8a', fore: '#f0c04a', cuff: '#ffffff', hand: '#d9a777' }) + `<circle cx="0" cy="0" r="${f(320 * .09)}" fill="#3a3a44" stroke="#1b1210" stroke-width="10"/>`;
+    const [hx2, hy2] = [-0.42 * 320 - 0, -0.6 * 320];
+    s += `<g transform="translate(${f(ax)} ${f(ay)}) rotate(${f(rot)})">${razor(hx2, hy2, -1.6, 1, t, { len: 360, stiff: 1, theme: STEEL })}${armG}</g>`;
+    if (u < .6) for (let i = 0; i < 8; i++) { const a = i * .8 + t * 6, r = 30 + 160 * u; s += `<circle cx="${f(sx0 + Math.cos(a) * r)}" cy="${f(sy0 + sink + Math.sin(a) * r * .7)}" r="${f(8 * (1 - u))}" fill="#9fd0ff"/>`; }
+  }
   s += L.rimLight(K.darrow(DX, FY, 330, { yaw: 14, brow: 'angry', mouth: t > T3 + .3 ? 'smirk' : 'flat', arms: ['hang', dPose], wind: t, armed: true }), 'gala') + razor(dhx, dhy, dAng, dExt, t, { len: t >= T2 - .3 ? 560 : dLen, theme: GOLD, stiff: t < T1 - .18 ? 0 : t < T2 - .3 ? 1 : t < T3 - .1 ? .25 : 1, pulse: t < T2 ? (t - (T1 - .18)) / .18 : (t - (T3 - .1)) / .15, trail: t >= T3 - .25 && t < T3 + .2, hot: t >= T3 - .1 && t < T3 + .3 });
   s += t >= T3 - .25 ? swoosh(DX + 60, FY - 520, 430, -2.2, 0.6, (t - (T3 - .25)) / .35) : '';
   s += impact(meet[0], meet[1], (t - T1) / .55, 1.2) + impact(meet[0] - 40, meet[1] - 120, (t - T2) / .45, .8) + impact(CX - 40, FY - 520, (t - T3) / .5, .9);
   const z = t < T1 ? lerp(1.0, 1.12, io(t / T1)) : t < T1 + .25 ? 1.22 : lerp(1.16, 1.08, io((t - T1) / 3));
-  let out = `<g transform="translate(540 1000) scale(${f(z * 100) / 100}) translate(-540 -1180)">${s}</g>`;
+  let out = `<g transform="translate(540 1000) scale(${f(z * 100) / 100}) translate(${f(-540 - 70 * cl((t - T3) / .8))} -1180)">${s}</g>`;
   out = shakeG(shakeG(shakeG(out, t, T1, 20), t, T2, 12), t, T3, 16) + flash(t, T1, '#fff', .75) + flash(t, T3, '#fff', .5);
   const c = t < T1 ? ['A DUEL.', 'IN FRONT OF EVERYONE.'] : t < T3 ? ['RAZORS DRAWN.', 'BELLONA VS. THE REAPER.'] : ['DARROW WINS.', "HE TAKES CASSIUS'S SWORD ARM."];
   return { svg: out, cap: cap(...c) };
@@ -112,15 +119,40 @@ function rain(t) {
   CUTS.forEach((c, i) => { d += swoosh(DX + 60, FY - 500, 450, -2.0, 0.7, (t - (c - .3)) / .4, i === 0 ? '#ffe6a8' : '#e9eef4'); });
   // landing impact
   d += impact(DX, FY - 10, (t - LAND) / .6, 1.3);
-  // wolf jaws over Darrow on the last cut
-  const J = CUTS[0] - .55, ju = cl((t - J) / .5), jc = cl((t - (CUTS[0] - .05)) / .2), jf = 1 - cl((t - CUTS[0] - .5) / .5);
-  if (t > J && jf > 0) { const cx = 300 + 160, cy = FY - 560, sp = lerp(330, 40, eo(jc)) * (0.6 + 0.4 * eo(ju)), sc = 0.8 + 0.4 * eo(ju);
-    const jaw = (dir) => { let teeth = ''; for (let i = 0; i < 7; i++) { const x = -330 + i * 100; teeth += `<path d="M${x} 0 l40 ${dir * 90} l40 ${-dir * 90}Z" fill="#f4f1ea"/>`; } return `<g transform="translate(0 ${f(dir * sp)}) scale(1 ${dir})"><path d="M-430 0 Q-300 -280 0 -330 Q330 -300 470 -60 Q500 0 440 20 L-430 20 Z" fill="#1a0f22" opacity=".55" stroke="#ffcf6a" stroke-width="10" stroke-opacity=".9"/><path d="M-380 -40 Q-200 -230 60 -250" stroke="#ffcf6a" stroke-width="14" fill="none" opacity=".7"/>${teeth}<circle cx="-120" cy="-210" r="26" fill="#ffcf3a"/></g>`; };
-    d += `<g opacity="${f(jf * eo(ju))}" transform="translate(${cx} ${cy}) scale(${f(sc)})">${jaw(-1)}${jaw(1)}</g>`; }
+  // WOLF JAWS: one-frame slam. Karnus drawn as a glowing outline, engulfed by a giant wolf head with razor teeth.
+  const JT = CUTS[0] - .02, jk = t - JT;
+  if (jk >= 0 && jk < 1 / 30) {
+    const HS = .62, cx = 600, cy = FY - 640, kx = cx + 140, ky = cy + 165;
+    const WT = process.env.WOLF === 'dark' ? { fur: '#16101e', fur2: '#2a2038', line: '#ffcf6a', mouth: '#3a0d14', eye: '#ffd23a', glow: '#ffb02e' }
+                                          : { fur: '#f4f2ee', fur2: '#c9ccd6', line: '#120d0f', mouth: '#4a0f18', eye: '#7fd3ff', glow: '#9fd8ff' };
+    // wolf head in profile facing right; mouth hinge at (-330, 0), jaws open ±gap around Karnus
+    const G = 250, LW = 14;
+    let teeth = '';
+    for (let i = 0; i < 10; i++) { const x = -200 + i * 72, h = (i === 8 ? 150 : i % 2 ? 70 : 105); // upper row
+      const yT = -G + 30 + i * 8; teeth += `<path d="M${x - 24} ${yT} L${x + 4} ${yT + h} L${x + 26} ${yT} Z" fill="#fffdf6" stroke="#120d0f" stroke-width="6"/>`; }
+    for (let i = 0; i < 9; i++) { const x = -190 + i * 72, h = (i === 7 ? 140 : i % 2 ? 65 : 95), yB = G - 30 - i * 6; teeth += `<path d="M${x - 24} ${yB} L${x + 2} ${yB - h} L${x + 26} ${yB} Z" fill="#fffdf6" stroke="#120d0f" stroke-width="6"/>`; }
+    const ruff = Array.from({ length: 9 }, (_, i) => { const a = (-150 + i * 28) * Math.PI / 180, r1 = 430, r2 = 560 + (i % 2) * 60; return `L${f(-380 + Math.cos(a) * r2)} ${f(Math.sin(a) * r2 * .9)} L${f(-380 + Math.cos(a + .17) * r1)} ${f(Math.sin(a + .17) * r1 * .9)}`; }).join(' ');
+    const head = `<g transform="translate(${cx} ${cy}) scale(${HS})">
+      <path d="M-380 -470 ${ruff} L-380 470 Z" fill="${WT.fur2}" stroke="${WT.line}" stroke-width="${LW}" stroke-linejoin="round"/>
+      <path d="M-330 0 L-470 -230 Q-470 -520 -170 -560 L-40 -560 Q200 -470 420 -330 L590 -${G + 20} Q630 -${G} 600 -${G - 40} L-150 -${G - 40} Z" fill="${WT.fur}" stroke="${WT.line}" stroke-width="${LW}" stroke-linejoin="round"/>
+      <path d="M-330 0 L-470 220 Q-430 470 -120 470 Q200 430 520 ${G + 10} Q540 ${G - 30} 500 ${G - 40} L-150 ${G - 40} Z" fill="${WT.fur}" stroke="${WT.line}" stroke-width="${LW}" stroke-linejoin="round"/>
+      <path d="M-330 0 L-150 -${G - 40} L560 -${G - 40} L500 ${G - 40} L-150 ${G - 40} Z" fill="${WT.mouth}"/>
+      <path d="M-300 -470 L-360 -820 L-140 -560 Z M-80 -540 L-60 -860 L110 -500 Z" fill="${WT.fur}" stroke="${WT.line}" stroke-width="${LW}" stroke-linejoin="round"/>
+      <path d="M-280 -520 L-320 -730 L-180 -560 Z M-50 -540 L-40 -760 L70 -520 Z" fill="${WT.fur2}"/>
+      <ellipse cx="575" cy="-${G + 10}" rx="46" ry="34" fill="#120d0f"/>
+      <path d="M-60 -400 L140 -440 L110 -360 Z" fill="${WT.eye}" stroke="#120d0f" stroke-width="9" stroke-linejoin="round"/>${L.glow(70, -405, 110, WT.glow, .9)}
+      <path d="M-200 -480 Q60 -500 380 -360 M-420 -150 Q-380 -330 -200 -420 M-420 160 Q-360 360 -150 420 M-100 330 Q150 330 400 250" stroke="${WT.fur2}" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path d="M-180 -400 L-120 -430 M140 -440 L200 -455" stroke="#120d0f" stroke-width="10" stroke-linecap="round"/>
+      </g>`;
+    const teethG = `<g transform="translate(${cx} ${cy}) scale(${HS})">${teeth}</g>`;
+    const outline = `<g>${K.karnus(kx, ky, 125, { yaw: -16, brow: 'sad', mouth: 'frown', arms: ['raise', 'raise'] }).replace(/fill="#[0-9a-fA-F]{3,6}"/g, 'fill="none"').replace(/stroke="#[0-9a-fA-F]{3,6}"/g, 'stroke="#fff6dc"')}</g>`;
+    d += `<rect x="-200" y="-200" width="1480" height="2400" fill="#1a0606" opacity=".75"/>` + L.glow(cx, cy, 650, '#ff6a2a', .45) + head + outline + teethG
+      + Array.from({ length: 18 }, (_, i) => { const a = i / 18 * Math.PI * 2; return `<line x1="${f(cx + Math.cos(a) * 560)}" y1="${f(cy + Math.sin(a) * 560)}" x2="${f(cx + Math.cos(a) * 820)}" y2="${f(cy + Math.sin(a) * 820)}" stroke="#fff" stroke-width="12"/>`; }).join('');
+  }
   s += d;
   let out = `<g transform="translate(540 1000) scale(${f(lerp(1.0, 1.08, io(t / 6.4)) * 100) / 100}) translate(-560 -1160)">${s}</g>`;
   out = shakeG(out, t, LAND, 22); CUTS.forEach(c => { out = shakeG(out, t, c, 10); });
-  out += flash(t, LAND, '#fff3c4', .6) + flash(t, CUTS[0], '#ffe6a8', .55);
+  out += flash(t, LAND, '#fff3c4', .6) + flash(t, CUTS[0] + .08, '#ffffff', .8);
   const c = t < 1.4 ? ['AN ARMY FROM ORBIT.', 'THE IRON RAIN.', '#ffe08a'] : t < CUTS[2] - .2 ? ['THE REAPER LANDS.', 'GOLDS FALL.', '#ffe08a'] : ['MARS FALLS.', 'TO DARROW.', '#ffe08a'];
   return { svg: out, cap: cap(...c) };
 }
@@ -133,7 +165,7 @@ const SHOTS = { duel: [duel, 5.6], rain: [rain, 6.4] };
     await Promise.all([0, 1, 2, 3].map(async w => { const p = await b.newPage({ viewport: { width: W, height: H } }); await p.setContent(PAGE); await p.evaluate(() => document.fonts.load('80px Anton'));
       for (let i = w; i < N; i += 4) { const { svg, cap: c } = fn(i / FPS); await p.evaluate(h => { document.getElementById('w').innerHTML = h; }, `<svg class="gsl-frame" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><defs>${MONO}</defs>${L.defs()}${svg}${L.grade(k === 'duel' ? 'gala' : 'mars', {})}</svg>${c}`); await p.screenshot({ path: `${dir}/f${String(i).padStart(4, '0')}.jpg`, type: 'jpeg', quality: 90 }); }
       await p.close(); }));
-    const name = k === 'duel' ? 'duel-preview' : 'ironrain-preview';
+    const name = k === 'duel' ? 'duel-preview' : 'ironrain-preview' + (process.env.WOLF === 'dark' ? '-darkwolf' : '');
     execFileSync('ffmpeg', ['-v', 'error', '-y', '-framerate', String(FPS), '-i', `${dir}/f%04d.jpg`, '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-crf', '21', '-movflags', '+faststart', `${ROOT}/${name}.mp4`]);
     execFileSync('ffmpeg', ['-v', 'error', '-y', '-i', `${ROOT}/${name}.mp4`, '-vf', 'fps=2.2,scale=180:-1,tile=7x2', '-frames:v', '1', `${ROOT}/out/${name}-sheet.jpg`]);
     console.log(name, N); }
