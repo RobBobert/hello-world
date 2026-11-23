@@ -40,7 +40,8 @@ function hero(x, y, h, kit, o = {}) {
   setArm(-1, arms[0]); setArm(1, arms[1]);
   if (o.stance === 'wide') { Jp.kL = [-.1, -.275]; Jp.kR = [.1, -.275]; Jp.aL = [-.13, -.045]; Jp.aR = [.13, -.045]; }
   const J = {}; for (const k in Jp) J[k] = [x + Jp[k][0] * h + (k === 'head' || k === 'neck' ? yaw * h * .0006 : 0), y + Jp[k][1] * h];
-  const C = kit.col, W = v => v * h;
+  const C = kit.col, W = v => v * h, HS = o.headScale || 1;
+  if (HS !== 1) J.head = [J.head[0], J.head[1] - h * .086 * (HS - 1) * .95];
   let g = '';
   // cape behind
   if (kit.cape) { const flut = Math.sin((o.wind || 0) * 1.8) * W(.02); g += `<path d="M${f(J.sL[0])} ${f(J.sL[1])} L${f(J.sR[0])} ${f(J.sR[1])} Q${f(x + W(.24) + flut)} ${f(y - W(.4))} ${f(x + W(.28) + flut * 2)} ${f(y - W(seated ? .48 : .02))} L${f(x - W(.26) + flut)} ${f(y - W(seated ? .48 : .0))} Q${f(x - W(.22))} ${f(y - W(.4))} ${f(J.sL[0])} ${f(J.sL[1])} Z" fill="${kit.cape}" stroke="${INK}" stroke-width="${sw}" stroke-linejoin="round"/>`; }
@@ -79,7 +80,7 @@ function hero(x, y, h, kit, o = {}) {
     if (kit.emblem === 'lion') g += lionFace(px + d * W(.008), py + W(.01), W(.02), C.plateDk, C.plateHi, '#3a2508'); }
   // neck + head
   g += limb([J.neck[0], J.neck[1] + W(.01)], [J.head[0], J.head[1]], W(.05), W(.05), C.skin, INK, sw) + `<path d="M${f(J.neck[0] - W(.04))} ${f(J.neck[1] + W(.012))} L${f(J.neck[0] - W(.034))} ${f(J.neck[1] - W(.014))} Q${f(J.neck[0])} ${f(J.neck[1] - W(.004))} ${f(J.neck[0] + W(.034))} ${f(J.neck[1] - W(.014))} L${f(J.neck[0] + W(.04))} ${f(J.neck[1] + W(.012))} Z" fill="${C.suit}" stroke="${INK}" stroke-width="${sw}" stroke-linejoin="round"/>`;
-  const [hx, hy] = J.head, rx = W(.07), ry = W(.086);
+  const [hx, hy] = J.head, rx = W(.07) * HS, ry = W(.086) * HS;
   if (kit.hairBack) g += kit.hairBack(hx, hy, rx, ry, yaw, sw, o);
   g += `<path d="M${f(hx - rx)} ${f(hy - ry * .1)} Q${f(hx - rx)} ${f(hy - ry)} ${f(hx)} ${f(hy - ry)} Q${f(hx + rx)} ${f(hy - ry)} ${f(hx + rx)} ${f(hy - ry * .1)} Q${f(hx + rx * .92)} ${f(hy + ry * .6)} ${f(hx + rx * .3)} ${f(hy + ry * .98)} L${f(hx - rx * .3)} ${f(hy + ry * .98)} Q${f(hx - rx * .92)} ${f(hy + ry * .6)} ${f(hx - rx)} ${f(hy - ry * .1)} Z" fill="${C.skin}" stroke="${INK}" stroke-width="${sw}" stroke-linejoin="round"/>`;
   // shadow side of the face (moves with yaw)
