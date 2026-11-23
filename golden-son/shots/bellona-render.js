@@ -45,9 +45,12 @@ const DP = { cloak: S.darrow.cloak, leg: '#1d171c', boot: '#2a2024', armor: S.da
 const CP = { cloak: null, leg: S.cassius.clothShade, boot: '#2a2024', armor: S.cassius.armor, armorSh: S.cassius.armorShade, trim: S.silver, body: S.cassius.cloth, bodySh: S.cassius.clothShade, arm: S.cassius.cloth, shoulder: S.cassius.armor, pelt: null, hair: 'curls', hairCol: S.cassius.hair, hairHi: S.cassius.hairHi };
 const pick = (file, name) => { if (process.argv.includes('--standin')) return null; try { const m = require(file); const fn = typeof m === 'function' ? m : (m[name] || m.draw || m.default); if (typeof fn === 'function') { console.log('using real model', file); return fn; } } catch (e) { if (e.code !== 'MODULE_NOT_FOUND') console.log('model', file, 'failed:', e.message); } return null; };
 const STANDIN_ANCHORS = { darrowHairTop: 1.1, cassiusSeatedHairTop: 0.49 };
+const sDarrow = (x, y, h, o) => figure(x, y, h, DP, o), sCassius = (x, y, h, o) => figure(x, o.pose === 'seated' ? y + 0.344 * h : y, h, CP, o); // seated: y = table edge
+// a model that throws while its artist is mid-edit falls back to the stand-in (warned once), so framing work never blocks
+const safe = (real, standin, name) => { if (!real) return standin; let warned = false; return (...a) => { try { return real(...a); } catch (e) { if (!warned) { warned = true; console.log(`!! ${name} model threw (${e.message}) - using stand-in`); } return standin(...a); } }; };
 const deps = {
-  darrow: pick('../models/darrow.js', 'darrow') || ((x, y, h, o) => figure(x, y, h, DP, o)),
-  cassius: pick('../models/cassius.js', 'cassius') || ((x, y, h, o) => figure(x, o.pose === 'seated' ? y + 0.344 * h : y, h, CP, o)), // seated: y = table edge
+  darrow: safe(pick('../models/darrow.js', 'darrow'), sDarrow, 'darrow'),
+  cassius: safe(pick('../models/cassius.js', 'cassius'), sCassius, 'cassius'),
   lighting: process.argv.includes('--nolight') ? undefined : (() => { try { const L = require('../lighting.js'); return L && L.grade ? L : undefined; } catch (e) { return undefined; } })(),
 };
 if (process.argv.includes('--standin')) deps.anchors = STANDIN_ANCHORS;
@@ -64,7 +67,7 @@ const guides = `<div style="position:absolute;left:150px;top:270px;width:780px;h
   const b = await chromium.launch();
   if (mode === 'stills' || mode === 'at') {
     const g = process.argv.includes('--guides');
-    const times = mode === 'at' ? [[process.argv[4] || 'at', +process.argv[3]]] : [0.3, 0.53, 0.75, 1.5, 2.4, 3.2, 4.2, 4.75, 5.3, 6.4, 7.0, 8.6].map((t, i) => [String(i + 1).padStart(2, '0'), t]);
+    const times = mode === 'at' ? [[process.argv[4] || 'at', +process.argv[3]]] : [0.3, 0.62, 0.9, 1.6, 2.4, 3.2, 4.1, 5.4, 5.9, 7.2, 8.0, 9.5].map((t, i) => [String(i + 1).padStart(2, '0'), t]);
     const p = await page(b, 1);
     for (const [n, t] of times) { await put(p, t); if (g) await p.evaluate(h => document.getElementById('w').insertAdjacentHTML('beforeend', h), guides); await p.screenshot({ path: `${out}/comp-${n}.png` }); }
   } else {

@@ -202,9 +202,9 @@ function buildHead(X, Y, u, yawDeg, pitchDeg, E, o) {
   const noseD = poly(hull([R0, nT, T2, T0, NB, ...Wg, ...Wt, ...Sr, ...Wl]), 0.035 * u);
 
   // --- painted skin: gradient base, two-step warm shadow (the light is fixed, so the shadow stays put while the face turns) ---
-  const shx = -0.4 * u, shy = -0.12 * u, rw = 0.028 * u, sg = `url(#${id}sg)`;
+  const shx = -0.3 * u, shy = -0.11 * u, rw = 0.028 * u, sg = `url(#${id}sg)`;
   const defs = `<defs><path id="${id}h" d="${hullD}"/><path id="${id}n" d="${noseD}"/>`
-    + `<linearGradient id="${id}sg" gradientUnits="userSpaceOnUse" x1="${f(X - 0.75 * u)}" y1="${f(Y - 1.0 * u)}" x2="${f(X + 0.7 * u)}" y2="${f(Y + 1.2 * u)}"><stop offset="0" stop-color="${SKIN_HI}"/><stop offset="0.42" stop-color="${SKIN}"/><stop offset="1" stop-color="${mix(SKIN, SKIN_MID, 0.75)}"/></linearGradient>`
+    + `<linearGradient id="${id}sg" gradientUnits="userSpaceOnUse" x1="${f(X - 0.75 * u)}" y1="${f(Y - 1.0 * u)}" x2="${f(X + 0.7 * u)}" y2="${f(Y + 1.2 * u)}"><stop offset="0" stop-color="${SKIN_HI}"/><stop offset="0.42" stop-color="${SKIN}"/><stop offset="1" stop-color="${mix(SKIN, SKIN_MID, 0.45)}"/></linearGradient>`
     + `<linearGradient id="${id}hg" gradientUnits="userSpaceOnUse" x1="${f(X - 1.1 * u)}" y1="${f(Y - 1.5 * u)}" x2="${f(X + 1.0 * u)}" y2="${f(Y + 1.2 * u)}"><stop offset="0" stop-color="${mix(HAIR, HAIR_HI, 0.55)}"/><stop offset="0.4" stop-color="${HAIR}"/><stop offset="1" stop-color="${HAIR_MID}"/></linearGradient></defs>`;
   const both = (fill, tx, ty) => `<g fill="${fill}" transform="translate(${f(tx)} ${f(ty)})"><use href="#${id}h"/><use href="#${id}n"/></g>`;
   const shadeIn = `<rect x="${f(X - 3 * u)}" y="${f(Y - 3 * u)}" width="${f(6 * u)}" height="${f(6 * u)}" fill="${RIMC}"/>${both(SKIN_SH, -rw, 0)}${both(SKIN_MID, shx * 0.8, shy * 0.8)}${both(sg, shx, shy)}`;
@@ -217,9 +217,9 @@ function buildHead(X, Y, u, yawDeg, pitchDeg, E, o) {
   feat += soft([F(-0.13, -1.0), F(0.05, -0.99), F(0.06, -1.12), F(-0.1, -1.16)], SKIN_HI, 0.5, 0.05);
   // cheek plane under the cheekbone on the side away from the key; a lighter echo on the lit side
   { const a = F(0.74, -0.12), b = F(0.5, -0.36), c = F(0.56, -0.78), d = F(0.7, -0.84), e2 = F(0.79, -0.4);
-    if (area([a, b, c, d, e2]) < 0) feat += soft([a, b, c, d, e2], SKIN_SH, 0.6);
+    if (area([a, b, c, d, e2]) < 0) feat += soft([a, b, c, d, e2], SKIN_SH, 0.32 + 0.25 * E.ten);
     const m = [F(-0.74, -0.3), F(-0.52, -0.42), F(-0.55, -0.8), F(-0.68, -0.84), F(-0.76, -0.5)];
-    if (area(m) > 0) feat += soft(m, SKIN_MID, 0.45 + 0.25 * E.ten); }
+    if (area(m) > 0) feat += soft(m, SKIN_MID, 0.08 + 0.55 * E.ten * E.ten); }
   // under-nose cast shadow
   feat += soft([Wg[0], NB, Wg[1], [Wg[1][0] + 0.03 * u, Wg[1][1] + 0.06 * u], [NB[0] + 0.05 * u, NB[1] + 0.085 * u], [Wg[0][0] + 0.045 * u, Wg[0][1] + 0.03 * u]], SKIN_SH, 0.75, 0.02);
   const blink = o.blink === true ? 1 : (+o.blink || 0), look = cl(+o.look || 0, -1, 1);
@@ -230,7 +230,7 @@ function buildHead(X, Y, u, yawDeg, pitchDeg, E, o) {
     const U1 = F(s * 0.25, upY + bi * 0.55), U2 = F(s * 0.49, upY + 0.016 + E.fur * 0.02), L1 = F(s * 0.5, lowY), L2 = F(s * 0.28, lowY - 0.006);
     // socket shadow between brow and lid (deepens with anger)
     const so = [F(s * 0.12, 0.13 + bi), F(s * 0.3, 0.21 + bm * 0.6), F(s * 0.66, 0.16 + bo), F(s * 0.64, 0.03), F(s * 0.4, upY * 0.8 + 0.02), F(s * 0.14, -0.01)];
-    feat += soft(so, SKIN_SH, 0.42 + 0.3 * E.fur);
+    feat += soft(so, SKIN_SH, 0.34 + 0.35 * E.fur);
     if (E.fur > 0.02) feat += soft([F(s * 0.1, 0.16 + bi), F(s * 0.34, 0.2 + bm), F(s * 0.3, 0.02), F(s * 0.14, -0.06)], '#6b3320', 0.5 * E.fur);
     const eyeD = `M${pt(I)}C${pt(U1)} ${pt(U2)} ${pt(O)}C${pt(L1)} ${pt(L2)} ${pt(I)}Z`;
     const ir = 0.116, ix = s * 0.378 + look * 0.05, iy = 0.004, ring = (r) => { const q = []; for (let i = 0; i < 14; i++) { const a = i / 14 * 2 * Math.PI; q.push(F(ix + r * Math.cos(a), iy + r * Math.sin(a))); } return spline(q, 1); };
@@ -254,9 +254,9 @@ function buildHead(X, Y, u, yawDeg, pitchDeg, E, o) {
     feat += `<path d="M${pt(a)}L${pt(b)}Q${pt(q1)} ${pt(c)}L${pt(d)}Q${pt(q2)} ${pt(q3)}Z" fill="${BROW}"/>`
       + `<path d="M${pt(F(s * 0.2, 0.275 + bi * 0.8, 0.014))}Q${pt(q1)} ${pt(F(s * 0.5, 0.285 + bm, 0.014))}" ${st(FINE, '#7a5220')} opacity=".7"/>`;
     // fury: furrows between the brows, snarl lines beside the nose, clenched-jaw muscle
-    if (E.fur > 0.02) { const g1 = F(s * 0.045, 0.24 + bi * 0.5), g2 = F(s * 0.07, 0.09 + bi * 0.5); feat += `<path d="M${pt(g1)}Q${pt(F(s * 0.035, 0.16 + bi * 0.5))} ${pt(g2)}" ${st(MID * 0.9 * E.fur)}/>`; }
-    if (E.nl > 0.02) { const g1 = F(s * (0.2 + fl), -0.37), g2 = F(s * 0.33, -0.47), g3 = F(s * 0.365, -0.64); feat += `<path d="M${pt(g1)}Q${pt(g2)} ${pt(g3)}" ${st(MID * 0.8 * E.nl * (si === 0 && E.mc[1] > E.mc[0] + 0.03 ? 0.2 : 1))}/>`; }
-    if (E.ten > 0.02) feat += `<path d="M${pt(F(s * 0.6, -0.58))}Q${pt(F(s * 0.66, -0.74))} ${pt(F(s * 0.56, -0.92))}" ${st(FINE * 1.3 * E.ten)} opacity=".8"/>`;
+    if (E.fur > 0.02) { const g1 = F(s * 0.045, 0.24 + bi * 0.5), g2 = F(s * 0.07, 0.09 + bi * 0.5); feat += `<path d="M${pt(g1)}Q${pt(F(s * 0.035, 0.16 + bi * 0.5))} ${pt(g2)}" ${st(MID * 0.9 * E.fur * E.fur)}/>`; }
+    if (E.nl > 0.02) { const g1 = F(s * (0.2 + fl), -0.37), g2 = F(s * 0.33, -0.47), g3 = F(s * 0.365, -0.64); feat += `<path d="M${pt(g1)}Q${pt(g2)} ${pt(g3)}" ${st(MID * 0.8 * E.nl * E.nl * (si === 0 && E.mc[1] > E.mc[0] + 0.03 ? 0.2 : 1))}/>`; }
+    if (E.ten > 0.02) feat += `<path d="M${pt(F(s * 0.6, -0.58))}Q${pt(F(s * 0.66, -0.74))} ${pt(F(s * 0.56, -0.92))}" ${st(FINE * 1.3 * E.ten * E.ten)} opacity=".8"/>`;
   });
   if (E.fur > 0.02) feat += `<path d="M${pt(F(-0.075, 0.075))}Q${pt(F(0, 0.05))} ${pt(F(0.075, 0.075))}" ${st(FINE * 1.2 * E.fur)}/>`;
   // mouth
@@ -325,14 +325,14 @@ function buildHead(X, Y, u, yawDeg, pitchDeg, E, o) {
   for (const q of pr) {
     const r = q.r, k = q.c.k;
     dsh += crescent(q.x, q.y, r * 0.97, -r * 0.34, -r * 0.3);
-    dhi += crescent(q.x - r * 0.05, q.y - r * 0.05, r * 0.72, r * 0.17, r * 0.15);
-    const a0 = q.c.a * D, r1 = r * 0.5, a1 = a0 + 3.4, s0 = [q.x + r1 * Math.cos(a0), q.y + r1 * Math.sin(a0)], s1 = [q.x + r1 * Math.cos(a1), q.y + r1 * Math.sin(a1)];
-    const arc = `M${pt(s0)}A${f(r1)} ${f(r1)} 0 1 1 ${pt(s1)}`;
-    if (k % 3 === 0) dws += arc; else if (k % 3 === 1) dln += arc;
+    dhi += crescent(q.x - r * 0.06, q.y - r * 0.06, r * 0.74, r * 0.3, r * 0.26);
+    const a0 = q.c.a * D, r1 = r * 0.52, a1 = a0 + 2.3, s0 = [q.x + r1 * Math.cos(a0), q.y + r1 * Math.sin(a0)], s1 = [q.x + r1 * Math.cos(a1), q.y + r1 * Math.sin(a1)];
+    const arc = `M${pt(s0)}A${f(r1)} ${f(r1)} 0 0 1 ${pt(s1)}`;
+    if (k % 5 === 0) dws += arc; else if (k % 3 === 1) dln += arc;
   }
   const paint = `<g id="${id}hp"><rect x="${f(X - 3 * u)}" y="${f(Y - 3 * u)}" width="${f(6 * u)}" height="${f(6 * u)}" fill="${RIMC}"/>`
     + `<g fill="${HAIR_SH}" transform="translate(${f(-0.026 * u)} 0)">${cs}</g><g fill="${HAIR_MID}" transform="translate(${f(-0.15 * u)} ${f(-0.09 * u)})">${cs}</g><g fill="url(#${id}hg)" transform="translate(${f(-0.22 * u)} ${f(-0.13 * u)})">${cs}</g>`
-    + `<path d="${dsh}" fill="${HAIR_MID}" opacity=".8"/><path d="${dhi}" fill="${HAIR_HI}" opacity=".8"/><path d="${dln}" ${st(FINE * 1.5, HAIR_SH)} opacity=".75"/><path d="${dws}" ${st(FINE * 1.5, HAIR_HI)} opacity=".9"/></g>`;
+    + `<path d="${dsh}" fill="${HAIR_MID}" opacity=".8"/><path d="${dhi}" fill="${HAIR_HI}" opacity=".8"/><path d="${dln}" ${st(FINE * 1.6, HAIR_SH)} opacity=".5"/><path d="${dws}" ${st(FINE * 3, HAIR_HI)} opacity=".7"/></g>`;
   const back = `<g fill="${HAIR_LINE}" stroke="${HAIR_LINE}" stroke-width="${f(OUT * 2.1)}">${cs}</g><clipPath id="${id}hb">${cs}</clipPath><g clip-path="url(#${id}hb)">${paint}</g>`;
   const fl2 = pr.map(q => ({ q, rr: q.r * sst(-0.3, 0.0, q.zn) })).filter(e => e.rr > 0.02 * u);
   const chinY = P(0, -1.29, 0.6)[1];
@@ -443,7 +443,7 @@ function cassius(x, y, h, opts = {}) {
     let inn = '';
     // pec shadow + abdominal lames
     const pl = [T(-1.38, 8.05), T(-0.75, 7.68), T(0, 7.78), T(0.75, 7.68), T(1.38, 8.05)];
-    inn += `<path d="M${pt(pl[0])}Q${pt(pl[1])} ${pt(pl[2])}Q${pt(pl[3])} ${pt(pl[4])}L${pt(T(1.4, 7.8))}Q${pt(T(0.75, 7.5))} ${pt(T(0, 7.62))}Q${pt(T(-0.75, 7.5))} ${pt(T(-1.4, 7.8))}Z" fill="${0}"/>`;
+    inn += `<path d="M${pt(pl[0])}Q${pt(pl[1])} ${pt(pl[2])}Q${pt(pl[3])} ${pt(pl[4])}L${pt(T(1.4, 7.8))}Q${pt(T(0.75, 7.5))} ${pt(T(0, 7.62))}Q${pt(T(-0.75, 7.5))} ${pt(T(-1.4, 7.8))}Z" fill="${PL_SH}" opacity=".5"/>`;
     // speculars (upper-left planes)
     inn += `<path d="${poly([T(-1.32, 8.62), T(-0.62, 8.72), T(-0.5, 8.5), T(-0.95, 8.3), T(-1.4, 8.3)], 0.05 * u)}" fill="${SPEC}"/>`;
     inn += `<path d="${poly([T(-1.12, 7.42), T(-0.72, 7.34), T(-0.74, 7.15), T(-1.02, 7.2)], 0.03 * u)}" fill="${SPEC}"/><path d="${poly([T(-0.98, 7.02), T(-0.7, 6.96), T(-0.7, 6.82), T(-0.92, 6.86)], 0.03 * u)}" fill="${SPEC}"/>`;
@@ -469,7 +469,7 @@ function cassius(x, y, h, opts = {}) {
     const d = `M${f(nb[0] - nw * 1.08)} ${f(nb[1])}L${f(tx - nw)} ${f(ty)}L${f(tx + nw)} ${f(ty)}L${f(nb[0] + nw * 1.08)} ${f(nb[1])}Z`;
     const nid = 'cas' + (++UID);
     s += `<path d="${d}" fill="${H.sg}" stroke="${SK_LINE}" stroke-width="${f(OUT * 0.45 * u)}" stroke-linejoin="round"/><clipPath id="${nid}"><path d="${d}"/></clipPath>`
-      + `<g clip-path="url(#${nid})"><path d="${H.hullD}" fill="${SKIN_SH}" transform="translate(${f(0.16 * u)} ${f(0.5 * u)})"/><rect x="${f(nb[0] + nw * 0.35)}" y="${f(ty - u)}" width="${f(u)}" height="${f(3 * u)}" fill="${SKIN_SH}"/></g>`;
+      + `<g clip-path="url(#${nid})"><path d="${H.hullD}" fill="${SKIN_SH}" opacity=".85" transform="translate(${f(0.16 * u)} ${f(0.5 * u)})"/><rect x="${f(nb[0] + nw * 0.35)}" y="${f(ty - u)}" width="${f(u)}" height="${f(3 * u)}" fill="${SKIN_SH}"/></g>`;
     // gorget: ribbed tube
     const g0 = 9.0, g1 = 9.42, gx = t => lerp(nb[0], tx, (t - 9.0) / ((Y0 - ty) / u - 9.0));
     const gw = 0.58 * u, gl = [gx(g1) - gw * 0.94, Y0 - g1 * u], gr = [gx(g1) + gw * 0.94, Y0 - g1 * u], gd = `M${f(nb[0] - gw * 1.06)} ${f(Y0 - (g0 - 0.25) * u)}L${pt(gl)}Q${f(gx(g1))} ${f(gl[1] + 0.2 * u)} ${pt(gr)}L${f(nb[0] + gw * 1.06)} ${f(Y0 - (g0 - 0.25) * u)}Z`;

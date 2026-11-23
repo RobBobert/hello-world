@@ -45,6 +45,6 @@ module.exports.shadowMulGala = '#5a46b4'; // multiply colour for cel shadows in 
 module.exports.cassius2 = {
   plateHi: '#ffffff', plate: '#dde4ee', plateMid: '#a7b3c8', plateShade: '#6c7a99', plateDeep: '#3a4664', plateLine: '#27314d',
   accent: '#2f5fc6', accentHi: '#7fa6f2', cloth: '#2b4a8a', clothHi: '#4470c4', clothShade: '#162a54', clothDeep: '#0d1a3a',
-  skinHi: '#efc79c', skin: '#d9a777', skinMid: '#c08458', skinShade: '#9c5e3e', skinLine: '#4f2616',
+  skinHi: '#efc79c', skin: '#d9a777', skinMid: '#c68d62', skinShade: '#a96b4b', skinLine: '#4f2616',
   hairHi: '#fbe9ae', hair: '#d9a53e', hairMid: '#b47f28', hairShade: '#855a1c', hairLine: '#5c3b10', rim: '#b9d2ff',
 };

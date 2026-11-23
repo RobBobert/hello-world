@@ -24,8 +24,8 @@ function sheet() {
 }
 function faces() { // gentle hero turn -18 -> +18 with neutral -> angry, then the other expressions inside the film's range
   const W = 2400, H = 1480; let b = '';
-  [-18, -9, 0, 9, 18].forEach((yaw, i) => { b += bust(10 + i * 478, 10, 468, 700, { yaw, expr: 'neutral', exprTo: 'angry', mix: i / 4 }, 1.35) + label(244 + i * 478, 700, `yaw ${yaw} / angry ${i * 25}%`); });
-  [['neutral', 0, 0, 0], ['smirk', -12, 0, 0], ['shock', 10, 0, 0], ['pain', -15, -6, 0], ['angry', 15, 0, 0]].forEach(([expr, yaw, pitch, blink], i) => { b += bust(10 + i * 478, 730, 468, 700, { yaw, expr, pitch, blink }, 1.35) + label(244 + i * 478, 1420, `${expr} / yaw ${yaw}`); });
+  [-18, -9, 0, 9, 18].forEach((yaw, i) => { b += bust(10 + i * 478, 10, 468, 700, { yaw, expr: 'neutral', exprTo: 'angry', mix: i / 4 }, 1.35) + label(244 + i * 478, 40, `yaw ${yaw} / angry ${i * 25}%`); });
+  [['neutral', 0, 0, 0], ['smirk', -12, 0, 0], ['shock', 10, 0, 0], ['pain', -15, -6, 0], ['angry', 15, 0, 0]].forEach(([expr, yaw, pitch, blink], i) => { b += bust(10 + i * 478, 730, 468, 700, { yaw, expr, pitch, blink }, 1.35) + label(244 + i * 478, 760, `${expr} / yaw ${yaw}`); });
   return svg(W, H, b);
 }
 function adjacent() { // neighbouring yaws side by side: nothing should pop
