@@ -42,9 +42,9 @@ function longHair(cx, cy, r, o = {}) {
 
 
 // Half-moon hooked sickle (the iconic slingBlade): grip at (0,0), blade rises and curls over. dir = 1 hooks to the right.
-function moonBlade(x, y, s, rot = 0, dir = 1, glow = false) {
+function moonBlade(x, y, s, rot = 0, dir = 1, glow = false, sweep = 1.15) {
   const L = s * 0.95, pts = [], N = 26;
-  for (let i = 0; i <= N; i++) { const u = i / N, a = -Math.PI / 2 + dir * u * Math.PI * 1.15, R = L * 0.5; pts.push([dir * R * (1 - Math.cos(u * Math.PI * 1.15)) * 0.55, -L * 0.15 - R * Math.sin(u * Math.PI * 1.15) * 1.25 + u * u * L * 0.12]); }
+  for (let i = 0; i <= N; i++) { const u = i / N, R = L * 0.5; pts.push([dir * R * (1 - Math.cos(u * Math.PI * sweep)) * 0.55, -L * 0.15 - R * Math.sin(u * Math.PI * sweep) * 1.25 + u * u * L * 0.12 * (sweep > 1.25 ? -1 : 1)]); }
   const O = [], I = [];
   for (let i = 0; i <= N; i++) { const p = pts[i], q = pts[Math.min(N, i + 1)], r0 = pts[Math.max(0, i - 1)], dx = q[0] - r0[0], dy = q[1] - r0[1], m = Math.hypot(dx, dy) || 1, nx = -dy / m, ny = dx / m, u = i / N;
     const w = s * 0.13 * Math.sin(Math.PI * Math.min(1, u * 1.05 + 0.08)) * (u > .9 ? (1 - u) / .1 : 1) + s * 0.012; O.push([p[0] + nx * w * dir, p[1] + ny * w * dir]); I.push([p[0] - nx * w * 0.25 * dir, p[1] - ny * w * 0.25 * dir]); }
@@ -160,7 +160,14 @@ function build(x, y, s, o, kit) {
 const lionPauldrons = (x, y, s) => [-1, 1].map(d => { const px = x + d * s * 0.36, py = y - s * 1.47;
   return `<path d="M${f(px - d * s * 0.2)} ${f(py - s * 0.04)} Q${f(px)} ${f(py - s * 0.2)} ${f(px + d * s * 0.17)} ${f(py + s * 0.02)} Q${f(px + d * s * 0.12)} ${f(py + s * 0.12)} ${f(px - d * s * 0.06)} ${f(py + s * 0.1)} Z" fill="#b8862a" stroke="${INK}" stroke-width="${f(s * 0.04)}" stroke-linejoin="round"/>${lionFace(px + d * s * 0.01, py - s * 0.02, s * 0.085, '#a87a26', '#e2b65a', '#5a3a10')}`; }).join('');
 const longSash = (x, y, s) => sash(x, y, s) + `<path d="M${f(x + s * 0.2)} ${f(y - s * 0.86)} l${f(s * 0.05)} ${f(s * 0.62)} l${f(s * 0.08)} ${f(-s * 0.01)} l${f(-s * 0.04)} ${f(-s * 0.62)} Z" fill="#8f1a16" stroke="${INK}" stroke-width="${f(s * 0.03)}"/>`;
-const hipSickle = (x, y, s) => moonBlade(x - s * 0.34, y - s * 0.74, s * 0.62, 200, -1);
+const hipSickle = (x, y, s) => { const gx = x - s * 0.34, gy = y - s * 0.92, k = s / 100;
+  const P = (a, b) => `${f(gx + a * k)} ${f(gy + b * k)}`;
+  const blade = `M${P(-3, 18)} C${P(-16, 40)} ${P(-18, 62)} ${P(-4, 76)} C${P(8, 86)} ${P(24, 84)} ${P(34, 70)} L${P(30, 66)} C${P(22, 76)} ${P(10, 76)} ${P(4, 68)} C${P(-6, 56)} ${P(-4, 40)} ${P(5, 22)} Z`;
+  return `<g><path d="${blade}" fill="#e6ebf1" stroke="${INK}" stroke-width="${f(s * .03)}" stroke-linejoin="round"/>
+    <path d="M${P(-6, 30)} C${P(-12, 50)} ${P(-8, 66)} ${P(2, 74)}" stroke="#fff" stroke-width="${f(s * .014)}" fill="none" stroke-linecap="round"/>
+    ${[[-10, 44], [-8, 60], [6, 76], [22, 78]].map(([a, b]) => `<circle cx="${f(gx + a * k)}" cy="${f(gy + b * k)}" r="${f(s * .008)}" fill="#7d8894"/>`).join('')}
+    <rect x="${f(gx - s * .04)}" y="${f(gy - s * .14)}" width="${f(s * .08)}" height="${f(s * .3)}" rx="${f(s * .02)}" fill="#2a1a12" stroke="${INK}" stroke-width="${f(s * .025)}" transform="rotate(-12 ${f(gx)} ${f(gy)})"/>
+    <circle cx="${f(gx + s * .03)}" cy="${f(gy - s * .16)}" r="${f(s * .035)}" fill="#c9a24a" stroke="${INK}" stroke-width="${f(s * .02)}"/></g>`; };
 const DARROW = { yaw: 15, hair: 'long', arms: ['hang', 'blade'], hipBlade: hipSickle,
   hairOpts: { hairCol: '#e3ad3e', hairHi: '#fff2b8', hairShade: '#a8782a' },
   headOpts: { hairCol: '#e3ad3e', hairHi: '#fff0b0', brow: 'angry', mouth: 'smirk', iris: '#e0a326' },

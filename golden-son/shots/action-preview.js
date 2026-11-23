@@ -137,24 +137,24 @@ function rain(t) {
     // white wolf head, manga ink
     const fur = (x, y, n, len, ang) => Array.from({ length: n }, (_, i) => { const a = ang + (i - n / 2) * .06, l = len * (.7 + (i % 3) * .15); return `<path d="M${f(x + i * 6)} ${f(y + (i % 2) * 8)} q${f(Math.cos(a) * l * .5)} ${f(Math.sin(a) * l * .5 - 6)} ${f(Math.cos(a) * l)} ${f(Math.sin(a) * l)}" stroke="#111" stroke-width="4" fill="none" stroke-linecap="round"/>`; }).join('');
     let teeth = '';
-    for (let i = 0; i < 10; i++) { const x = -200 + i * 72, h = (i === 8 ? 165 : i % 2 ? 80 : 115), yT = -G + 30 + i * 8; teeth += `<path d="M${x - 24} ${yT} Q${x} ${yT + h * .55} ${x + 4} ${yT + h} Q${x + 10} ${yT + h * .5} ${x + 26} ${yT} Z" fill="#fff" stroke="#111" stroke-width="6"/><path d="M${x - 6} ${yT + 10} L${x + 2} ${yT + h * .7}" stroke="#999" stroke-width="3"/>`; }
-    for (let i = 0; i < 9; i++) { const x = -190 + i * 72, h = (i === 7 ? 150 : i % 2 ? 72 : 105), yB = G - 30 - i * 6; teeth += `<path d="M${x - 24} ${yB} Q${x} ${yB - h * .55} ${x + 2} ${yB - h} Q${x + 10} ${yB - h * .5} ${x + 26} ${yB} Z" fill="#fff" stroke="#111" stroke-width="6"/>`; }
+    for (let i = 0; i < 10; i++) { const x = -200 + i * 72, h = (i === 8 ? 165 : i % 2 ? 80 : 115), yT = -G + 30 + i * 8; teeth += `<path d="M${x - 24} ${yT} Q${x} ${yT + h * .55} ${x + 4} ${yT + h} Q${x + 10} ${yT + h * .5} ${x + 26} ${yT} Z" fill="#fff" stroke="#c4ccd8" stroke-width="5"/>`; }
+    for (let i = 0; i < 9; i++) { const x = -190 + i * 72, h = (i === 7 ? 150 : i % 2 ? 72 : 105), yB = G - 30 - i * 6; teeth += `<path d="M${x - 24} ${yB} Q${x} ${yB - h * .55} ${x + 2} ${yB - h} Q${x + 10} ${yB - h * .5} ${x + 26} ${yB} Z" fill="#fff" stroke="#c4ccd8" stroke-width="5"/>`; }
     const ruff = Array.from({ length: 11 }, (_, i) => { const a = (-150 + i * 22) * Math.PI / 180, r1 = 420, r2 = 560 + (i % 2) * 80; return `L${f(-380 + Math.cos(a) * r2)} ${f(Math.sin(a) * r2 * .9)} L${f(-380 + Math.cos(a + .14) * r1)} ${f(Math.sin(a + .14) * r1 * .9)}`; }).join(' ');
-    const W1 = '#ffffff', LN = '#111', LW = 12;
+    const W1 = '#ffffff', SH = '#dfe4ec', SH2 = '#c4ccd8', LN = '#b8c0cc', LW = 10, MOUTH = '#8a1420';
+    // wolf eye: almond, slanted, red iris with a vertical slit
+    const eye = `<path d="M-90 -395 Q20 -470 160 -430 Q90 -365 -90 -395 Z" fill="#fff6e0" stroke="${SH2}" stroke-width="8"/><ellipse cx="55" cy="-415" rx="44" ry="30" fill="#e8251c"/><ellipse cx="55" cy="-415" rx="11" ry="27" fill="#5a0810"/><circle cx="70" cy="-428" r="8" fill="#fff"/>${L.glow(55, -415, 100, '#ff2a1a', .6)}
+      <path d="M-110 -440 Q20 -500 175 -455" stroke="${SH2}" stroke-width="12" fill="none" stroke-linecap="round"/>`;
     const head = `<g transform="translate(${f(cx)} ${f(cy)}) scale(${f(HS)})">
-      <path d="M-380 -470 ${ruff} L-380 470 Z" fill="${W1}" stroke="${LN}" stroke-width="${LW}" stroke-linejoin="round"/>
-      ${fur(-640, -200, 9, 90, Math.PI)}${fur(-660, 120, 9, 90, Math.PI * .95)}${fur(-560, -420, 7, 80, -2.4)}${fur(-560, 380, 7, 80, 2.4)}
+      <path d="M-380 -470 ${ruff} L-380 470 Z" fill="${SH}" stroke="${LN}" stroke-width="${LW}" stroke-linejoin="round"/>
       <path d="M-330 0 L-470 -230 Q-470 -520 -170 -560 L-40 -560 Q200 -470 420 -330 L600 -${G + 20} Q640 -${G} 610 -${G - 40} L-150 -${G - 40} Z" fill="${W1}" stroke="${LN}" stroke-width="${LW}" stroke-linejoin="round"/>
+      <path d="M-470 -230 Q-470 -520 -170 -560 L-120 -560 Q-360 -470 -380 -230 Z" fill="${SH}"/>
       <path d="M-330 0 L-470 220 Q-430 470 -120 470 Q200 430 520 ${G + 10} Q540 ${G - 30} 500 ${G - 40} L-150 ${G - 40} Z" fill="${W1}" stroke="${LN}" stroke-width="${LW}" stroke-linejoin="round"/>
-      <path d="M-330 0 L-150 -${G - 40} L560 -${G - 40} L500 ${G - 40} L-150 ${G - 40} Z" fill="#1a0505"/>
+      <path d="M-470 220 Q-430 470 -120 470 Q100 450 300 360 Q20 400 -200 380 Q-380 340 -470 220 Z" fill="${SH}"/>
+      <path d="M-330 0 L-150 -${G - 40} L560 -${G - 40} L500 ${G - 40} L-150 ${G - 40} Z" fill="${MOUTH}"/>
       <path d="M-300 -470 L-370 -840 L-130 -560 Z M-80 -540 L-60 -880 L120 -500 Z" fill="${W1}" stroke="${LN}" stroke-width="${LW}" stroke-linejoin="round"/>
-      <path d="M-290 -520 L-335 -760 L-185 -565 Z M-50 -545 L-42 -780 L75 -525 Z" fill="#cfcfcf"/>
-      ${Array.from({ length: 14 }, (_, i) => `<line x1="${-280 + i * 14}" y1="-560" x2="${-250 + i * 14}" y2="-700" stroke="#111" stroke-width="3"/>`).join('')}
-      <ellipse cx="590" cy="-${G + 10}" rx="46" ry="34" fill="#111"/>
-      <path d="M-60 -400 Q40 -455 150 -440 Q120 -380 110 -360 Q20 -365 -60 -400 Z" fill="#e8251c" stroke="#111" stroke-width="9"/><circle cx="70" cy="-405" r="16" fill="#111"/>${L.glow(60, -405, 120, '#ff2a1a', .85)}
-      <path d="M-120 -470 L-20 -440 M150 -440 L230 -470 M-140 -340 Q-40 -380 60 -350" stroke="#111" stroke-width="10" fill="none" stroke-linecap="round"/>
-      ${fur(-200, -500, 12, 60, -.4)}${fur(0, -470, 12, 55, -.35)}${fur(-300, 300, 10, 60, .4)}${fur(-80, 380, 10, 50, .3)}
-      <path d="M-420 -150 Q-380 -330 -200 -420 M-420 160 Q-360 360 -150 420 M200 -440 Q350 -380 480 -300 M-100 330 Q150 330 400 250" stroke="#111" stroke-width="6" fill="none" stroke-linecap="round"/>
+      <path d="M-290 -520 L-335 -760 L-185 -565 Z M-50 -545 L-42 -780 L75 -525 Z" fill="#f2c4cc"/>
+      <ellipse cx="590" cy="-${G + 10}" rx="44" ry="32" fill="#8a7a80"/>
+      ${eye}
       </g>`;
     const teethG = `<g transform="translate(${f(cx)} ${f(cy)}) scale(${f(HS)})">${teeth}</g>`;
     const impactLines = snap > 0 ? Array.from({ length: 16 }, (_, i) => { const a = i / 16 * Math.PI * 2; return `<line x1="${f(kx + Math.cos(a) * 260)}" y1="${f(hy + 80 + Math.sin(a) * 260)}" x2="${f(kx + Math.cos(a) * (360 + 200 * snap))}" y2="${f(hy + 80 + Math.sin(a) * (360 + 200 * snap))}" stroke="#e8251c" stroke-width="12" stroke-linecap="round"/>`; }).join('') : '';
