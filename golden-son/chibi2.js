@@ -44,14 +44,14 @@ function longHair(cx, cy, r, o = {}) {
 // pose per side: 'hang' | 'hip' | 'blade' (right only) | 'table' | 'raise' | 'cross'
 function arm(sx, sy, s, side, pose, col, o) {
   const P = {
-    hang: [[side * 0.17, 0.42], [side * 0.22, 0.85]], hip: [[side * 0.34, 0.36], [side * 0.08, 0.72]], blade: [[side * 0.26, 0.38], [side * 0.36, 0.76]],
+    hang: [[side * 0.17, 0.42], [side * 0.22, 0.85]], stump: [[side * 0.17, 0.42], [side * 0.2, 0.72]], hip: [[side * 0.34, 0.36], [side * 0.08, 0.72]], blade: [[side * 0.26, 0.38], [side * 0.36, 0.76]],
     table: [[side * 0.24, 0.42], [side * -0.02, 0.6]], raise: [[side * 0.26, -0.28], [side * 0.2, -0.62]], cross: [[side * 0.18, 0.4], [side * -0.3, 0.52]],
   }[pose] || [[side * 0.17, 0.42], [side * 0.22, 0.85]];
   const e = [sx + P[0][0] * s, sy + P[0][1] * s], h = [sx + P[1][0] * s, sy + P[1][1] * s], w = s * 0.15, sw = s * 0.04;
   const seg = (a, b, wd, c) => `<line x1="${f(a[0])}" y1="${f(a[1])}" x2="${f(b[0])}" y2="${f(b[1])}" stroke="${INK}" stroke-width="${f(wd + sw * 2)}" stroke-linecap="round"/><line x1="${f(a[0])}" y1="${f(a[1])}" x2="${f(b[0])}" y2="${f(b[1])}" stroke="${c}" stroke-width="${f(wd)}" stroke-linecap="round"/>`;
   const upper = seg([sx, sy], e, w, col.sleeve), fore = seg(e, h, w * 0.92, col.fore || col.sleeve);
   const cuff = `<circle cx="${f(h[0] - (h[0] - e[0]) * 0.18)}" cy="${f(h[1] - (h[1] - e[1]) * 0.18)}" r="${f(w * 0.55)}" fill="${col.cuff || col.fore || col.sleeve}" stroke="${INK}" stroke-width="${f(sw * 0.8)}"/>`;
-  const hand = `<circle cx="${f(h[0])}" cy="${f(h[1])}" r="${f(s * 0.085)}" fill="${col.hand}" stroke="${INK}" stroke-width="${f(sw * 0.9)}"/>`;
+  const hand = pose === 'stump' ? `<circle cx="${f(h[0])}" cy="${f(h[1])}" r="${f(s * 0.06)}" fill="#5a4a3a" stroke="${INK}" stroke-width="${f(sw * 0.9)}"/>` : `<circle cx="${f(h[0])}" cy="${f(h[1])}" r="${f(s * 0.085)}" fill="${col.hand}" stroke="${INK}" stroke-width="${f(sw * 0.9)}"/>`;
   let blade = '';
   if (pose === 'blade') { const [x, y] = h; blade = `<path d="M${f(x)} ${f(y)} q${f(s * 0.3)} ${f(s * 0.12)} ${f(s * 0.24)} ${f(s * 0.7)} q${f(-s * 0.22)} ${f(-s * 0.26)} ${f(-s * 0.2)} ${f(-s * 0.68)}Z" fill="#e9eef4" stroke="${INK}" stroke-width="${f(sw * 0.7)}" stroke-linejoin="round"/><path d="M${f(x + s * 0.04)} ${f(y + s * 0.05)} q${f(s * 0.17)} ${f(s * 0.12)} ${f(s * 0.17)} ${f(s * 0.5)}" stroke="#fff" stroke-width="${f(sw * 0.6)}" fill="none" stroke-linecap="round"/>`; }
   return blade + upper + fore + cuff + hand;
