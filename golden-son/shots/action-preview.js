@@ -80,19 +80,19 @@ function rain(t) {
   const [hx, hy] = C.handAt(DX, FY, 340, 1, pose, 12);
   const ang = ph > 0 && ph < .65 ? lerp(-2.0, 0.6, io(ph / .5)) : -0.25;
   let d = L.floorShadow(DX, FY + 6, 280, { mood: 'mars' }) + `<g transform="translate(0 ${f(fall)})">${L.rimLight(K.darrow(DX, FY, 340, { yaw: 12, brow: 'angry', mouth: 'flat', arms: ['hang', pose], wind: t, armed: t > LAND }), 'mars')}${t > LAND ? razor(hx, hy, ang, eo((t - LAND) / .4), t, { len: 560, wave: ph > 0 && ph < .65 ? .25 : .9, trail: ph > .2 && ph < .6, col: '#f2f6fa' }) : ''}</g>`;
-  CUTS.forEach((c, i) => { d += swoosh(DX + 60, FY - 500, 450, -2.0, 0.7, (t - (c - .3)) / .4, i === 2 ? '#ffe6a8' : '#e9eef4'); });
+  CUTS.forEach((c, i) => { d += swoosh(DX + 60, FY - 500, 450, -2.0, 0.7, (t - (c - .3)) / .4, i === 0 ? '#ffe6a8' : '#e9eef4'); });
   // landing impact
   d += impact(DX, FY - 10, (t - LAND) / .6, 1.3);
   // wolf jaws over Darrow on the last cut
-  const J = CUTS[2] - .55, ju = cl((t - J) / .5), jc = cl((t - (CUTS[2] - .05)) / .2), jf = 1 - cl((t - CUTS[2] - .5) / .5);
-  if (t > J && jf > 0) { const cx = DX + 120, cy = FY - 560, sp = lerp(330, 40, eo(jc)) * (0.6 + 0.4 * eo(ju)), sc = 0.8 + 0.4 * eo(ju);
+  const J = CUTS[0] - .55, ju = cl((t - J) / .5), jc = cl((t - (CUTS[0] - .05)) / .2), jf = 1 - cl((t - CUTS[0] - .5) / .5);
+  if (t > J && jf > 0) { const cx = 300 + 160, cy = FY - 560, sp = lerp(330, 40, eo(jc)) * (0.6 + 0.4 * eo(ju)), sc = 0.8 + 0.4 * eo(ju);
     const jaw = (dir) => { let teeth = ''; for (let i = 0; i < 7; i++) { const x = -330 + i * 100; teeth += `<path d="M${x} 0 l40 ${dir * 90} l40 ${-dir * 90}Z" fill="#f4f1ea"/>`; } return `<g transform="translate(0 ${f(dir * sp)}) scale(1 ${dir})"><path d="M-430 0 Q-300 -280 0 -330 Q330 -300 470 -60 Q500 0 440 20 L-430 20 Z" fill="#1a0f22" opacity=".55" stroke="#ffcf6a" stroke-width="10" stroke-opacity=".9"/><path d="M-380 -40 Q-200 -230 60 -250" stroke="#ffcf6a" stroke-width="14" fill="none" opacity=".7"/>${teeth}<circle cx="-120" cy="-210" r="26" fill="#ffcf3a"/></g>`; };
     d += `<g opacity="${f(jf * eo(ju))}" transform="translate(${cx} ${cy}) scale(${f(sc)})">${jaw(-1)}${jaw(1)}</g>`; }
   s += d;
   let out = `<g transform="translate(540 1000) scale(${f(lerp(1.0, 1.08, io(t / 6.4)) * 100) / 100}) translate(-560 -1160)">${s}</g>`;
   out = shakeG(out, t, LAND, 22); CUTS.forEach(c => { out = shakeG(out, t, c, 10); });
-  out += flash(t, LAND, '#fff3c4', .6) + flash(t, CUTS[2], '#ffe6a8', .55);
-  const c = t < 1.8 ? ['AN ARMY FROM ORBIT.', 'THE IRON RAIN.', '#ffe08a'] : t < CUTS[2] - .6 ? ['THE REAPER LANDS.', 'GOLDS FALL.', '#ffe08a'] : ['MARS FALLS.', 'TO DARROW.', '#ffe08a'];
+  out += flash(t, LAND, '#fff3c4', .6) + flash(t, CUTS[0], '#ffe6a8', .55);
+  const c = t < 1.4 ? ['AN ARMY FROM ORBIT.', 'THE IRON RAIN.', '#ffe08a'] : t < CUTS[2] - .2 ? ['THE REAPER LANDS.', 'GOLDS FALL.', '#ffe08a'] : ['MARS FALLS.', 'TO DARROW.', '#ffe08a'];
   return { svg: out, cap: cap(...c) };
 }
 const SHOTS = { duel: [duel, 5.6], rain: [rain, 6.4] };
