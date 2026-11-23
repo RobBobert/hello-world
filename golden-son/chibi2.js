@@ -44,6 +44,7 @@ function longHair(cx, cy, r, o = {}) {
 // pose per side: 'hang' | 'hip' | 'blade' (right only) | 'table' | 'raise' | 'cross'
 function arm(sx, sy, s, side, pose, col, o) {
   const P = {
+    thrust: [[side * 0.34, 0.08], [side * 0.66, 0.06]], slashUp: [[side * 0.3, -0.25], [side * 0.42, -0.6]], slashDown: [[side * 0.36, 0.22], [side * 0.6, 0.52]], guard: [[side * 0.3, 0.3], [side * 0.12, 0.05]],
     hang: [[side * 0.17, 0.42], [side * 0.22, 0.85]], stump: [[side * 0.17, 0.42], [side * 0.2, 0.72]], hip: [[side * 0.34, 0.36], [side * 0.08, 0.72]], blade: [[side * 0.26, 0.38], [side * 0.36, 0.76]],
     table: [[side * 0.24, 0.42], [side * -0.02, 0.6]], raise: [[side * 0.26, -0.28], [side * 0.2, -0.62]], cross: [[side * 0.18, 0.4], [side * -0.3, 0.52]],
   }[pose] || [[side * 0.17, 0.42], [side * 0.22, 0.85]];
@@ -128,7 +129,7 @@ function build(x, y, s, o, kit) {
   }
   const headSvg = R.head(hx, hy, r, { ...kit.headOpts, ...(kit.hair === 'long' ? { hair: 'none' } : {}), yaw, pitch: o.pitch, brow: o.brow ?? kit.headOpts.brow, mouth: o.mouth ?? kit.headOpts.mouth, blink: o.blink });
   // for long hair: suppress rig's own hair by drawing face only (strip hair groups is not possible), so draw rig head then cover with crown
-  const sheathed = kit.hipBlade && !arms.includes('blade') ? kit.hipBlade(x + k * .5, y, s) : '';
+  const sheathed = kit.hipBlade && !arms.includes('blade') && !o.armed ? kit.hipBlade(x + k * .5, y, s) : '';
   return `<g>${hairObj ? hairObj.back : ''}${bodySvg}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${sheathed}${armSvg(-1)}${armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${headSvg}${hairObj ? hairObj.front : ''}</g>`;
 }
 
@@ -153,4 +154,7 @@ const CASSIUS = { yaw: -15, hair: 'curls', arms: ['table', 'table'],
   top: sunPauldrons };
 const darrow = (x, y, s, o = {}) => build(x, y, s, o, DARROW);
 const cassius = (x, y, s, o = {}) => build(x, y, s, o, CASSIUS);
-module.exports = { darrow, cassius, longHair, arm, build, lionFace, sunEmblem };
+const ARMP = { thrust: [0.66, 0.06], slashUp: [0.42, -0.6], slashDown: [0.6, 0.52], guard: [0.12, 0.05], hang: [0.22, 0.85] };
+// hand position (world) for a pose, matching build()'s shoulder math
+const handAt = (x, y, s, side, pose, yaw = 0) => { const k = -yaw * s * 0.0016, top = y - s * 1.55, sx = x + k + side * s * 0.33, sy = top + s * 0.1, P = ARMP[pose] || ARMP.hang; return [sx + side * P[0] * s, sy + P[1] * s]; };
+module.exports = { handAt, darrow, cassius, longHair, arm, build, lionFace, sunEmblem };
