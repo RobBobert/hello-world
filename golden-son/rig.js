@@ -34,7 +34,7 @@ function short(seed = 9) {
   for (let lon = 85; lon <= 275; lon += 26) out.push({ lon: lon > 180 ? lon - 360 : lon, lat: 12, s: 0.24 });
   return out;
 }
-const HAIR = { curls: curls(), spikes: spikes(), short: short() };
+const HAIR = { curls: curls(), spikes: spikes(), short: short(), none: [] };
 
 // head(cx, cy, r, { yaw, pitch (deg), hair:'curls'|'spikes', hairCol, hairHi, iris, brow:'angry'|'soft'|'sad', mouth:'smile'|'smirk'|'flat'|'frown'|'open', blink })
 function head(cx, cy, r, o = {}) {
