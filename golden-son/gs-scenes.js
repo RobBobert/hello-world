@@ -33,7 +33,12 @@ const crowd = (n, y, s, seed = 1, col = '#14141c') => { let o = ''; for (let i =
 
 
 // ---------------- OPENING (6.4 s): boot smashes the steak -> plates explode, wine stains Cassius -> two steps -> OTS "Cassius." / OTS "Darrow."
-const OPEN = 6.4, LAND = 0.55, WINE_HIT = 1.75;
+const OPEN = 8.74, LAND = 0.55, WINE_HIT = 1.75;
+// Seedance v2 clip (our chibi refs): A = razor raise (0-1.65 s of clip), B = reverse OTS + sip (3.7 s-end)
+const SD_T = 2.75, SD_A = 50, SD_B = 130;
+const sdFrame = t => { if (t < SD_T) return null; const k = Math.round((t - SD_T) * 30);
+  const name = k < SD_A ? `a${String(k + 1).padStart(3, '0')}` : `b${String(Math.min(SD_B, k - SD_A + 1)).padStart(3, '0')}`;
+  return require('path').join(__dirname, 'seedance', 'fr', name + '.jpg'); };
 const shards = (cx, cy, k, n = 10, seed = 1) => { if (k <= 0 || k > 1.4) return ''; let o = '';
   for (let i = 0; i < n; i++) { const a = -Math.PI * (0.1 + 0.8 * ((i * 37 + seed * 13) % 100) / 100), v = 260 + ((i * 53) % 160), x = cx + Math.cos(a) * v * k, y = cy + Math.sin(a) * v * k + 520 * k * k, r = (i * 47) % 360 + k * 600;
     o += `<path d="M${f(x)} ${f(y)} l18 -8 l10 22 l-24 6 Z" fill="#eef1f5" stroke="#1b1210" stroke-width="4" transform="rotate(${f(r)} ${f(x)} ${f(y)})" opacity="${f(cl(1.4 - k))}"/>`; } return o; };
@@ -67,7 +72,7 @@ function opening(t) {
 const ACT_IMPACT = (x, y, u) => { if (u < 0 || u > 1) return ''; let o = ''; for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2, r0 = 40 + 300 * eo(u), r1 = r0 + 130 * (1 - u); o += `<line x1="${f(x + Math.cos(a) * r0)}" y1="${f(y + Math.sin(a) * r0 * .5)}" x2="${f(x + Math.cos(a) * r1)}" y2="${f(y + Math.sin(a) * r1 * .5)}" stroke="#fff6d0" stroke-width="${f(14 * (1 - u))}" stroke-linecap="round"/>`; } return o; };
 
 const BEATS = [
-  { fixed: true, t0f: 0, t1f: OPEN, l1: '', mood: 'gala', dialog: [[2.95, 'CASSIUS.'], [4.75, 'DARROW.']], art: (t) => opening(t) },
+  { fixed: true, t0f: 0, t1f: OPEN, l1: '', mood: 'gala', dialog: [[3.65, 'CASSIUS.'], [7.8, 'DARROW.']], raw: sdFrame, art: (t) => opening(t) },
   // 1. continues from the opening: Darrow on the table, Cassius stained
   { start: 'house bellona wants', pop: 'so he walks', l1: 'HOUSE BELLONA WANTS HIM DEAD.', l2: 'SO HE WALKS ACROSS THEIR TABLE.', mood: 'gala',
     art: (t, p, pt, d) => W(room('gala', t) + RIM(K.cassius(790, TY + 310, 330, { yaw: -18, brow: 'angry', mouth: 'frown', arms: ['table', 'table'] }), 'gala') + OTS.wine(790, TY + 310, 330) + tableG(t, { land: -8 })

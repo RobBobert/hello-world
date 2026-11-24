@@ -43,3 +43,13 @@ Not verifiable from sources and kept as style only: Darrow's smirk, the sun embl
 | Sevro with an eye patch | **Flag (user request).** In Golden Son he has a replacement bionic eye, not a patch ([TV Tropes / wiki summary]). |
 | Howlers: one woman, one blonde | OK — the Howlers include women; specific members not named on screen. |
 | Pronunciation of "Cassius" / "Darrow" in the dialogue lines | Not verified against the audiobook; uses ElevenLabs default pronunciation. |
+
+## Pass 2 addendum (v4 video: Seedance opening, new razor, necks)
+
+| Element | Status |
+|---|---|
+| Opening 2.75–8.7 s is Seedance-generated from our chibi refs (razor raise, reverse angle, Cassius sips) | Dramatization, same as v2 flag: table walk confirmed; the "Cassius." / "Darrow." exchange, sip and wine stain are invented for the cold open. No text or extra characters were introduced by Seedance (checked frame by frame). |
+| Darrow's razor redrawn (C-sweep, flared tip, black grip) | Stylized. Books describe a curved slingBlade; the exact shape follows the user's fan-art reference, not a canon illustration. |
+| Neck/gorget change | Visual only, no story claim. |
+| Captions / dialog timing | "CASSIUS." on Darrow's line (3.65 s), "DARROW." on Cassius's line (7.8 s); each shows 1.7 s. Narration captions unchanged, all shifted by +2.34 s with the audio. |
+| Still open | Karnus death in Iron Rain (flag), Sevro patch vs bionic eye (user choice), name pronunciation unverified. |
