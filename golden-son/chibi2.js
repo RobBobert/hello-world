@@ -134,7 +134,11 @@ const sash = (x, y, s) => `<path d="M${f(x - s * 0.27)} ${f(y - s * 0.94)} L${f(
 const pauldrons = (x, y, s, col, hi) => [-1, 1].map(d => `<path d="M${f(x + d * s * 0.16)} ${f(y - s * 1.5)} q${f(d * s * 0.2)} ${f(-s * 0.1)} ${f(d * s * 0.3)} ${f(s * 0.08)} q${f(-d * s * 0.02)} ${f(s * 0.1)} ${f(-d * s * 0.12)} ${f(s * 0.08)} Z" fill="${col}" stroke="${INK}" stroke-width="${f(s * 0.04)}" stroke-linejoin="round"/><path d="M${f(x + d * s * 0.2)} ${f(y - s * 1.55)} q${f(d * s * 0.1)} ${f(-s * 0.03)} ${f(d * s * 0.18)} ${f(s * 0.02)}" stroke="${hi}" stroke-width="${f(s * 0.03)}" fill="none" stroke-linecap="round" opacity=".9"/>`).join('');
 
 function build(x, y, s, o, kit) {
-  const yaw = o.yaw ?? kit.yaw, k = -yaw * s * 0.0016, top = y - s * 1.55, r = s * 0.42, hx = x + yaw * s * 0.0012, hy = top - r * 0.78;
+  const yaw = o.yaw ?? kit.yaw, k = -yaw * s * 0.0016, top = y - s * 1.55, r = s * 0.42, hx = x, hy = top - r - s * 0.13;
+  const skin = (kit.armCol && kit.armCol.hand) || '#e9c3a0', gf = (kit.body && kit.body.fill) || '#d9a441', gt = (kit.body && kit.body.trim) || '#f6dc8b';
+  const neck = `<rect x="${f(x - s * 0.075)}" y="${f(top - s * 0.2)}" width="${f(s * 0.15)}" height="${f(s * 0.23)}" fill="${o.back ? '#c99a74' : skin}" stroke="${INK}" stroke-width="${f(s * 0.035)}"/>`
+    + `<path d="M${f(x - s * 0.19)} ${f(top + s * 0.03)} Q${f(x)} ${f(top - s * 0.09)} ${f(x + s * 0.19)} ${f(top + s * 0.03)} Q${f(x)} ${f(top + s * 0.06)} ${f(x - s * 0.19)} ${f(top + s * 0.03)} Z" fill="${gf}" stroke="${INK}" stroke-width="${f(s * 0.035)}" stroke-linejoin="round"/>`
+    + `<path d="M${f(x - s * 0.12)} ${f(top - s * 0.01)} Q${f(x)} ${f(top - s * 0.06)} ${f(x + s * 0.12)} ${f(top - s * 0.01)}" stroke="${gt}" stroke-width="${f(s * 0.018)}" fill="none" stroke-linecap="round"/>`;
   const sx = s * 0.33, sy = top + s * 0.1;
   const arms = o.arms || kit.arms;
   const bodySvg = body2(x, y, s, { ...kit.body, yaw });
@@ -149,12 +153,12 @@ function build(x, y, s, o, kit) {
           return c; })() : `<path d="M${f(hx - r * .8)} ${f(hy - r * .5)} Q${f(hx)} ${f(hy - r * .2)} ${f(hx + r * .8)} ${f(hy - r * .5)} M${f(hx - r * .7)} ${f(hy)} Q${f(hx)} ${f(hy + r * .25)} ${f(hx + r * .7)} ${f(hy)}" stroke="${kit.hairOpts ? kit.hairOpts.hairShade : '#8a6a2a'}" stroke-width="${f(r * .06)}" fill="none"/>`)
       + `<ellipse cx="${f(hx - r * .98)}" cy="${f(hy + r * .05)}" rx="${f(r * .12)}" ry="${f(r * .2)}" fill="#f2d3b3" stroke="${INK}" stroke-width="${f(r * .06)}"/><ellipse cx="${f(hx + r * .98)}" cy="${f(hy + r * .05)}" rx="${f(r * .12)}" ry="${f(r * .2)}" fill="#f2d3b3" stroke="${INK}" stroke-width="${f(r * .06)}"/>`;
     const bodyB = body2(x, y, s, { ...kit.body, sigil: null, yaw });
-    return `<g>${bodyB}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${kit.hipBlade ? kit.hipBlade(x, y, s) : ''}${armSvg(-1)}${armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${backHead}</g>`;
+    return `<g>${bodyB}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${kit.hipBlade ? kit.hipBlade(x, y, s) : ''}${armSvg(-1)}${armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${neck}${backHead}</g>`;
   }
   const headSvg = R.head(hx, hy, r, { ...kit.headOpts, ...(kit.hair === 'long' ? { hair: 'none' } : {}), yaw, pitch: o.pitch, brow: o.brow ?? kit.headOpts.brow, mouth: o.mouth ?? kit.headOpts.mouth, blink: o.blink });
   // for long hair: suppress rig's own hair by drawing face only (strip hair groups is not possible), so draw rig head then cover with crown
   const sheathed = kit.hipBlade && !arms.includes('blade') && !o.armed ? kit.hipBlade(x + k * .5, y, s) : '';
-  return `<g>${hairObj ? hairObj.back : ''}${bodySvg}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${sheathed}${o.noArm === -1 ? `<circle cx="${f(x + k - sx)}" cy="${f(sy + s * 0.02)}" r="${f(s * 0.085)}" fill="#3a3a44" stroke="${INK}" stroke-width="${f(s * 0.04)}"/>` : armSvg(-1)}${o.noArm === 1 ? `<circle cx="${f(x + k + sx)}" cy="${f(sy + s * 0.02)}" r="${f(s * 0.085)}" fill="#3a3a44" stroke="${INK}" stroke-width="${f(s * 0.04)}"/>` : armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${headSvg}${hairObj ? hairObj.front : ''}</g>`;
+  return `<g>${hairObj ? hairObj.back : ''}${bodySvg}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${sheathed}${o.noArm === -1 ? `<circle cx="${f(x + k - sx)}" cy="${f(sy + s * 0.02)}" r="${f(s * 0.085)}" fill="#3a3a44" stroke="${INK}" stroke-width="${f(s * 0.04)}"/>` : armSvg(-1)}${o.noArm === 1 ? `<circle cx="${f(x + k + sx)}" cy="${f(sy + s * 0.02)}" r="${f(s * 0.085)}" fill="#3a3a44" stroke="${INK}" stroke-width="${f(s * 0.04)}"/>` : armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${neck}${headSvg}${hairObj ? hairObj.front : ''}</g>`;
 }
 
 const lionPauldrons = (x, y, s) => [-1, 1].map(d => { const px = x + d * s * 0.36, py = y - s * 1.47;
