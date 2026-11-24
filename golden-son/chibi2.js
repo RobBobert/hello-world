@@ -73,7 +73,7 @@ function moonBlade(x, y, s, rot = 0, dir = 1, glow = false) {
 function arm(sx, sy, s, side, pose, col, o) {
   const P = {
     sword: [[side * 0.24, 0.36], [side * 0.3, 0.7]], thrust: [[side * 0.34, 0.08], [side * 0.66, 0.06]], slashUp: [[side * 0.3, -0.25], [side * 0.42, -0.6]], slashDown: [[side * 0.36, 0.22], [side * 0.6, 0.52]], guard: [[side * 0.3, 0.3], [side * 0.12, 0.05]],
-    hang: [[side * 0.17, 0.42], [side * 0.22, 0.85]], stump: [[side * 0.17, 0.42], [side * 0.2, 0.72]], hip: [[side * 0.34, 0.36], [side * 0.08, 0.72]], blade: [[side * 0.26, 0.38], [side * 0.36, 0.76]], bladeUp: [[side * 0.3, -0.2], [side * 0.36, -0.55]], bladePoint: [[side * 0.32, 0.12], [side * 0.6, 0.18]],
+    hang: [[side * 0.17, 0.42], [side * 0.22, 0.85]], stump: [[side * 0.17, 0.42], [side * 0.2, 0.72]], hip: [[side * 0.34, 0.36], [side * 0.08, 0.72]], blade: [[side * 0.26, 0.38], [side * 0.36, 0.76]], bladeUp: [[side * 0.3, -0.2], [side * 0.36, -0.55]], bladePoint: [[side * 0.32, 0.12], [side * 0.6, 0.18]], halt: [[side * 0.36, -0.12], [side * 0.62, -0.42]], pommel: [[side * 0.22, 0.42], [side * -0.3, 0.74]],
     table: [[side * 0.24, 0.42], [side * -0.02, 0.6]], raise: [[side * 0.26, -0.28], [side * 0.2, -0.62]], cross: [[side * 0.18, 0.4], [side * -0.3, 0.52]],
   }[pose] || [[side * 0.17, 0.42], [side * 0.22, 0.85]];
   const e = [sx + P[0][0] * s, sy + P[0][1] * s], h = [sx + P[1][0] * s, sy + P[1][1] * s], w = s * 0.15, sw = s * 0.04;
@@ -107,6 +107,11 @@ function body2(x, y, s, o = {}) {
     g += `<path d="M${P(d * 0.07, 0.42)} L${P(d * 0.235, 0.42)} L${P(d * 0.22, 0.12)} L${P(d * 0.08, 0.12)} Z" fill="${greave}" stroke="${INK}" stroke-width="${f(sw)}" stroke-linejoin="round"/>`;
     g += `<path d="M${P(d * 0.075, 0.14)} L${P(d * 0.225, 0.14)} Q${P(d * 0.33, 0.06)} ${P(d * 0.32, 0)} L${P(d * 0.06, 0)} Z" fill="${boot}" stroke="${INK}" stroke-width="${f(sw)}" stroke-linejoin="round"/>`;
     g += `<path d="M${P(d * 0.1, 0.36)} L${P(d * 0.2, 0.36)}" stroke="${trim}" stroke-width="${f(s * 0.03)}" stroke-linecap="round"/>`;
+  }
+  if (o.gown) { // long gown to the floor (covers legs)
+    const gt = o.gownTrim || trim;
+    g += `<path d="M${P(-0.27, 0.9)} L${P(0.27, 0.9)} Q${P(0.4, 0.45)} ${P(0.54, 0.02)} Q${P(0, -0.06)} ${P(-0.54, 0.02)} Q${P(-0.4, 0.45)} ${P(-0.27, 0.9)} Z" fill="${o.gown}" stroke="${INK}" stroke-width="${f(sw)}" stroke-linejoin="round"/>`;
+    g += `<path d="M${P(-0.5, 0.07)} Q${P(0, 0.0)} ${P(0.5, 0.07)} M${P(-0.08, 0.88)} L${P(-0.18, 0.06)} M${P(0.08, 0.88)} L${P(0.18, 0.06)}" stroke="${gt}" stroke-width="${f(s * 0.022)}" fill="none"/>`;
   }
   // tassets (armour skirt flaps)
   g += `<path d="M${P(-0.3, 0.86)} L${P(0.3, 0.86)} L${P(0.33, 0.56)} L${P(0.12, 0.6)} L${P(0, 0.54)} L${P(-0.12, 0.6)} L${P(-0.33, 0.56)} Z" fill="${fill}" stroke="${INK}" stroke-width="${f(sw)}" stroke-linejoin="round"/>`;

@@ -11,19 +11,30 @@ const sio = u => { u = cl(u); return u * u * (3 - 2 * u); }; // gentle ease for 
 const MONO = `<g filter="url(#mono)">`;
 
 // timeline (seconds)
-const LAND = 0.55, PULL = [0.55, 2.1], STEP = [3.0, 3.8], DRAW = [12.45, 12.9], POINT = 13.3, ORBIT = [14.1, 15.7], SIP = [17.55, 18.6], WINE = 1.6;
+const LAND = 0.55, PULL = [0.55, 2.1], STEP = [3.0, 3.8], DRAW = [12.45, 12.9], POINT = 13.3, ORBIT = [12.9, 14.6], SIP = [16.4, 17.4], WINE = 1.6;
 const ENV = require('../vo/mouth-env.json');
 const envMouth = (t, rest) => { const i = Math.round(t * 30), v = Math.max(ENV[i] || 0, .7 * (ENV[i - 1] || 0)); return v > .42 ? 'open' : v > .13 ? 'talk' : rest; };
 // world (metres-ish). y up. Table top at 0.75.
 const TOP = 0.75, D0 = { x: -0.22, z: 0 }, CAS = { x: 0.42, z: 1.1 }, M = { x: 0.1, z: 0.55 }, R = 1.3;
 const FOC = 1100, HCH = 2.45; // chibi drawn height = HCH * s
 
+// keyframed camera: look-at target T, distance r, azimuth a (deg, around T from +z toward +x), height h, horizon hz
+const DT = [-0.22, 0.22];
+const KF = [
+  { t: 0, T: [M.x, M.z], r: 1.3, a: 0, h: 1.0, hz: 980 },
+  { t: 3.9, T: [M.x, M.z], r: 1.3, a: 0, h: 1.0, hz: 980 },
+  { t: 4.6, T: DT, r: 1.77, a: 10, h: 1.05, hz: 975 },   // turn onto Darrow
+  { t: 7.4, T: DT, r: 1.3, a: 62, h: 1.3, hz: 935 },     // arc right around his face: the families behind him come into view
+  { t: 12.9, T: DT, r: 1.3, a: 62, h: 1.3, hz: 935 },
+  { t: 14.6, T: [M.x, M.z], r: 1.3, a: 180, h: 1.6, hz: 800 }, // swing to the shot over Darrow's shoulder onto Cassius
+];
+function camAt(t) { let k = 0; while (k < KF.length - 2 && t > KF[k + 1].t) k++; const A = KF[k], B = KF[k + 1], u = sio((t - A.t) / (B.t - A.t));
+  const Tx = lerp(A.T[0], B.T[0], u), Tz = lerp(A.T[1], B.T[1], u), r = lerp(A.r, B.r, u), a = lerp(A.a, B.a, u) * Math.PI / 180;
+  return { Tx, Tz, cx: Tx + r * Math.sin(a), cz: Tz + r * Math.cos(a), h: lerp(A.h, B.h, u), hz: lerp(A.hz, B.hz, u) }; }
 function camera(t) {
-  const th = Math.PI * sio((t - ORBIT[0]) / (ORBIT[1] - ORBIT[0]));
-  const cx = M.x + R * Math.sin(th), cz = M.z + R * Math.cos(th);
-  const fx = M.x - cx, fz = M.z - cz, n = Math.hypot(fx, fz);
-  const u = sio((t - ORBIT[0]) / (ORBIT[1] - ORBIT[0]));
-  return { th, cx, cz, fx: fx / n, fz: fz / n, rx: -fz / n, rz: fx / n, h: lerp(1.0, 1.6, u), hz: lerp(980, 800, u) };
+  const c = camAt(t), fx = c.Tx - c.cx, fz = c.Tz - c.cz, n = Math.hypot(fx, fz), th = Math.atan2(c.cx - M.x, c.cz - M.z);
+  const c0 = camAt(t - 1 / 30), th0 = Math.atan2(c0.cx - M.x, c0.cz - M.z);
+  return { th, spinV: Math.abs(th - th0) * 30, cx: c.cx, cz: c.cz, fx: fx / n, fz: fz / n, rx: -fz / n, rz: fx / n, h: c.h, hz: c.hz };
 }
 const proj = (C, x, y, z) => { const vx = x - C.cx, vz = z - C.cz, d = vx * C.fx + vz * C.fz, l = vx * C.rx + vz * C.rz;
   return { X: W / 2 + FOC * l / d, Y: C.hz + FOC * (C.h - y) / d, d, sc: FOC / d }; };
@@ -49,7 +60,7 @@ function yawFor(C, px, pz, faceX, faceZ) {
 }
 // talking mouth during a spoken window
 const talk = (t, a, b, rest, a2 = -1, b2 = -1) => (t >= a && t < b) || (t >= a2 && t < b2) ? ['talk', 'open', 'flat', 'open'][Math.floor(t * 13) % 4] : rest;
-const SAY_D = [1.55, 14.05], SAY_C = [15.6, 18.35];
+const SAY_D = [1.55, 13.5], SAY_C = [14.65, 17.3];
 
 function intro(t) {
   const C = camera(t);
@@ -103,7 +114,7 @@ function intro(t) {
   const wu = cl((t - 1.2) / (WINE - 1.2)), g0 = proj(C, CAS.x - 0.2, TOP + .1, 0.3), g1 = proj(C, CAS.x, 0.55, CAS.z);
   const wine = t > 1.2 && t < WINE + .1 ? `<path d="M${f(g0.X)} ${f(g0.Y)} Q${f((g0.X + g1.X) / 2)} ${f(Math.min(g0.Y, g1.Y) - 200)} ${f(lerp(g0.X, g1.X, wu))} ${f(lerp(g0.Y, g1.Y, wu) - 200 * Math.sin(Math.PI * wu))}" stroke="#8f1018" stroke-width="${f(6 + 10 * wu)}" fill="none" stroke-linecap="round" opacity=".9"/>` : '';
   // ---- background hall pans with the orbit (two copies, motion-blurred while turning)
-  const spin = Math.abs(Math.sin(Math.PI * cl((t - ORBIT[0]) / (ORBIT[1] - ORBIT[0])))), pan = -C.th / Math.PI * 1500;
+  const spin = cl(C.spinV / 2.2), pan = -C.th / Math.PI * 1500;
   const off = ((pan % W) + W) % W - W;
   const hall = `<filter id="ib" x="-10%" y="0" width="120%" height="100%"><feGaussianBlur stdDeviation="${f(spin * 14)} 0"/></filter><g filter="url(#ib)">${[0, 1, 2].map(i => `<g transform="translate(${f(off + i * W)} ${f(C.hz - 1010)})">${MONO}${L.skyOrRoom('gala', t, { floorY: 1470 })}</g></g>`).join('')}</g>`;
   const floor = `<defs><linearGradient id="flr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6a6c76"/><stop offset="1" stop-color="#34343c"/></linearGradient></defs><rect x="0" y="${f(C.hz + 40)}" width="${W}" height="${f(H - C.hz)}" fill="url(#flr)"/>`;
@@ -126,10 +137,29 @@ function intro(t) {
     { x: -1.05, z: -.8, hair: 'curls', hc: '#e0aa40', brow: 'soft', mouth: 'frown', fill: '#33558f' },
     { x: 1.0, z: -.95, hair: 'spikes', hc: '#c99a34', stand: true, brow: 'angry', mouth: 'shout', arms: ['hang', 'thrust'], fill: '#24407a' },
     { x: 2.05, z: -.8, hair: 'long', hc: '#f0c868', brow: 'angry', mouth: 'flat', fill: '#2b4a8a' },
+    // standing rows of the family watching
+    { x: -4.10, z: -1.75, hair: 'curls', hc: '#d6a23c', stand: true, brow: 'soft', mouth: 'flat', arms: ['hip', 'hip'], fill: '#2b4a8a' },
+    { x: -3.40, z: -1.75, hair: 'short', hc: '#c9962e', stand: true, brow: 'angry', mouth: 'frown', arms: ['hang', 'hang'], fill: '#24407a' },
+    { x: -2.80, z: -1.75, hair: 'long', hc: '#d9b25a', stand: true, brow: 'angry', mouth: 'flat', arms: ['hang', 'hang'], fill: '#33558f' },
+    { x: -2.15, z: -1.75, hair: 'curls', hc: '#e2b24a', stand: true, brow: 'soft', mouth: 'frown', arms: ['hang', 'hip'], fill: '#1f3a70' },
+    { x: -1.50, z: -1.75, hair: 'spikes', hc: '#dcae48', stand: true, brow: 'angry', mouth: 'flat', arms: ['hip', 'hang'], fill: '#2b4a8a' },
+    { x: -0.80, z: -1.75, hair: 'short', hc: '#e0aa40', stand: true, brow: 'angry', mouth: 'frown', arms: ['hang', 'hang'], fill: '#24407a' },
+    { x: -3.85, z: 1.90, hair: 'curls', hc: '#f0c868', stand: true, brow: 'soft', mouth: 'flat', arms: ['hang', 'hip'], fill: '#33558f' },
+    { x: -3.15, z: 1.90, hair: 'long', hc: '#e8c060', stand: true, brow: 'angry', mouth: 'frown', arms: ['hang', 'hang'], fill: '#1f3a70' },
+    { x: -2.55, z: 1.90, hair: 'curls', hc: '#d6a23c', stand: true, brow: 'angry', mouth: 'flat', arms: ['hip', 'hang'], fill: '#2b4a8a' },
+    { x: -1.90, z: 1.90, hair: 'short', hc: '#c9962e', stand: true, brow: 'soft', mouth: 'frown', arms: ['hang', 'hip'], fill: '#24407a' },
+    { x: -1.25, z: 1.90, hair: 'long', hc: '#d9b25a', stand: true, brow: 'angry', mouth: 'flat', arms: ['hang', 'hang'], fill: '#33558f' },
+    { x: -0.55, z: 1.90, hair: 'curls', hc: '#e2b24a', stand: true, brow: 'angry', mouth: 'frown', arms: ['hang', 'hang'], fill: '#1f3a70' },
+    { x: -4.10, z: -2.50, hair: 'spikes', hc: '#dcae48', stand: true, brow: 'soft', mouth: 'flat', arms: ['hip', 'hip'], fill: '#2b4a8a' },
+    { x: -3.40, z: -2.50, hair: 'short', hc: '#e0aa40', stand: true, brow: 'angry', mouth: 'frown', arms: ['hang', 'hang'], fill: '#24407a' },
+    { x: -2.80, z: -2.50, hair: 'curls', hc: '#f0c868', stand: true, brow: 'angry', mouth: 'flat', arms: ['hang', 'hang'], fill: '#33558f' },
+    { x: -2.15, z: -2.50, hair: 'long', hc: '#e8c060', stand: true, brow: 'soft', mouth: 'frown', arms: ['hang', 'hip'], fill: '#1f3a70' },
+    { x: -1.50, z: -2.50, hair: 'curls', hc: '#d6a23c', stand: true, brow: 'angry', mouth: 'flat', arms: ['hip', 'hang'], fill: '#2b4a8a' },
+    { x: -0.80, z: -2.50, hair: 'short', hc: '#c9962e', stand: true, brow: 'angry', mouth: 'frown', arms: ['hang', 'hang'], fill: '#24407a' },
   ];
   GUESTS.forEach((g, gi) => { const sg = Math.sign(g.z), p = proj(C, g.x, g.stand ? 0 : .08, g.z); if (p.d < .35 || p.X < -700 || p.X > W + 700) return;
     const s0 = p.sc * (g.stand ? 1.25 : 1) / HCH, yw = yawFor(C, g.x, g.z, dp.x - g.x, dp.z - g.z), back = Math.abs(yw) > 100;
-    const mouth = g.mouth === 'shout' ? (t > 13.4 && t < 15.5 ? ['open', 'talk'][Math.floor(t * 7 + gi) % 2] : 'flat') : g.mouth;
+    const mouth = g.mouth === 'shout' ? (t > 13.0 && t < 14.6 ? ['open', 'talk'][Math.floor(t * 7 + gi) % 2] : 'flat') : g.mouth;
     const fig = K.karnus(p.X, p.Y, s0 / 1.12, { yaw: back ? 180 : cl(yw, -40, 40), back, brow: t > LAND ? g.brow : 'soft', mouth: t > LAND ? mouth : 'flat', arms: g.stand ? g.arms : ['table', 'table'],
       kitOverride: { hair: g.hair === 'long' ? 'short' : g.hair, hairLong: g.hair === 'long', hairCol: g.hc, over: [], fill: g.fill, cape: g.stand ? '#1b2f5c' : undefined } });
     const body = L.rimLight(fig, 'gala'), ch = g.stand ? '' : chair(g.x, g.z, sg), svg = back ? body + ch : ch + body;
@@ -146,9 +176,9 @@ function intro(t) {
   // ---- the pull-back: start zoomed tight on the steak, ease out to the full OTS frame (same shot, no cut)
   const zu = io((t - PULL[0]) / (PULL[1] - PULL[0])), z = t < PULL[0] ? 3.6 : lerp(3.6, 1, zu);
   const pu = io((t - ORBIT[1] + .35) / 1.1), z2 = lerp(1, 1.75, pu);
-  const du = io((t - 2.6) / 2.2) * (1 - io((t - 12.9) / .8)), z3 = lerp(1, 1.65, du); // push in on Darrow during the speech
+  const du = io((t - 8.0) / 1.6) * (1 - io((t - 11.2) / 1.4)), z3 = lerp(1, 2.0, du); // ease in on Darrow's eyes, then back out
   let fx = lerp(lerp(ps.X, W / 2, zu), pc.X, pu), fy = lerp(lerp(ps.Y - 60, H / 2, zu), pc.Y - 1.75 * sC, pu);
-  fx = lerp(fx, pd.X + .35 * sD, du); fy = lerp(fy, pd.Y - 1.45 * sD, du);
+  fx = lerp(fx, pd.X + .05 * sD, du); fy = lerp(fy, pd.Y - 1.6 * sD, du);
   const sh = t >= LAND && t < LAND + .35 ? Math.exp(-(t - LAND) * 12) * 26 : 0;
   const flash = t >= LAND && t < LAND + .12 ? `<rect width="${W}" height="${H}" fill="#fff" opacity="${f(.55 * (1 - (t - LAND) / .12))}"/>` : '';
   const BUB = [['MY HONOR HAS', '#1b1210', 7.98], ['BEEN PISSED ON,', '#1b1210', 7.98], ['AND I DEMAND', '#c8241c', 11.34], ['SATISFACTION.', '#c8241c', 11.34]];

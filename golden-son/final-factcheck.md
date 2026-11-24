@@ -77,3 +77,12 @@ Not verifiable from sources and kept as style only: Darrow's smirk, the sun embl
 - The challenge happens at the gala in the book, not on the Bellona table — the cold open merges the two moments (dramatization).
 - Copyright: audiobook audio is not committed to the public repo (golden-son/ref/ and vo/dialog.wav are gitignored).
   Expect a possible Content ID claim on YouTube; see notes to user.
+
+## Pass 2 addendum (v8)
+- Bodyguard beside the Sovereign drawn from the user's "Ajax" reference (dark-skinned, bald, gold armor, long blade). In
+  Golden Son the Sovereign's bodyguard at the gala is **Aja au Grimmus** (the Protean Knight); Ajax is her son from the later
+  books. Model is named "aja"; she's not named on screen.
+- Sovereign: queenly black-and-gold gown, no crown, arms raised to restore order (dramatization of "stops the duel").
+- Lorn: gray hair and beard per the user's reference (an old Gold; exception to the golden-hair rule), black robe, hands on
+  the pommel of a planted sword.
+- Intro: Darrow's "Cassius." removed; camera arcs around Darrow and eases in on his eyes during the speech.

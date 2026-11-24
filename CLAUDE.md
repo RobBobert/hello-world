@@ -20,7 +20,7 @@ arranged the public execution and Cassius killed Titus in the duel).
 - Outro: dark `#1c1512` card, final punchline, gold-ring avatar, `@AVANZO.TV`, a question in Cinzel small caps +
   gold answer line (e.g. "Do you want Golden Son next? / Yes or No").
 - Style: flat 2D, bell-shaped characters with ink outlines; the channel's own Institute map is used as a bitmap.
-- Darrow (Gold) carries a curved razor (C-sweep, flared tip, black grip; ref: user's fan-art pick), holstered at the hip except when fighting. All Golds have golden hair and the Peerless scar (crescent on the right cheek); non-Golds (Reds, Obsidians, Grays) keep their colors. Sevro: gold mohawk, gray wolf pelt,
+- Darrow (Gold) carries a curved razor (C-sweep, flared tip, black grip; ref: user's fan-art pick), holstered at the hip except when fighting. All Golds have golden hair (except the old gray Lorn) and the Peerless scar (crescent on the right cheek); non-Golds (Reds, Obsidians, Grays) keep their colors. Sevro: gold mohawk, gray wolf pelt,
   eye patch (Book 1, lost to the Jackal's knife; user says right eye — unverified).
 
 ## Audio rules

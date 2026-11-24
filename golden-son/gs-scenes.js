@@ -9,10 +9,27 @@ const T = (x, y, t, sz = 44, fill = '#f6ead2', op = 1) => `<text x="${x}" y="${y
 const fade = (svg, u) => `<g opacity="${cl(u).toFixed(3)}">${svg}</g>`;
 const slideIn = (svg, dx, u) => `<g transform="translate(${f(dx * (1 - eo(u)))} 0)" opacity="${cl(u * 2).toFixed(3)}">${svg}</g>`;
 const MONO = `<filter id="mono" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.32 0.34 0.34 0 -0.03  0.32 0.34 0.34 0 -0.03  0.33 0.34 0.38 0 0  0 0 0 1 0"/></filter>
-  <filter id="castsh" x="-50%" y="-50%" width="200%" height="200%"><feColorMatrix type="matrix" values="0 0 0 0 0.04  0 0 0 0 0.03  0 0 0 0 0.07  0 0 0 0.6 0"/><feGaussianBlur stdDeviation="3"/></filter>
+  <filter id="castsh" x="-50%" y="-50%" width="200%" height="200%"><feColorMatrix type="matrix" values="0 0 0 0 0.04  0 0 0 0 0.03  0 0 0 0 0.07  0 0 0 0.28 0"/><feGaussianBlur stdDeviation="7"/></filter>
   <filter id="sepia" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.45 0.4 0.15 0 0.05  0.38 0.36 0.13 0 0.03  0.28 0.27 0.1 0 0.01  0 0 0 1 0"/></filter>`;
 const room = (mood, t, o = {}) => mood === 'gala' && !o.color ? `<g filter="url(#mono)">${L.skyOrRoom('gala', t, { floorY: o.floorY || 1470, par: o.par || 0 })}</g>` : L.skyOrRoom(mood, t, { floorY: o.floorY || 1470, ...o });
 const TY = 1560;
+// Aja's long razor held across her body (ref pose)
+const ajaBlade = (x, y, s0, yaw) => { const S = s0 * 1.08, k = -yaw * S * .0016, hx = x + k - .33 * S - .12 * S, hy = y - 1.55 * S + .1 * S + .05 * S, a = .72, ux = Math.cos(a), uy = Math.sin(a), L = 1.45 * S, w = .045 * S;
+  const P = (d, o) => `${f(hx + ux * d - uy * o)} ${f(hy + uy * d + ux * o)}`;
+  return `<path d="M${P(.1 * S, -w)} L${P(L, -w * .2)} L${P(L + .08 * S, 0)} L${P(L, w * .2)} L${P(.1 * S, w)} Z" fill="#f4f8ff" stroke="#1b1210" stroke-width="${f(S * .022)}"/><path d="M${P(.12 * S, 0)} L${P(L, 0)}" stroke="#9fc8ff" stroke-width="${f(S * .012)}"/>`
+    + `<path d="M${P(.08 * S, -.13 * S)} L${P(.08 * S, .13 * S)}" stroke="#1b1210" stroke-width="${f(S * .07)}" stroke-linecap="round"/><path d="M${P(.08 * S, -.12 * S)} L${P(.08 * S, .12 * S)}" stroke="#e2b23a" stroke-width="${f(S * .04)}" stroke-linecap="round"/>`
+    + `<path d="M${P(.06 * S, 0)} L${P(-.2 * S, 0)}" stroke="#1b1210" stroke-width="${f(S * .07)}" stroke-linecap="round"/><path d="M${P(.05 * S, 0)} L${P(-.19 * S, 0)}" stroke="#c9a24a" stroke-width="${f(S * .04)}" stroke-linecap="round"/>`
+    + `<circle cx="${f(hx)}" cy="${f(hy)}" r="${f(S * .085)}" fill="#5a3a28" stroke="#1b1210" stroke-width="${f(S * .035)}"/>`; };
+// Praetorian at attention with an upright spear
+const spearman = (x, y, s, yaw) => { const hx = x - yaw * s * .0016 + s * .55; return `<path d="M${f(hx)} ${f(y - s * 2.6)} V${f(y)}" stroke="#1b1210" stroke-width="${f(s * .06)}"/><path d="M${f(hx)} ${f(y - s * 2.6)} V${f(y)}" stroke="#8a6a3a" stroke-width="${f(s * .03)}"/><path d="M${f(hx)} ${f(y - s * 2.95)} l${f(s * .07)} ${f(s * .3)} h${f(-s * .14)} Z" fill="#dfe4ec" stroke="#1b1210" stroke-width="${f(s * .02)}"/>`
+  + RIM(K.guard(x, y, s, { yaw, brow: 'angry', mouth: 'flat', arms: ['hang', 'hang'], kitOverride: { over: [], hair: 'short', hairCol: '#d9b25a', scar: true, fill: '#2a2630', shade: '#141216', trim: '#e2c070', sleeve: '#2a2630', fore: '#2a2630', leg: '#1a181c', cape: '#5a1010', sigil: undefined } }), 'gala'); };
+// Lorn's sword planted point-down, both hands on the pommel (ref pose)
+const pommelSword = (x, y, s) => { const hy = y - .71 * s, w = s * .07;
+  return `<path d="M${f(x - w / 2)} ${f(hy + s * .1)} L${f(x + w / 2)} ${f(hy + s * .1)} L${f(x + w / 2)} ${f(y - s * .06)} L${f(x)} ${f(y + s * .02)} L${f(x - w / 2)} ${f(y - s * .06)} Z" fill="#cfd6df" stroke="#1b1210" stroke-width="${f(s * .025)}"/><path d="M${f(x)} ${f(hy + s * .12)} V${f(y - s * .08)}" stroke="#fff" stroke-width="${f(s * .012)}"/>`
+    + `<path d="M${f(x - s * .19)} ${f(hy + s * .07)} Q${f(x)} ${f(hy + s * .14)} ${f(x + s * .19)} ${f(hy + s * .07)} L${f(x + s * .17)} ${f(hy + s * .12)} Q${f(x)} ${f(hy + s * .18)} ${f(x - s * .17)} ${f(hy + s * .12)} Z" fill="#8a8f98" stroke="#1b1210" stroke-width="${f(s * .022)}"/>`
+    + `<rect x="${f(x - s * .035)}" y="${f(hy - s * .06)}" width="${f(s * .07)}" height="${f(s * .14)}" fill="#2a1a12" stroke="#1b1210" stroke-width="${f(s * .02)}"/>`
+    + [-1, 1].map(d => `<circle cx="${f(x + d * s * .045)}" cy="${f(hy)}" r="${f(s * .085)}" fill="#e9c8a8" stroke="#1b1210" stroke-width="${f(s * .035)}"/>`).join('')
+    + `<path d="M${f(x - s * .1)} ${f(hy - s * .02)} q${f(s * .1)} ${f(-s * .05)} ${f(s * .2)} 0" stroke="#c9a24a" stroke-width="${f(s * .025)}" fill="none"/>`; };
 // comic speech bubble that pops in (screen space). lines: [[text, color, showAt]], tail points to (tx, ty)
 const bubble = (t, x, y, w, lines, tx, ty) => { const vis = lines.filter(l => t >= l[2]); if (!vis.length) return '';
   const u = cl((t - lines[0][2]) / .28), sc = u < .6 ? lerp(.55, 1.08, u / .6) : lerp(1.08, 1, (u - .6) / .4), h = 34 + vis.length * 64;
@@ -41,7 +58,7 @@ const crowd = (n, y, s, seed = 1, col = '#14141c') => { let o = ''; for (let i =
 
 
 // ---------------- OPENING (6.4 s): boot smashes the steak -> plates explode, wine stains Cassius -> two steps -> OTS "Cassius." / OTS "Darrow."
-const OPEN = 18.35, LAND = 0.55, WINE_HIT = 1.75;
+const OPEN = 17.3, LAND = 0.55, WINE_HIT = 1.75;
 // Seedance v2 clip (our chibi refs): A = razor raise (0-1.65 s of clip), B = reverse OTS + sip (3.7 s-end)
 const SD_T = 2.75, SD_A = 50, SD_B = 130;
 const sdFrame = t => { if (t < SD_T) return null; const k = Math.round((t - SD_T) * 30);
@@ -80,7 +97,7 @@ function opening(t) {
 const ACT_IMPACT = (x, y, u) => { if (u < 0 || u > 1) return ''; let o = ''; for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2, r0 = 40 + 300 * eo(u), r1 = r0 + 130 * (1 - u); o += `<line x1="${f(x + Math.cos(a) * r0)}" y1="${f(y + Math.sin(a) * r0 * .5)}" x2="${f(x + Math.cos(a) * r1)}" y2="${f(y + Math.sin(a) * r1 * .5)}" stroke="#fff6d0" stroke-width="${f(14 * (1 - u))}" stroke-linecap="round"/>`; } return o; };
 
 const BEATS = [
-  { fixed: true, t0f: 0, t1f: OPEN, l1: '', mood: 'gala', dialog: [[1.6, 'MY NAME, GENTLE LORDS AND LADIES,', 3.3], [4.98, 'IS DARROW AU ANDROMEDUS.', 2.6], [13.52, 'CASSIUS.', 1.3], [15.75, 'ALONE AT LAST,', 1.3], [17.07, 'MY OLD FRIEND.', 1.5]], art: (t) => INTRO.intro(t) },
+  { fixed: true, t0f: 0, t1f: OPEN, l1: '', mood: 'gala', dialog: [[1.6, 'MY NAME, GENTLE LORDS AND LADIES,', 3.3], [4.98, 'IS DARROW AU ANDROMEDUS.', 2.6], [14.7, 'ALONE AT LAST,', 1.3], [16.02, 'MY OLD FRIEND.', 1.3]], art: (t) => INTRO.intro(t) },
   // 1. continues from the opening: Darrow on the table, Cassius stained
   { start: 'house bellona wants', pop: 'so he walks', l1: 'HOUSE BELLONA WANTS HIM DEAD.', l2: 'SO HE WALKS ACROSS THEIR TABLE.', mood: 'gala',
     art: (t, p, pt, d) => W(room('gala', t) + RIM(K.cassius(790, TY + 310, 330, { yaw: -18, brow: 'angry', mouth: 'frown', arms: ['table', 'table'] }), 'gala') + OTS.wine(790, TY + 310, 330) + tableG(t, { land: -8 })
@@ -118,7 +135,10 @@ const BEATS = [
   // 10. Sovereign / bloodbath
   { start: 'the sovereign stops', pop: 'and the gala', l1: 'THE SOVEREIGN STOPS THE DUEL.', l2: 'THE GALA BECOMES A BLOODBATH.', mood: 'gala',
     art: (t, p, pt, d) => p ? `<g>${room('gala', t, { color: true })}</g><rect width="1080" height="1920" fill="#7a0d0d" opacity=".55"/>` + crowd(16, 1640, 160, 2, '#0a0505') + crowd(10, 1820, 220, 7, '#000') + L.dust(3, t, { count: 50, color: '#ff6a4a', opacity: .5 })
-      : W(room('gala', t) + crowd(12, 1500, 110, 4) + RIM(K.sovereign(540, 1660, 360, { arms: ['hang', 'raise'], yaw: 0 }), 'gala'), t, d, 1, 1.06, 540, 1120) },
+      : W(room('gala', t) + crowd(12, 1480, 110, 4)
+        + [[80, 1600, 14], [225, 1615, 10], [1010, 1600, -12]].map(([x, y, yw]) => spearman(x, y, 240, yw)).join('')
+        + RIM(K.aja(820, 1700, 285, { yaw: -10, brow: 'angry', mouth: 'smirk', arms: ['guard', 'hip'] }), 'gala') + ajaBlade(820, 1700, 285, -10)
+        + RIM(K.sovereign(430, 1700, 345, { arms: ['halt', 'halt'], yaw: 4, brow: 'angry', mouth: t > .3 && t < 2.6 ? ['open', 'talk'][Math.floor(t * 6) % 2] : 'flat' }), 'gala'), t, d, 1, 1.06, 540, 1120) },
   // 11. civil war
   { start: 'just like that', pop: 'civil war', l1: 'JUST LIKE THAT...', l2: 'CIVIL WAR.', mood: 'void',
     art: (t, p, pt, d) => `<rect width="540" height="1920" fill="#5e1012"/><rect x="540" width="540" height="1920" fill="#162a54"/>` + W(banner(110, 560, 320, 820, '#a81f1c', K.cassius ? `<g transform="translate(270 900)">${require('./chibi2.js').lionFace(0, 0, 110, '#b8862a', '#e6bb5c', '#5a3a10')}</g>` : '')
@@ -129,7 +149,7 @@ const BEATS = [
     art: (t, p, pt, d) => W(room('space', t, { deck: true, floorY: 1440 }) + (p ? slideIn(RIM(K.ragnar(720, 1680, 360, { yaw: -12 }), 'space'), 260, pt / .5) : '') + RIM(K.darrow(300, 1680, 320, { yaw: 16, arms: ['hang', 'table'] }), 'space'), t, d, 1, 1.06, 540, 1120) },
   // 13. Lorn
   { start: 'lorn the old', pop: 'who taught', l1: 'LORN, THE OLD RAGE KNIGHT.', l2: 'WHO TAUGHT HIM THE BLADE.', l2color: 'gold', mood: 'void',
-    art: (t, p, pt, d) => W(L.skyOrRoom('void', t, { floorY: 1450 }) + L.glow(540, 900, 600, '#9fc0ff', .25) + L.dust(5, t, { count: 50, color: '#e8f2ff', opacity: .6 }) + RIM(K.lorn(560, 1680, 360, { yaw: -8, arms: ['hang', 'sword'] }), 'void'), t, d, 1, 1.07, 540, 1120) },
+    art: (t, p, pt, d) => W(L.skyOrRoom('void', t, { floorY: 1450 }) + L.glow(540, 900, 600, '#9fc0ff', .25) + L.dust(5, t, { count: 50, color: '#e8f2ff', opacity: .6 }) + RIM(K.lorn(560, 1680, 360, { yaw: 0, arms: ['pommel', 'pommel'] }), 'void') + pommelSword(560, 1680, 360), t, d, 1, 1.07, 540, 1120) },
   // 14. Sevro + Howlers (one woman, one with normal blonde hair)
   { start: 'sevro and his', pop: 'howlers', l1: 'SEVRO...', l2: 'AND HIS HOWLERS.', l2color: 'gold', mood: 'mars',
     art: (t, p, pt, d) => { const H = [[170, 14, { hair: 'long', kitOverride: { hairLong: true, hair: 'short', hairCol: '#e8b84a', over: [] } }], [380, 14, { kitOverride: { hair: 'short', hairCol: '#e6c46a', over: [] } }], [700, -14, { kitOverride: { over: ['mohawk'], hairCol: '#d9a63c' } }], [910, -14, { kitOverride: { hair: 'curls', hairCol: '#c99a34', over: [] } }]];
