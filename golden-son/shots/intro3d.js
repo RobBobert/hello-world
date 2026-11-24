@@ -64,6 +64,8 @@ const SAY_D = [1.55, 13.5], SAY_C = [14.65, 17.3];
 
 function intro(t) {
   const C = camera(t);
+  const lightAt = (x, y0, z, hpx) => { const p0 = proj(C, x, y0, z), p1 = proj(C, x + .22, y0, z + .5); if (p0.d < .2 || p1.d < .2) return { k: 0, q: .01 };
+    const vx = p1.X - p0.X, vy = p1.Y - p0.Y; let q = vy / hpx; if (Math.abs(q) < .03) q = .03 * (q < 0 ? -1 : 1); return { k: cl(vx / (q * hpx), -3, 3), q: cl(q, -.6, .6) }; };
   // ---- Darrow: falls onto the steak, steps toward Cassius, draws + points the razor
   const fall = t < LAND ? 3.2 * Math.pow(1 - t / LAND, 2) : 0;
   const stepU = cl((t - STEP[0]) / (STEP[1] - STEP[0])), dz = 0.22 * io(stepU), bob = Math.abs(Math.sin(stepU * Math.PI * 2)) * 0.03;
@@ -71,14 +73,14 @@ function intro(t) {
   const dArm = t >= ORBIT[1] - .45 ? 'hang' : t >= POINT ? 'bladePoint' : t >= DRAW[0] ? 'bladeUp' : 'hang'; // lowers the razor once the camera is behind him
   const pd = proj(C, dp.x, TOP + fall + bob, dp.z), sD = pd.sc * 1.0 / HCH;
   const yD = yawFor(C, dp.x, dp.z, CAS.x - dp.x, CAS.z - dp.z), dBack = Math.abs(yD) > 100;
-  const darrow = K.darrow(pd.X, pd.Y, sD, { yaw: dBack ? 180 : cl(yD, -45, 45), back: dBack, mouth: t >= SAY_D[0] && t < SAY_D[1] ? envMouth(t, 'flat') : (t > LAND + .3 ? 'smirk' : 'flat'), brow: 'angry',
+  const darrow = K.darrow(pd.X, pd.Y, sD, { light: lightAt(dp.x, TOP, dp.z, HCH * sD), yaw: dBack ? 180 : cl(yD, -45, 45), back: dBack, mouth: t >= SAY_D[0] && t < SAY_D[1] ? envMouth(t, 'flat') : (t > LAND + .3 ? 'smirk' : 'flat'), brow: 'angry',
     arms: [dArm, 'hang'], drawn: t < ORBIT[1] - .45, wind: t });
   // ---- Cassius: seated (legs hidden), wine stain from WINE on, leans back + sips after the orbit
   const sipU = cl((t - SIP[0]) / (SIP[1] - SIP[0])), lean = -5 * io(cl((t - ORBIT[1]) / .5));
   const pc = proj(C, CAS.x, 0.08, CAS.z), sC = pc.sc * 1.0 / HCH;
   const yC = yawFor(C, CAS.x, CAS.z, dp.x - CAS.x, dp.z - CAS.z), cBack = Math.abs(yC) > 100;
   const raise = !cBack && t > SIP[0] - .25 && t < SIP[1] + .2;
-  const cas = K.cassius(pc.X, pc.Y, sC, { yaw: cBack ? 180 : cl(yC, -40, 40), back: cBack, brow: t > WINE && t < ORBIT[1] ? 'angry' : 'soft',
+  const cas = K.cassius(pc.X, pc.Y, sC, { noShadow: true, yaw: cBack ? 180 : cl(yC, -40, 40), back: cBack, brow: t > WINE && t < ORBIT[1] ? 'angry' : 'soft',
     mouth: t >= SAY_C[0] && t < SAY_C[1] ? envMouth(t, 'flat') : (t > WINE && t < ORBIT[1] ? 'frown' : 'smirk'), blink: false, arms: raise ? ['table', 'raise'] : ['table', 'table'] });
   const kC = -(cBack ? 0 : cl(yC, -40, 40)) * sC * 0.0016;
   const gob = (x, y, s) => `<g transform="translate(${f(x)} ${f(y)}) scale(${f(s)})"><path d="M-22 -40 h44 l-6 34 q-6 14 -16 14 q-10 0 -16 -14 z" fill="#e2a93b" stroke="#1b1210" stroke-width="5" stroke-linejoin="round"/><path d="M-17 -34 h34 l-2 10 h-30z" fill="#8f1018"/><path d="M-4 8 v18 h-12 v7 h32 v-7 h-12 v-18z" fill="#c98f2a" stroke="#1b1210" stroke-width="4"/></g>`;
@@ -117,7 +119,9 @@ function intro(t) {
   const spin = cl(C.spinV / 2.2), pan = -C.th / Math.PI * 1500;
   const off = ((pan % W) + W) % W - W;
   const hall = `<filter id="ib" x="-10%" y="0" width="120%" height="100%"><feGaussianBlur stdDeviation="${f(spin * 14)} 0"/></filter><g filter="url(#ib)">${[0, 1, 2].map(i => `<g transform="translate(${f(off + i * W)} ${f(C.hz - 1010)})">${MONO}${L.skyOrRoom('gala', t, { floorY: 1470 })}</g></g>`).join('')}</g>`;
-  const floor = `<defs><linearGradient id="flr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6a6c76"/><stop offset="1" stop-color="#34343c"/></linearGradient></defs><rect x="0" y="${f(C.hz + 40)}" width="${W}" height="${f(H - C.hz)}" fill="url(#flr)"/>`;
+  const fl = []; for (let gx = -6; gx <= 6; gx += .6) { const a1 = proj(C, gx, 0, -4), b1 = proj(C, gx, 0, 5); if (a1.d > .3 && b1.d > .3) fl.push(`M${f(a1.X)} ${f(a1.Y)} L${f(b1.X)} ${f(b1.Y)}`); }
+  for (let gz = -4; gz <= 5; gz += .6) { const a1 = proj(C, -6, 0, gz), b1 = proj(C, 6, 0, gz); if (a1.d > .3 && b1.d > .3) fl.push(`M${f(a1.X)} ${f(a1.Y)} L${f(b1.X)} ${f(b1.Y)}`); }
+  const floor = `<defs><linearGradient id="flr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4c5a"/><stop offset=".5" stop-color="#3a3c4a"/><stop offset="1" stop-color="#262632"/></linearGradient><radialGradient id="flg" cx=".5" cy=".2" r=".7"><stop offset="0" stop-color="#cfd6ff" stop-opacity=".22"/><stop offset="1" stop-color="#cfd6ff" stop-opacity="0"/></radialGradient></defs><rect x="0" y="${f(C.hz + 40)}" width="${W}" height="${f(H - C.hz)}" fill="url(#flr)"/><path d="${fl.join(' ')}" stroke="#8a90a8" stroke-width="2" opacity=".35" fill="none"/><rect x="0" y="${f(C.hz + 40)}" width="${W}" height="${f(H - C.hz)}" fill="url(#flg)"/>`;
   // ---- the long Bellona table: family seated (some with Cassius's curls), a few on their feet, angry, all eyes on Darrow
   const wrap = (svg, d, id) => d < 1.35 ? `<filter id="${id}"><feGaussianBlur stdDeviation="${f(cl((1.35 - d) * 16, 0, 8))}"/></filter><g filter="url(#${id})">${svg}</g>` : svg;
   const far = [], near = [], props = [];
@@ -138,6 +142,18 @@ function intro(t) {
     { x: 1.0, z: -.95, hair: 'spikes', hc: '#c99a34', stand: true, brow: 'angry', mouth: 'shout', arms: ['hang', 'thrust'], fill: '#24407a' },
     { x: 2.05, z: -.8, hair: 'long', hc: '#f0c868', brow: 'angry', mouth: 'flat', fill: '#2b4a8a' },
     // standing rows of the family watching
+    { x: -0.35, z: 2.75, hair: 'curls', hc: '#e2b24a', stand: true, brow: 'soft', mouth: 'frown', arms: ['hip', 'hip'], fill: '#2b4a8a' },
+    { x: 0.30, z: 2.75, hair: 'short', hc: '#dcae48', stand: true, brow: 'angry', mouth: 'flat', arms: ['hang', 'hang'], fill: '#24407a' },
+    { x: 0.95, z: 2.75, hair: 'long', hc: '#f0c868', stand: true, brow: 'soft', mouth: 'flat', arms: ['hang', 'hang'], fill: '#33558f' },
+    { x: 1.60, z: 2.75, hair: 'spikes', hc: '#e0aa40', stand: true, brow: 'angry', mouth: 'frown', arms: ['hip', 'hang'], fill: '#1f3a70' },
+    { x: 2.25, z: 2.75, hair: 'curls', hc: '#e8c060', stand: true, brow: 'soft', mouth: 'flat', arms: ['hang', 'hip'], fill: '#2b4a8a' },
+    { x: 2.90, z: 2.75, hair: 'short', hc: '#d6a23c', stand: true, brow: 'angry', mouth: 'flat', arms: ['hang', 'hang'], fill: '#24407a' },
+    { x: -0.05, z: 3.45, hair: 'long', hc: '#d9b25a', stand: true, brow: 'soft', mouth: 'frown', arms: ['hip', 'hang'], fill: '#33558f' },
+    { x: 0.60, z: 3.45, hair: 'curls', hc: '#c9962e', stand: true, brow: 'angry', mouth: 'flat', arms: ['hang', 'hang'], fill: '#1f3a70' },
+    { x: 1.25, z: 3.45, hair: 'curls', hc: '#e2b24a', stand: true, brow: 'soft', mouth: 'flat', arms: ['hang', 'hip'], fill: '#2b4a8a' },
+    { x: 1.90, z: 3.45, hair: 'short', hc: '#dcae48', stand: true, brow: 'angry', mouth: 'frown', arms: ['hip', 'hang'], fill: '#24407a' },
+    { x: 2.55, z: 3.45, hair: 'long', hc: '#f0c868', stand: true, brow: 'soft', mouth: 'flat', arms: ['hang', 'hang'], fill: '#33558f' },
+    { x: 3.20, z: 3.45, hair: 'spikes', hc: '#e0aa40', stand: true, brow: 'angry', mouth: 'flat', arms: ['hang', 'hang'], fill: '#1f3a70' },
     { x: -4.10, z: -1.75, hair: 'curls', hc: '#d6a23c', stand: true, brow: 'soft', mouth: 'flat', arms: ['hip', 'hip'], fill: '#2b4a8a' },
     { x: -3.40, z: -1.75, hair: 'short', hc: '#c9962e', stand: true, brow: 'angry', mouth: 'frown', arms: ['hang', 'hang'], fill: '#24407a' },
     { x: -2.80, z: -1.75, hair: 'long', hc: '#d9b25a', stand: true, brow: 'angry', mouth: 'flat', arms: ['hang', 'hang'], fill: '#33558f' },
@@ -160,10 +176,11 @@ function intro(t) {
   GUESTS.forEach((g, gi) => { const sg = Math.sign(g.z), p = proj(C, g.x, g.stand ? 0 : .08, g.z); if (p.d < .35 || p.X < -700 || p.X > W + 700) return;
     const s0 = p.sc * (g.stand ? 1.25 : 1) / HCH, yw = yawFor(C, g.x, g.z, dp.x - g.x, dp.z - g.z), back = Math.abs(yw) > 100;
     const mouth = g.mouth === 'shout' ? (t > 13.0 && t < 14.6 ? ['open', 'talk'][Math.floor(t * 7 + gi) % 2] : 'flat') : g.mouth;
-    const fig = K.karnus(p.X, p.Y, s0 / 1.12, { yaw: back ? 180 : cl(yw, -40, 40), back, brow: t > LAND ? g.brow : 'soft', mouth: t > LAND ? mouth : 'flat', arms: g.stand ? g.arms : ['table', 'table'],
+    const fig = K.karnus(p.X, p.Y, s0 / 1.12, { light: g.stand ? lightAt(g.x, 0, g.z, HCH * s0) : undefined, noShadow: !g.stand, yaw: back ? 180 : cl(yw, -40, 40), back, brow: t > LAND ? g.brow : 'soft', mouth: t > LAND ? mouth : 'flat', arms: g.stand ? g.arms : ['table', 'table'],
       kitOverride: { hair: g.hair === 'long' ? 'short' : g.hair, hairLong: g.hair === 'long', hairCol: g.hc, over: [], fill: g.fill, cape: g.stand ? '#1b2f5c' : undefined } });
     const body = L.rimLight(fig, 'gala'), ch = g.stand ? '' : chair(g.x, g.z, sg), svg = back ? body + ch : ch + body;
-    (isFar(g.z) ? far : near).push({ d: p.d, svg: wrap(svg, p.d, 'gb' + gi) });
+    const svgD = p.d > 2.4 ? `<filter id="gf${gi}"><feGaussianBlur stdDeviation="${f(cl((p.d - 2.4) * 1.6, 0, 3))}"/><feColorMatrix type="saturate" values=".75"/></filter><g filter="url(#gf${gi})" opacity=".92">${svg}</g>` : svg;
+    (isFar(g.z) ? far : near).push({ d: p.d, svg: wrap(svgD, p.d, 'gb' + gi) });
     if (!g.stand) props.push(plateAt(g.x, sg * .3)); });
   // Cassius + his chair + plate
   const casChair = chair(CAS.x, CAS.z, 1), casFull = cBack ? casSvg + casChair : casChair + casSvg;
