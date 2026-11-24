@@ -22,9 +22,9 @@ const longBlade = (x, y, S, yaw) => { const k = -yaw * S * .0016, hx = x + k - .
       return C2.moonBlade(ox, oy, bs, -48, -1) + `<circle cx="${hx.toFixed(1)}" cy="${hy.toFixed(1)}" r="${(S * .085).toFixed(1)}" fill="#e9c3a0" stroke="#1b1210" stroke-width="${(S * .035).toFixed(1)}"/>`; })()
   const html = `<!doctype html><style>@font-face{font-family:Anton;src:url(${font('anton.woff2')})}@font-face{font-family:Cinzel;font-weight:700;src:url(${font('cinzel700.woff2')})}
     body{margin:0;width:${W}px;height:${H}px;overflow:hidden}svg{position:absolute;inset:0}
-    .t{position:absolute;top:300px;left:40px;right:40px;text-align:center;font-family:Anton;text-transform:uppercase;line-height:1.05;-webkit-text-stroke:3px #120c0a;paint-order:stroke fill;text-shadow:0 7px 0 rgba(0,0,0,.55)}
-    .a{font-size:120px;color:#f6ead2}.c{font-size:98px;color:#e8372c;white-space:nowrap}
-    .lab{position:absolute;top:1590px;width:100%;text-align:center;font-family:Cinzel;font-weight:700;font-size:62px;color:#f6ead2;text-shadow:0 4px 0 rgba(0,0,0,.5)}</style>
+    .t{position:absolute;top:250px;left:20px;right:20px;text-align:center;font-family:Anton;text-transform:uppercase;line-height:1.05;-webkit-text-stroke:3px #120c0a;paint-order:stroke fill;text-shadow:0 7px 0 rgba(0,0,0,.55)}
+    .a{font-size:150px;color:#f6ead2}.c{font-size:114px;color:#e8372c;white-space:nowrap}
+    .lab{position:absolute;top:1590px;width:100%;text-align:center;font-family:Cinzel;font-weight:700;font-size:76px;color:#f6ead2;text-shadow:0 4px 0 rgba(0,0,0,.5)}</style>
     <svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}">${L.defs()}${bg}${art}</svg>
     <div class="t"><div class="a">HE WON MARS.</div><div class="c">AND LOST EVERYTHING.</div></div>
     <div class="lab">GOLDEN SON · BOOK 2</div>`;
