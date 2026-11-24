@@ -72,7 +72,7 @@ function intro(t) {
   const pd = proj(C, dp.x, TOP + fall + bob, dp.z), sD = pd.sc * 1.0 / HCH;
   const yD = yawFor(C, dp.x, dp.z, CAS.x - dp.x, CAS.z - dp.z), dBack = Math.abs(yD) > 100;
   const darrow = K.darrow(pd.X, pd.Y, sD, { yaw: dBack ? 180 : cl(yD, -45, 45), back: dBack, mouth: t >= SAY_D[0] && t < SAY_D[1] ? envMouth(t, 'flat') : (t > LAND + .3 ? 'smirk' : 'flat'), brow: 'angry',
-    arms: dBack ? ['hang', dArm] : ['hang', dArm], drawn: true, wind: t });
+    arms: [dArm, 'hang'], drawn: true, wind: t });
   // ---- Cassius: seated (legs hidden), wine stain from WINE on, leans back + sips after the orbit
   const sipU = cl((t - SIP[0]) / (SIP[1] - SIP[0])), lean = -5 * io(cl((t - ORBIT[1]) / .5));
   const pc = proj(C, CAS.x, 0.08, CAS.z), sC = pc.sc * 1.0 / HCH;
