@@ -68,11 +68,11 @@ function intro(t) {
   const fall = t < LAND ? 3.2 * Math.pow(1 - t / LAND, 2) : 0;
   const stepU = cl((t - STEP[0]) / (STEP[1] - STEP[0])), dz = 0.22 * io(stepU), bob = Math.abs(Math.sin(stepU * Math.PI * 2)) * 0.03;
   const dp = { x: D0.x, z: D0.z + dz };
-  const dArm = t >= POINT ? 'bladePoint' : t >= DRAW[0] ? 'bladeUp' : 'hang';
+  const dArm = t >= ORBIT[1] - .45 ? 'hang' : t >= POINT ? 'bladePoint' : t >= DRAW[0] ? 'bladeUp' : 'hang'; // lowers the razor once the camera is behind him
   const pd = proj(C, dp.x, TOP + fall + bob, dp.z), sD = pd.sc * 1.0 / HCH;
   const yD = yawFor(C, dp.x, dp.z, CAS.x - dp.x, CAS.z - dp.z), dBack = Math.abs(yD) > 100;
   const darrow = K.darrow(pd.X, pd.Y, sD, { yaw: dBack ? 180 : cl(yD, -45, 45), back: dBack, mouth: t >= SAY_D[0] && t < SAY_D[1] ? envMouth(t, 'flat') : (t > LAND + .3 ? 'smirk' : 'flat'), brow: 'angry',
-    arms: [dArm, 'hang'], drawn: true, wind: t });
+    arms: [dArm, 'hang'], drawn: t < ORBIT[1] - .45, wind: t });
   // ---- Cassius: seated (legs hidden), wine stain from WINE on, leans back + sips after the orbit
   const sipU = cl((t - SIP[0]) / (SIP[1] - SIP[0])), lean = -5 * io(cl((t - ORBIT[1]) / .5));
   const pc = proj(C, CAS.x, 0.08, CAS.z), sC = pc.sc * 1.0 / HCH;
