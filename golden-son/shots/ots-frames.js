@@ -13,11 +13,11 @@ const crowd = (n, y, s, col = '#14141c') => { let o = ''; for (let i = 0; i < n;
 const wine = (x, y, s) => `<path d="M${x - s * .18} ${y - s * 1.3} q${s * .06} ${s * .1} ${s * .02} ${s * .26} q${s * .1} ${s * .02} ${s * .08} ${s * .18} q${-s * .12} ${s * .04} ${-s * .2} ${-s * .06} q${-s * .06} ${-s * .18} ${s * .1} ${-s * .38}Z" fill="#7a1018" opacity=".78"/>`;
 const FRAMES = {
   // A: over Cassius's shoulder (fg right), looking up at Darrow on the table
-  'ots-cassius': () => {
+  'ots-cassius': (dArms = ['hang', 'hang']) => {
     const TY = 1330;
     const table = `<rect x="-200" y="${TY}" width="1480" height="700" fill="#2b4a8a"/><rect x="-200" y="${TY}" width="1480" height="18" fill="#d8e0ea"/><rect x="-200" y="${TY + 18}" width="1480" height="40" fill="#1b2f5c"/>`;
     return room(0) + crowd(12, 1290, 90) + table + steak(560, TY, .9, true) + `<g transform="translate(150 ${TY}) "><path d="M-22 -100 h44 l-7 52 h-10 v34 h18 v12 h-46 v-12 h18 v-34 h-10z" fill="#e2a93b" stroke="#1b1210" stroke-width="5" transform="rotate(75)"/></g>`
-      + L.floorShadow(430, TY + 6, 200, { mood: 'gala' }) + L.rimLight(K.darrow(430, TY, 300, { yaw: -14, pitch: -8, mouth: 'smirk', brow: 'angry', arms: ['hang', 'hang'] }), 'gala')
+      + L.floorShadow(430, TY + 6, 200, { mood: 'gala' }) + L.rimLight(K.darrow(430, TY, 300, { yaw: -14, pitch: -8, mouth: 'smirk', brow: 'angry', arms: dArms }), 'gala')
       + L.dof('near', L.rimLight(K.cassius(840, 2520, 640, { back: true, yaw: 180, arms: ['table', 'table'] }), 'gala'));
   },
   // B: over Darrow's shoulder (fg left, from behind/above), looking down at Cassius seated
