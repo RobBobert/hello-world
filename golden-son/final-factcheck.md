@@ -86,3 +86,11 @@ Not verifiable from sources and kept as style only: Darrow's smirk, the sun embl
 - Lorn: gray hair and beard per the user's reference (an old Gold; exception to the golden-hair rule), black robe, hands on
   the pommel of a planted sword.
 - Intro: Darrow's "Cassius." removed; camera arcs around Darrow and eases in on his eyes during the speech.
+
+## Pass 2 addendum (v13)
+- **Karnus:** sources: Darrow storms the Sovereign's ship alone during the battle and kills Karnus there (then Aja subdues him).
+  Fixed: the Iron Rain wolf-strike victim is now an unnamed Bellona knight (curly hair, no Karnus spikes). Karnus's shipboard
+  death is not shown (the narration doesn't cover it).
+- **Sevro's eyes:** sources: in Golden Son he has a bionic replacement eye; he gets Darrow's original red eyes in Morning Star.
+  Video still shows the user's eye patch — pending user decision (bionic eye would be book-accurate for Golden Son).
+- End card avatar replaced with the user's full-quality image; 1 s cover frame (golden-son-cover.png) appended after the end card.

@@ -108,7 +108,8 @@ function rain(t) {
   // enemies (Bellona Golds)
   const foes = [[700, 'karnus'], [850, 'guard'], [960, 'guard']];
   foes.forEach(([x, kind], i) => { const tc = CUTS[i], hit = t > tc, u = hit ? eo((t - tc) / .5) : 0, adv = t < tc ? lerp(80, 0, eo((t - LAND) / 1)) : 0;
-    const fig = (kind === 'karnus' ? K.karnus : K.guard)(x + adv, FY, kind === 'karnus' ? 280 : 250, { yaw: -16, brow: hit ? 'sad' : 'angry', mouth: 'frown', arms: hit ? ['cross', 'cross'] : ['hang', 'thrust'], kitOverride: kind === 'guard' ? { over: [], hair: 'short', scar: true, sleeve: '#16294a', fore: '#2b4a8a', fill: '#2b4a8a', shade: '#16294a', trim: '#d8e0ea', hairCol: '#d9b25a', leg: '#16294a' } : {} });
+    const fig = (kind === 'karnus' ? K.karnus : K.guard)(x + adv, FY, kind === 'karnus' ? 270 : 250, { // first victim: an unnamed Bellona knight (Karnus actually dies later, aboard the Sovereign's ship)
+      yaw: -16, brow: hit ? 'sad' : 'angry', mouth: 'frown', arms: hit ? ['cross', 'cross'] : ['hang', 'thrust'], kitOverride: kind === 'guard' ? { over: [], sigil: null, hair: 'short', scar: true, sleeve: '#16294a', fore: '#2b4a8a', fill: '#2b4a8a', shade: '#16294a', trim: '#d8e0ea', hairCol: '#d9b25a', leg: '#16294a' } : { hair: 'curls', hairCol: '#d9a93e' } });
     s += `<g transform="translate(${f(160 * u)} ${f(40 * u)}) rotate(${f(70 * u)} ${f(x)} ${FY})" opacity="${f(1 - .85 * cl((t - tc - .25) / .4))}">${L.rimLight(fig, 'mars')}</g>`; });
   // Darrow slices: pose + whip razor sweeping toward the current foe
   const ci = CUTS.findIndex(c => t < c + .35), tc = CUTS[Math.max(0, ci)] ?? CUTS[2], ph = t - (tc - .3);

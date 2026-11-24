@@ -24,7 +24,7 @@ const PAGE = `<!doctype html><style>@font-face{font-family:Anton;src:url(${font(
   .l1,.l2{font-size:84px;letter-spacing:1px;-webkit-text-stroke:2px #120c0a;paint-order:stroke fill;text-shadow:0 5px 0 rgba(0,0,0,.55),0 0 40px rgba(0,0,0,.6)}.l1{color:#f6ead2}.l2 span{display:inline-block}
   .plate{position:absolute;left:70px;right:70px;top:230px;border-radius:40px;background:radial-gradient(ellipse at center,rgba(8,4,6,.62) 0%,rgba(8,4,6,.45) 60%,rgba(8,4,6,0) 100%)}
   .sm .l1,.sm .l2{font-size:72px}
-  .outcap{top:400px;left:100px;right:100px}.outcap .l1,.outcap .l2{font-size:100px}.av{position:absolute;left:375px;top:680px;width:330px;height:330px;border-radius:50%;border:12px solid #e2a93b;box-sizing:border-box;background:url(${AV}) center/118% no-repeat}
+  .outcap{top:400px;left:100px;right:100px}.outcap .l1,.outcap .l2{font-size:100px}.av{position:absolute;left:375px;top:680px;width:330px;height:330px;border-radius:50%;border:12px solid #e2a93b;box-sizing:border-box;background:url(${AV}) center/100% no-repeat}
   .oh{position:absolute;top:1030px;width:100%;text-align:center;font-family:Cinzel;font-weight:700;font-size:62px;color:#f6ead2}
   .oq{position:absolute;top:1150px;left:130px;right:130px;line-height:1.12;text-align:center;font-family:Cinzel;font-weight:700;font-size:60px;color:#f6ead2;font-variant:small-caps}
   .oa{position:absolute;top:1238px;left:130px;right:130px;line-height:1.12;text-align:center;font-family:Cinzel;font-weight:700;font-size:54px;color:#e2a93b;font-variant:small-caps}</style><div id="w"></div>`;
