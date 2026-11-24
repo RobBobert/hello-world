@@ -16,7 +16,9 @@ const longBlade = (x, y, S, yaw) => { const k = -yaw * S * .0016, hx = x + k - .
     <rect width="${W}" height="${H}" fill="url(#g2)"/><path d="M0 0 H690 L360 ${H} H0 Z" fill="url(#g1)"/>
     <path d="M690 0 L360 ${H}" stroke="#f6ead2" stroke-width="6" opacity=".55"/>`;
   const art = L.rimLight(K.cassius(300, 1530, 315, { yaw: 14, brow: 'angry', mouth: 'frown', arms: ['guard', 'hang'] }), 'gala') + longBlade(300, 1530, 315, 14)
-    + L.rimLight(K.darrow(720, 1530, 340, { yaw: -14, brow: 'angry', mouth: 'smirk', arms: ['hang', 'blade'], drawn: true }), 'triumph');
+    + L.rimLight(K.darrow(720, 1530, 340, { yaw: -14, brow: 'angry', mouth: 'smirk', arms: ['hang', 'hang'], armed: true }), 'triumph')
+    + (() => { const S = 340, k = 14 * S * .0016, hx = 720 + k + .33 * S + .22 * S, hy = 1530 - 1.55 * S + .1 * S + .85 * S; // razor angled up across his chest
+      return C2.moonBlade(hx, hy, S * .9, -48, -1) + `<circle cx="${hx.toFixed(1)}" cy="${hy.toFixed(1)}" r="${(S * .085).toFixed(1)}" fill="#e9c3a0" stroke="#1b1210" stroke-width="${(S * .035).toFixed(1)}"/>`; })()
   const html = `<!doctype html><style>@font-face{font-family:Anton;src:url(${font('anton.woff2')})}@font-face{font-family:Cinzel;font-weight:700;src:url(${font('cinzel700.woff2')})}
     body{margin:0;width:${W}px;height:${H}px;overflow:hidden}svg{position:absolute;inset:0}
     .t{position:absolute;top:300px;left:40px;right:40px;text-align:center;font-family:Anton;text-transform:uppercase;line-height:1.05;-webkit-text-stroke:3px #120c0a;paint-order:stroke fill;text-shadow:0 7px 0 rgba(0,0,0,.55)}
