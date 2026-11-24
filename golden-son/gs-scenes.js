@@ -1,6 +1,6 @@
 // GOLDEN SON in 2 minutes: all beats, chibi v2 cast in lit sets, calm camera.
 // Each beat: start/pop cue (spoken words), captions, mood, art(t, p, pt) -> SVG (world space 1080x1920).
-const L = require('./lighting.js'), K = require('./cast.js'), ACT = require('./shots/action-preview.js'), OTS = require('./shots/ots-frames.js');
+const L = require('./lighting.js'), K = require('./cast.js'), ACT = require('./shots/action-preview.js'), OTS = require('./shots/ots-frames.js'), INTRO = require('./shots/intro3d.js');
 const cl = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v)), io = u => { u = cl(u); return u < .5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2; };
 const eo = u => 1 - Math.pow(1 - cl(u), 3), lerp = (a, b, u) => a + (b - a) * u;
 const f = v => v.toFixed(1);
@@ -72,7 +72,7 @@ function opening(t) {
 const ACT_IMPACT = (x, y, u) => { if (u < 0 || u > 1) return ''; let o = ''; for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2, r0 = 40 + 300 * eo(u), r1 = r0 + 130 * (1 - u); o += `<line x1="${f(x + Math.cos(a) * r0)}" y1="${f(y + Math.sin(a) * r0 * .5)}" x2="${f(x + Math.cos(a) * r1)}" y2="${f(y + Math.sin(a) * r1 * .5)}" stroke="#fff6d0" stroke-width="${f(14 * (1 - u))}" stroke-linecap="round"/>`; } return o; };
 
 const BEATS = [
-  { fixed: true, t0f: 0, t1f: OPEN, l1: '', mood: 'gala', dialog: [[3.65, 'CASSIUS.'], [7.8, 'DARROW.']], raw: sdFrame, art: (t) => opening(t) },
+  { fixed: true, t0f: 0, t1f: OPEN, l1: '', mood: 'gala', dialog: [[3.65, 'CASSIUS.'], [7.8, 'DARROW.']], art: (t) => INTRO.intro(t) },
   // 1. continues from the opening: Darrow on the table, Cassius stained
   { start: 'house bellona wants', pop: 'so he walks', l1: 'HOUSE BELLONA WANTS HIM DEAD.', l2: 'SO HE WALKS ACROSS THEIR TABLE.', mood: 'gala',
     art: (t, p, pt, d) => W(room('gala', t) + RIM(K.cassius(790, TY + 310, 330, { yaw: -18, brow: 'angry', mouth: 'frown', arms: ['table', 'table'] }), 'gala') + OTS.wine(790, TY + 310, 330) + tableG(t, { land: -8 })
@@ -124,7 +124,7 @@ const BEATS = [
     art: (t, p, pt, d) => W(L.skyOrRoom('void', t, { floorY: 1450 }) + L.glow(540, 900, 600, '#9fc0ff', .25) + L.dust(5, t, { count: 50, color: '#e8f2ff', opacity: .6 }) + RIM(K.lorn(560, 1680, 360, { yaw: -8, arms: ['hang', 'sword'] }), 'void'), t, d, 1, 1.07, 540, 1120) },
   // 14. Sevro + Howlers (one woman, one with normal blonde hair)
   { start: 'sevro and his', pop: 'howlers', l1: 'SEVRO...', l2: 'AND HIS HOWLERS.', l2color: 'gold', mood: 'mars',
-    art: (t, p, pt, d) => { const H = [[170, 14, { hair: 'long', kitOverride: { hairLong: true, hair: 'short', hairCol: '#3a2418', over: [] } }], [380, 14, { kitOverride: { hair: 'short', hairCol: '#e6c46a', over: [] } }], [700, -14, { kitOverride: { over: ['mohawk'], hairCol: '#2a2420' } }], [910, -14, { kitOverride: { hair: 'short', hairCol: '#8a5a2a', over: [] } }]];
+    art: (t, p, pt, d) => { const H = [[170, 14, { hair: 'long', kitOverride: { hairLong: true, hair: 'short', hairCol: '#e8b84a', over: [] } }], [380, 14, { kitOverride: { hair: 'short', hairCol: '#e6c46a', over: [] } }], [700, -14, { kitOverride: { over: ['mohawk'], hairCol: '#d9a63c' } }], [910, -14, { kitOverride: { hair: 'curls', hairCol: '#c99a34', over: [] } }]];
       return W(room('mars', t, { sunX: 760, sunH: 300, floorY: 1440 }) + (p ? H.map(([x, yw, o], i) => slideIn(RIM(K.sevro(x, 1600, 230, { yaw: yw, mouth: 'flat', brow: 'angry', ...o }), 'mars'), i < 2 ? -200 : 200, (pt - i * .08) / .4)).join('') : '')
         + RIM(K.sevro(540, 1700, 330, { yaw: 0, mouth: 'smirk', arms: ['hip', 'hip'] }), 'mars'), t, d, 1, 1.06, 540, 1120); } },
   // 15-16. Iron Rain (one continuous action shot: drop, wolf jaws on Karnus, two more cuts)

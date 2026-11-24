@@ -131,7 +131,7 @@ function rain(t) {
     // Karnus silhouette
     const kar = K.karnus(kx, ky, 280, { yaw: -16, brow: 'sad', mouth: 'flat', blink: true, arms: ['raise', 'raise'], kitOverride: { hair: 'none' } });
     const sil = `<g>${kar.replace(/fill="(?!none)[^"]*"/g, 'fill="#050505"').replace(/stroke="[^"]*"/g, `stroke="${red ? '#e8251c' : '#050505'}"`).replace(/stroke-width="([\d.]+)"/g, (m, w) => `stroke-width="${(+w * (red ? 1.4 : 1)).toFixed(1)}"`)}</g>`;
-    const SS = 280 * 1.12, rr = SS * .42, hx = kx - 16 * SS * .0012, hy = ky - SS * 1.55 - rr * .78;
+    const SS = 280 * 1.12, rr = SS * .42, hx = kx, hy = ky - SS * 1.55 - rr + SS * .02;
     const kHair = `<path d="M${f(hx - rr)} ${f(hy - rr * .2)} L${f(hx - rr * .7)} ${f(hy - rr * 1.35)} L${f(hx - rr * .3)} ${f(hy - rr * .95)} L${f(hx)} ${f(hy - rr * 1.55)} L${f(hx + rr * .3)} ${f(hy - rr * .95)} L${f(hx + rr * .72)} ${f(hy - rr * 1.35)} L${f(hx + rr)} ${f(hy - rr * .2)} Z" fill="#050505" stroke="${red ? '#e8251c' : '#050505'}" stroke-width="10" stroke-linejoin="round"/>`;
     const kEyes = red ? [-1, 1].map(d => `<path d="M${f(hx + d * rr * .55)} ${f(hy - rr * .05)} L${f(hx + d * rr * .15)} ${f(hy + rr * .08)}" stroke="#ff2a1a" stroke-width="12" stroke-linecap="round"/>${L.glow(hx + d * rr * .35, hy, 40, '#ff2a1a', .8)}`).join('') : '';
     // white wolf head, manga ink
@@ -165,7 +165,7 @@ function rain(t) {
       </g>`;
     const teethG = `<g transform="translate(${f(cx)} ${f(cy)}) scale(${f(HS)})">${teeth}</g>`;
     const impactLines = snap > 0 ? Array.from({ length: 16 }, (_, i) => { const a = i / 16 * Math.PI * 2; return `<line x1="${f(kx + Math.cos(a) * 260)}" y1="${f(hy + 80 + Math.sin(a) * 260)}" x2="${f(kx + Math.cos(a) * (360 + 200 * snap))}" y2="${f(hy + 80 + Math.sin(a) * (360 + 200 * snap))}" stroke="#e8251c" stroke-width="12" stroke-linecap="round"/>`; }).join('') : '';
-    d += `<g>${sil}${kHair}${kEyes}${head}${teethG}${impactLines}</g>`;
+    d += `<g>${sil}${kHair}${kEyes}<g opacity="${f(.5 - .12 * snap)}">${head}${teethG}</g>${impactLines}</g>`;
   }
   s += d;
   let out = `<g transform="translate(540 1000) scale(${f(lerp(1.0, 1.08, io(t / 6.4)) * 100) / 100}) translate(-560 -1160)">${s}</g>`;

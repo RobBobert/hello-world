@@ -31,7 +31,7 @@ function kit(o) {
 function make(K) {
   return (x, y, s, o = {}) => { const k = kit({ ...K, ...o.kitOverride });
     let svg = build(x, y, s * (K.scale || 1), { ...(K.hairLong ? { hair: 'long' } : {}), ...o }, k);
-    const S = s * (K.scale || 1), yaw = o.yaw ?? k.yaw, r = S * 0.42, hx = x + yaw * S * 0.0012, hy = y - S * 1.55 - r * 0.78;
+    const S = s * (K.scale || 1), yaw = o.yaw ?? k.yaw, r = S * 0.42, hx = x, hy = y - S * 1.55 - r + S * 0.02; // keep in sync with chibi2 build()
     const ov = k.over.map(n => overlay[n](hx, hy, r, k.overCol)).join('');
     if (K.skin) svg = svg.replace(/#f2d3b3/g, K.skin).replace(/#dcae88/g, K.skinSh || '#b98a6a');
     return svg.replace(/<\/g>$/, ov + '</g>');
@@ -44,18 +44,18 @@ const helmetAres = (x, y, s) => { let sp = ''; for (let i = 0; i < 9; i++) { con
   return sp + `<path d="M${f(x - s * .13)} ${f(y + s * .1)} Q${f(x - s * .14)} ${f(y - s * .14)} ${f(x)} ${f(y - s * .15)} Q${f(x + s * .14)} ${f(y - s * .14)} ${f(x + s * .13)} ${f(y + s * .1)} L${f(x + s * .05)} ${f(y + s * .12)} L${f(x + s * .04)} ${f(y)} L${f(x - s * .04)} ${f(y)} L${f(x - s * .05)} ${f(y + s * .12)} Z" fill="#b0231f" stroke="${INK}" stroke-width="${f(s * .02)}" stroke-linejoin="round"/>`; };
 
 const CAST = {
-  augustus: make({ hair: 'short', hairCol: '#c9b27a', fill: '#2a2224', shade: '#120e10', trim: '#e2a93b', cape: '#8f1d16', leg: '#1a1416', brow: 'angry', mouth: 'frown', sigil: (x, y, s) => lionFace(x, y, s * .16, '#b8862a', '#e6bb5c', '#5a3a10'), over: ['crown'], scale: 1.0 }),
+  augustus: make({ hair: 'short', hairCol: '#d9b456', fill: '#2a2224', shade: '#120e10', trim: '#e2a93b', cape: '#8f1d16', leg: '#1a1416', brow: 'angry', mouth: 'frown', sigil: (x, y, s) => lionFace(x, y, s * .16, '#b8862a', '#e6bb5c', '#5a3a10'), over: ['crown'], scale: 1.0 }),
   karnus: make({ hair: 'spikes', hairCol: '#a8782a', fill: '#2b4a8a', shade: '#16294a', trim: '#d8e0ea', cape: '#1b2f5c', leg: '#16294a', brow: 'angry', mouth: 'smirk', sigil: eagle('#d8e0ea'), scale: 1.12 }),
   harmony: make({ hair: 'short', hairCol: '#b3361f', fill: '#3a2a26', shade: '#1e1412', trim: '#b0231f', leg: '#2a1e1a', brow: 'angry', mouth: 'flat', iris: '#8a3a2a', over: ['scar'], scale: .9 }),
   sovereign: make({ hair: 'short', hairCol: '#e6cf8a', fill: '#f2efe8', shade: '#b8b2a6', trim: '#e2a93b', cape: '#e2a93b', leg: '#d8d2c6', brow: 'soft', mouth: 'flat', over: ['bun', 'crown'], overCol: '#e6cf8a', sigil: (x, y, s) => sunEmblem(x, y, s * .12), scale: .92 }),
   ragnar: make({ hair: 'none', hairCol: '#eef2f6', fill: '#2a2a32', shade: '#14141a', trim: '#7fb8ff', leg: '#1e1e24', brow: 'angry', mouth: 'flat', iris: '#1b1210', over: ['tattoo', 'braid'], overCol: '#eef2f6', skin: '#e8e4e0', skinSh: '#c4beb8', sigil: rune, scale: 1.25 }),
-  lorn: make({ hair: 'short', hairCol: '#b8b4ac', fill: '#6a5a3a', shade: '#3a301e', trim: '#c9a24a', cape: '#5a4a3a', leg: '#2a241c', brow: 'soft', mouth: 'flat', over: ['beard'], overCol: '#b8b4ac', scale: 1.0 }),
+  lorn: make({ hair: 'short', hairCol: '#d6bc6a', fill: '#6a5a3a', shade: '#3a301e', trim: '#c9a24a', cape: '#5a4a3a', leg: '#2a241c', brow: 'soft', mouth: 'flat', over: ['beard'], overCol: '#cdb466', scale: 1.0 }),
   sevro: make({ hair: 'none', hairCol: '#c9a24a', fill: '#3a3a3e', shade: '#1e1e22', trim: '#cfd4dc', cape: '#7f8798', leg: '#26262a', brow: 'angry', mouth: 'smirk', over: ['mohawk', 'patchEye'], sigil: wolf, scale: .86 }),
   fitchner: make({ hair: 'short', hairCol: '#b8964a', fill: '#7a6a3a', shade: '#4a3e20', trim: '#c9a24a', leg: '#3a3020', brow: 'soft', mouth: 'smirk', over: ['stubble'], scale: .95 }),
   mustang: make({ hairLong: true, hair: 'short', hairCol: '#f2d27a', over: ['pony'], overCol: '#f2d27a', fill: '#f4ecd8', shade: '#c9b98a', trim: '#e2a93b', leg: '#d8ccb0', brow: 'soft', mouth: 'smile', sigil: (x, y, s) => lionFace(x, y, s * .12, '#e2a93b', '#fff2c4', '#8a6a1a'), scale: .92 }),
   roque: make({ hairLong: true, hair: 'short', hairCol: '#e6c46a', fill: '#5a2e6a', shade: '#2e1838', trim: '#e2a93b', leg: '#2e1838', brow: 'sad', mouth: 'flat', scale: .97 }),
-  jackal: make({ hair: 'short', hairCol: '#c9b27a', fill: '#4a3e2a', shade: '#2a2216', trim: '#c9a24a', leg: '#2a2216', brow: 'soft', mouth: 'smirk', iris: '#c9a24a', arms: ['hang', 'stump'], scale: .9 }),
-  red: make({ hair: 'spikes', hairCol: '#a52617', fill: '#8a3a2a', shade: '#4a1e14', trim: '#c9a24a', leg: '#3a1e14', brow: 'sad', mouth: 'flat', scale: .95 }),
+  jackal: make({ hair: 'short', hairCol: '#e2c062', fill: '#4a3e2a', shade: '#2a2216', trim: '#c9a24a', leg: '#2a2216', brow: 'soft', mouth: 'smirk', iris: '#c9a24a', arms: ['hang', 'stump'], scale: .9 }),
+  red: make({ hair: 'short', hairCol: '#a52617', hairShade: '#6e180e', hairHi: '#e0604a', fill: '#8a3a2a', shade: '#4a1e14', trim: '#c9a24a', leg: '#3a1e14', brow: 'sad', mouth: 'flat', scale: .95 }),
   guard: make({ hair: 'short', hairCol: '#2a2a2a', fill: '#3a3a40', shade: '#1e1e22', trim: '#8a8f98', leg: '#26262a', brow: 'angry', mouth: 'flat', scale: 1 }),
 };
 CAST.darrow = C.darrow; CAST.cassius = C.cassius; CAST.ares = helmetAres;

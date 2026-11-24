@@ -53,3 +53,9 @@ Not verifiable from sources and kept as style only: Darrow's smirk, the sun embl
 | Neck/gorget change | Visual only, no story claim. |
 | Captions / dialog timing | "CASSIUS." on Darrow's line (3.65 s), "DARROW." on Cassius's line (7.8 s); each shows 1.7 s. Narration captions unchanged, all shifted by +2.34 s with the audio. |
 | Still open | Karnus death in Iron Rain (flag), Sevro patch vs bionic eye (user choice), name pronunciation unverified. |
+
+## Pass 2 addendum (v5)
+- Intro rebuilt as one continuous camera move in code (no Seedance footage now). Same dramatized content as before (flagged).
+- Hair: Golds' hair made golden per user (Howlers, Lorn, Augustus, Jackal). Kept true-to-book colors for non-Golds: Harmony (Red), the Red-Darrow hologram (Red), Ragnar (Obsidian, white), guards (Gray). Sevro shown with a gold mohawk — CLAUDE.md notes "dark hair" from earlier; user's call.
+- Darrow's razor holstered in every scene except the intro and the two fight scenes (duel, Iron Rain), where he is using it.
+- Wolf jaws ~50% translucent over the strike. No story claims changed.

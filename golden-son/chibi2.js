@@ -73,7 +73,7 @@ function moonBlade(x, y, s, rot = 0, dir = 1, glow = false) {
 function arm(sx, sy, s, side, pose, col, o) {
   const P = {
     sword: [[side * 0.24, 0.36], [side * 0.3, 0.7]], thrust: [[side * 0.34, 0.08], [side * 0.66, 0.06]], slashUp: [[side * 0.3, -0.25], [side * 0.42, -0.6]], slashDown: [[side * 0.36, 0.22], [side * 0.6, 0.52]], guard: [[side * 0.3, 0.3], [side * 0.12, 0.05]],
-    hang: [[side * 0.17, 0.42], [side * 0.22, 0.85]], stump: [[side * 0.17, 0.42], [side * 0.2, 0.72]], hip: [[side * 0.34, 0.36], [side * 0.08, 0.72]], blade: [[side * 0.26, 0.38], [side * 0.36, 0.76]],
+    hang: [[side * 0.17, 0.42], [side * 0.22, 0.85]], stump: [[side * 0.17, 0.42], [side * 0.2, 0.72]], hip: [[side * 0.34, 0.36], [side * 0.08, 0.72]], blade: [[side * 0.26, 0.38], [side * 0.36, 0.76]], bladeUp: [[side * 0.3, -0.2], [side * 0.36, -0.55]], bladePoint: [[side * 0.32, 0.12], [side * 0.6, 0.18]],
     table: [[side * 0.24, 0.42], [side * -0.02, 0.6]], raise: [[side * 0.26, -0.28], [side * 0.2, -0.62]], cross: [[side * 0.18, 0.4], [side * -0.3, 0.52]],
   }[pose] || [[side * 0.17, 0.42], [side * 0.22, 0.85]];
   const e = [sx + P[0][0] * s, sy + P[0][1] * s], h = [sx + P[1][0] * s, sy + P[1][1] * s], w = s * 0.15, sw = s * 0.04;
@@ -88,7 +88,9 @@ function arm(sx, sy, s, side, pose, col, o) {
     const ctr = [P(s * .1), P(L * .95)].map(p => p.map(f).join(' ')).join(' L');
     blade = `<path d="M${ctr}" stroke="#ffae2a" stroke-width="${f(s * .18)}" opacity=".3" stroke-linecap="round"/><path d="M${pts} Z" fill="#f2f4f8" stroke="${INK}" stroke-width="${f(s * .03)}" stroke-linejoin="round"/><path d="M${ctr}" stroke="#fff" stroke-width="${f(s * .015)}"/><path d="M${pts} Z" fill="none" stroke="#ffd36a" stroke-width="${f(s * .012)}"/>`
       + `<path d="M${[P(s * .06, -s * .14), P(s * .1, -s * .14), P(s * .1, s * .14), P(s * .06, s * .14)].map(p => p.map(f).join(' ')).join(' L')} Z" fill="#ffd36a" stroke="${INK}" stroke-width="${f(s * .02)}"/>`; }
-  if (pose === 'blade') { const [x, y] = h; blade = moonBlade(x, y + s * 0.02, s * 1.05, side * 28, side); }
+  if (pose === 'blade') { const [x, y] = h; blade = moonBlade(x, y + s * 0.02, s * 0.85, side * 28, side); }
+  if (pose === 'bladeUp') { const [x, y] = h; blade = moonBlade(x, y, s * 0.85, side * 12, side); }
+  if (pose === 'bladePoint') { const [x, y] = h; blade = moonBlade(x, y, s * 0.85, side * 78, side); }
   return blade + upper + fore + cuff + hand;
 }
 
@@ -150,7 +152,7 @@ function build(x, y, s, o, kit) {
     + `<path d="M${f(x - s * 0.19)} ${f(top + s * 0.03)} Q${f(x)} ${f(top - s * 0.09)} ${f(x + s * 0.19)} ${f(top + s * 0.03)} Q${f(x)} ${f(top + s * 0.06)} ${f(x - s * 0.19)} ${f(top + s * 0.03)} Z" fill="${gf}" stroke="${INK}" stroke-width="${f(s * 0.035)}" stroke-linejoin="round"/>`
     + `<path d="M${f(x - s * 0.12)} ${f(top - s * 0.01)} Q${f(x)} ${f(top - s * 0.06)} ${f(x + s * 0.12)} ${f(top - s * 0.01)}" stroke="${gt}" stroke-width="${f(s * 0.018)}" fill="none" stroke-linecap="round"/>`;
   const sx = s * 0.33, sy = top + s * 0.1;
-  const arms = o.arms || kit.arms;
+  const BL = ['blade', 'bladeUp', 'bladePoint'], arms = (o.arms || kit.arms).map(a => BL.includes(a) && !o.drawn && !o.armed ? 'hang' : a);
   const bodySvg = body2(x, y, s, { ...kit.body, yaw });
   const armSvg = side => arm(x + k + side * sx, sy, s, side, side < 0 ? arms[0] : arms[1], kit.armCol, o);
   // left arm behind body when crossing, otherwise in front
@@ -163,11 +165,11 @@ function build(x, y, s, o, kit) {
           return c; })() : `<path d="M${f(hx - r * .8)} ${f(hy - r * .5)} Q${f(hx)} ${f(hy - r * .2)} ${f(hx + r * .8)} ${f(hy - r * .5)} M${f(hx - r * .7)} ${f(hy)} Q${f(hx)} ${f(hy + r * .25)} ${f(hx + r * .7)} ${f(hy)}" stroke="${kit.hairOpts ? kit.hairOpts.hairShade : '#8a6a2a'}" stroke-width="${f(r * .06)}" fill="none"/>`)
       + `<ellipse cx="${f(hx - r * .98)}" cy="${f(hy + r * .05)}" rx="${f(r * .12)}" ry="${f(r * .2)}" fill="#f2d3b3" stroke="${INK}" stroke-width="${f(r * .06)}"/><ellipse cx="${f(hx + r * .98)}" cy="${f(hy + r * .05)}" rx="${f(r * .12)}" ry="${f(r * .2)}" fill="#f2d3b3" stroke="${INK}" stroke-width="${f(r * .06)}"/>`;
     const bodyB = body2(x, y, s, { ...kit.body, sigil: null, yaw });
-    return `<g>${bodyB}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${kit.hipBlade ? kit.hipBlade(x, y, s) : ''}${armSvg(-1)}${armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${neck}${backHead}</g>`;
+    return `<g>${bodyB}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${kit.hipBlade && !arms.some(a => BL.includes(a)) && !o.armed ? kit.hipBlade(x, y, s) : ''}${armSvg(-1)}${armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${neck}${backHead}</g>`;
   }
   const headSvg = R.head(hx, hy, r, { ...kit.headOpts, ...(kit.hair === 'long' ? { hair: 'none' } : {}), yaw, pitch: o.pitch, brow: o.brow ?? kit.headOpts.brow, mouth: o.mouth ?? kit.headOpts.mouth, blink: o.blink });
   // for long hair: suppress rig's own hair by drawing face only (strip hair groups is not possible), so draw rig head then cover with crown
-  const sheathed = kit.hipBlade && !arms.includes('blade') && !o.armed ? kit.hipBlade(x + k * .5, y, s) : '';
+  const sheathed = kit.hipBlade && !arms.some(a => BL.includes(a)) && !o.armed ? kit.hipBlade(x + k * .5, y, s) : '';
   return `<g>${hairObj ? hairObj.back : ''}${bodySvg}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${sheathed}${o.noArm === -1 ? `<circle cx="${f(x + k - sx)}" cy="${f(sy + s * 0.02)}" r="${f(s * 0.085)}" fill="#3a3a44" stroke="${INK}" stroke-width="${f(s * 0.04)}"/>` : armSvg(-1)}${o.noArm === 1 ? `<circle cx="${f(x + k + sx)}" cy="${f(sy + s * 0.02)}" r="${f(s * 0.085)}" fill="#3a3a44" stroke="${INK}" stroke-width="${f(s * 0.04)}"/>` : armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${neck}${headSvg}${hairObj ? hairObj.front : ''}</g>`;
 }
 
