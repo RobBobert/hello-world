@@ -11,7 +11,9 @@ const sio = u => { u = cl(u); return u * u * (3 - 2 * u); }; // gentle ease for 
 const MONO = `<g filter="url(#mono)">`;
 
 // timeline (seconds)
-const LAND = 0.55, PULL = [0.55, 2.1], STEP = [2.1, 2.8], DRAW = [2.85, 3.3], POINT = 3.45, ORBIT = [4.85, 6.45], SIP = [6.7, 7.5], WINE = 1.6;
+const LAND = 0.55, PULL = [0.55, 2.1], STEP = [3.0, 3.8], DRAW = [12.45, 12.9], POINT = 13.3, ORBIT = [14.1, 15.7], SIP = [17.55, 18.6], WINE = 1.6;
+const ENV = require('../vo/mouth-env.json');
+const envMouth = (t, rest) => { const i = Math.round(t * 30), v = Math.max(ENV[i] || 0, .7 * (ENV[i - 1] || 0)); return v > .42 ? 'open' : v > .13 ? 'talk' : rest; };
 // world (metres-ish). y up. Table top at 0.75.
 const TOP = 0.75, D0 = { x: -0.22, z: 0 }, CAS = { x: 0.42, z: 1.1 }, M = { x: 0.1, z: 0.55 }, R = 1.3;
 const FOC = 1100, HCH = 2.45; // chibi drawn height = HCH * s
@@ -46,8 +48,8 @@ function yawFor(C, px, pz, faceX, faceZ) {
   return a * 180 / Math.PI;
 }
 // talking mouth during a spoken window
-const talk = (t, a, b, rest) => t >= a && t < b ? ['talk', 'open', 'flat', 'open'][Math.floor(t * 13) % 4] : rest;
-const SAY_D = [3.65, 4.76], SAY_C = [7.8, 8.63];
+const talk = (t, a, b, rest, a2 = -1, b2 = -1) => (t >= a && t < b) || (t >= a2 && t < b2) ? ['talk', 'open', 'flat', 'open'][Math.floor(t * 13) % 4] : rest;
+const SAY_D = [1.55, 14.05], SAY_C = [15.6, 18.35];
 
 function intro(t) {
   const C = camera(t);
@@ -58,7 +60,7 @@ function intro(t) {
   const dArm = t >= POINT ? 'bladePoint' : t >= DRAW[0] ? 'bladeUp' : 'hang';
   const pd = proj(C, dp.x, TOP + fall + bob, dp.z), sD = pd.sc * 1.0 / HCH;
   const yD = yawFor(C, dp.x, dp.z, CAS.x - dp.x, CAS.z - dp.z), dBack = Math.abs(yD) > 100;
-  const darrow = K.darrow(pd.X, pd.Y, sD, { yaw: dBack ? 180 : cl(yD, -45, 45), back: dBack, mouth: talk(t, SAY_D[0], SAY_D[1], t > LAND + .3 ? 'smirk' : 'flat'), brow: 'angry',
+  const darrow = K.darrow(pd.X, pd.Y, sD, { yaw: dBack ? 180 : cl(yD, -45, 45), back: dBack, mouth: t >= SAY_D[0] && t < SAY_D[1] ? envMouth(t, 'flat') : (t > LAND + .3 ? 'smirk' : 'flat'), brow: 'angry',
     arms: dBack ? ['hang', dArm] : ['hang', dArm], drawn: true, wind: t });
   // ---- Cassius: seated (legs hidden), wine stain from WINE on, leans back + sips after the orbit
   const sipU = cl((t - SIP[0]) / (SIP[1] - SIP[0])), lean = -5 * io(cl((t - ORBIT[1]) / .5));
@@ -66,7 +68,7 @@ function intro(t) {
   const yC = yawFor(C, CAS.x, CAS.z, dp.x - CAS.x, dp.z - CAS.z), cBack = Math.abs(yC) > 100;
   const raise = !cBack && t > SIP[0] - .25 && t < SIP[1] + .2;
   const cas = K.cassius(pc.X, pc.Y, sC, { yaw: cBack ? 180 : cl(yC, -40, 40), back: cBack, brow: t > WINE && t < ORBIT[1] ? 'angry' : 'soft',
-    mouth: talk(t, SAY_C[0], SAY_C[1], t > WINE && t < ORBIT[1] ? 'frown' : 'flat'), blink: sipU > .25 && sipU < .8, arms: raise ? ['table', 'raise'] : ['table', 'table'] });
+    mouth: t >= SAY_C[0] && t < SAY_C[1] ? envMouth(t, 'flat') : (t > WINE && t < ORBIT[1] ? 'frown' : 'smirk'), blink: false, arms: raise ? ['table', 'raise'] : ['table', 'table'] });
   const kC = -(cBack ? 0 : cl(yC, -40, 40)) * sC * 0.0016;
   const gob = (x, y, s) => `<g transform="translate(${f(x)} ${f(y)}) scale(${f(s)})"><path d="M-22 -40 h44 l-6 34 q-6 14 -16 14 q-10 0 -16 -14 z" fill="#e2a93b" stroke="#1b1210" stroke-width="5" stroke-linejoin="round"/><path d="M-17 -34 h34 l-2 10 h-30z" fill="#8f1018"/><path d="M-4 8 v18 h-12 v7 h32 v-7 h-12 v-18z" fill="#c98f2a" stroke="#1b1210" stroke-width="4"/></g>`;
   const hand = raise ? [pc.X + kC + 0.53 * sC, pc.Y - 2.07 * sC + sC * 0.06] : null;
@@ -127,7 +129,7 @@ function intro(t) {
   ];
   GUESTS.forEach((g, gi) => { const sg = Math.sign(g.z), p = proj(C, g.x, g.stand ? 0 : .08, g.z); if (p.d < .35 || p.X < -700 || p.X > W + 700) return;
     const s0 = p.sc * (g.stand ? 1.25 : 1) / HCH, yw = yawFor(C, g.x, g.z, dp.x - g.x, dp.z - g.z), back = Math.abs(yw) > 100;
-    const mouth = g.mouth === 'shout' ? (t > LAND + .2 ? ['open', 'talk'][Math.floor(t * 7 + gi) % 2] : 'flat') : g.mouth;
+    const mouth = g.mouth === 'shout' ? (t > 13.4 && t < 15.5 ? ['open', 'talk'][Math.floor(t * 7 + gi) % 2] : 'flat') : g.mouth;
     const fig = K.karnus(p.X, p.Y, s0 / 1.12, { yaw: back ? 180 : cl(yw, -40, 40), back, brow: t > LAND ? g.brow : 'soft', mouth: t > LAND ? mouth : 'flat', arms: g.stand ? g.arms : ['table', 'table'],
       kitOverride: { hair: g.hair === 'long' ? 'short' : g.hair, hairLong: g.hair === 'long', hairCol: g.hc, over: [], fill: g.fill, cape: g.stand ? '#1b2f5c' : undefined } });
     const body = L.rimLight(fig, 'gala'), ch = g.stand ? '' : chair(g.x, g.z, sg), svg = back ? body + ch : ch + body;
@@ -144,9 +146,17 @@ function intro(t) {
   // ---- the pull-back: start zoomed tight on the steak, ease out to the full OTS frame (same shot, no cut)
   const zu = io((t - PULL[0]) / (PULL[1] - PULL[0])), z = t < PULL[0] ? 3.6 : lerp(3.6, 1, zu);
   const pu = io((t - ORBIT[1] + .35) / 1.1), z2 = lerp(1, 1.75, pu);
-  const fx = lerp(lerp(ps.X, W / 2, zu), pc.X, pu), fy = lerp(lerp(ps.Y - 60, H / 2, zu), pc.Y - 1.75 * sC, pu);
+  const du = io((t - 2.6) / 2.2) * (1 - io((t - 12.9) / .8)), z3 = lerp(1, 1.65, du); // push in on Darrow during the speech
+  let fx = lerp(lerp(ps.X, W / 2, zu), pc.X, pu), fy = lerp(lerp(ps.Y - 60, H / 2, zu), pc.Y - 1.75 * sC, pu);
+  fx = lerp(fx, pd.X + .35 * sD, du); fy = lerp(fy, pd.Y - 1.45 * sD, du);
   const sh = t >= LAND && t < LAND + .35 ? Math.exp(-(t - LAND) * 12) * 26 : 0;
   const flash = t >= LAND && t < LAND + .12 ? `<rect width="${W}" height="${H}" fill="#fff" opacity="${f(.55 * (1 - (t - LAND) / .12))}"/>` : '';
-  return `<g transform="translate(${f(sh * Math.sin(t * 90))} ${f(sh * Math.cos(t * 77))}) translate(${W / 2} ${H / 2}) scale(${f(z * z2 * 1000) / 1000}) translate(${f(-fx)} ${f(-fy)})">${scene}</g>${flash}`;
+  const BUB = [['MY HONOR HAS', '#1b1210', 7.98], ['BEEN PISSED ON,', '#1b1210', 7.98], ['AND I DEMAND', '#c8241c', 11.34], ['SATISFACTION.', '#c8241c', 11.34]];
+  let bub = ''; if (t >= 7.98 && t < 13.35) { const vis = BUB.filter(l => t >= l[2]), u = cl((t - 7.98) / .28), fo = cl((13.35 - t) / .2), sc = (u < .6 ? lerp(.55, 1.08, u / .6) : lerp(1.08, 1, (u - .6) / .4));
+    const ZZ = z * z2 * z3, tx = W / 2 + (pd.X + .14 * sD - fx) * ZZ, ty = H / 2 + (pd.Y - 1.72 * sD - fy) * ZZ, w = 560, h = 34 + vis.length * 64, bx = cl(tx + 70, 120, W - 120 - w), by = Math.max(330, ty - 1.36 * sD * ZZ - h);
+    const txt = vis.map((l, i) => { const v = cl((t - l[2]) / .2), s2 = i < 2 ? 1 : (v < .6 ? lerp(.6, 1.1, v / .6) : lerp(1.1, 1, (v - .6) / .4)), cy = by + 60 + i * 64;
+      return `<text x="${f(bx + w / 2)}" y="${f(cy + 18)}" text-anchor="middle" font-family="Anton" font-size="58" fill="${l[1]}" opacity="${f(Math.min(1, v * 1.5))}" transform="translate(${f(bx + w / 2)} ${f(cy)}) scale(${f(s2)}) translate(${f(-(bx + w / 2))} ${f(-cy)})">${l[0]}</text>`; }).join('');
+    bub = `<g opacity="${f(fo)}" transform="translate(${f(tx)} ${f(ty)}) scale(${f(sc)}) translate(${f(-tx)} ${f(-ty)})"><path d="M${f(bx + 60)} ${f(by + h - 4)} L${f(tx)} ${f(ty)} L${f(bx + 150)} ${f(by + h - 4)} Z" fill="#fffaf0" stroke="#120c0a" stroke-width="8" stroke-linejoin="round"/><rect x="${f(bx)}" y="${f(by)}" width="${w}" height="${h}" rx="34" fill="#fffaf0" stroke="#120c0a" stroke-width="8"/><path d="M${f(bx + 62)} ${f(by + h - 8)} L${f(tx)} ${f(ty)} L${f(bx + 146)} ${f(by + h - 8)}" fill="#fffaf0"/>${txt}</g>`; }
+  return `<g transform="translate(${f(sh * Math.sin(t * 90))} ${f(sh * Math.cos(t * 77))}) translate(${W / 2} ${H / 2}) scale(${f(z * z2 * z3 * 1000) / 1000}) translate(${f(-fx)} ${f(-fy)})">${scene}</g>${flash}${bub}`;
 }
 module.exports = { intro, LAND, ORBIT };

@@ -13,6 +13,13 @@ const MONO = `<filter id="mono" x="0" y="0" width="100%" height="100%"><feColorM
   <filter id="sepia" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.45 0.4 0.15 0 0.05  0.38 0.36 0.13 0 0.03  0.28 0.27 0.1 0 0.01  0 0 0 1 0"/></filter>`;
 const room = (mood, t, o = {}) => mood === 'gala' && !o.color ? `<g filter="url(#mono)">${L.skyOrRoom('gala', t, { floorY: o.floorY || 1470, par: o.par || 0 })}</g>` : L.skyOrRoom(mood, t, { floorY: o.floorY || 1470, ...o });
 const TY = 1560;
+// comic speech bubble that pops in (screen space). lines: [[text, color, showAt]], tail points to (tx, ty)
+const bubble = (t, x, y, w, lines, tx, ty) => { const vis = lines.filter(l => t >= l[2]); if (!vis.length) return '';
+  const u = cl((t - lines[0][2]) / .28), sc = u < .6 ? lerp(.55, 1.08, u / .6) : lerp(1.08, 1, (u - .6) / .4), h = 34 + vis.length * 64;
+  const txt = vis.map((l, i) => { const v = cl((t - l[2]) / .2), s2 = i === 0 ? 1 : (v < .6 ? lerp(.6, 1.1, v / .6) : lerp(1.1, 1, (v - .6) / .4));
+    return `<text x="${x + w / 2}" y="${y + 78 + i * 64}" text-anchor="middle" font-family="Anton" font-size="58" fill="${l[1]}" transform="translate(${x + w / 2} ${y + 60 + i * 64}) scale(${f(s2)}) translate(${-(x + w / 2)} ${-(y + 60 + i * 64)})" opacity="${f(v * 1.5)}">${l[0]}</text>`; }).join('');
+  return `<g transform="translate(${tx} ${ty}) scale(${f(sc)}) translate(${-tx} ${-ty})"><path d="M${x + 60} ${y + h - 4} L${tx} ${ty} L${x + 150} ${y + h - 4} Z" fill="#fffaf0" stroke="#120c0a" stroke-width="8" stroke-linejoin="round"/>
+    <rect x="${x}" y="${y}" width="${w}" height="${h}" rx="34" fill="#fffaf0" stroke="#120c0a" stroke-width="8"/><path d="M${x + 62} ${y + h - 8} L${tx} ${ty} L${x + 146} ${y + h - 8}" fill="#fffaf0"/>${txt}</g>`; };
 const tableG = (t, o = {}) => { const land = o.land ?? -9, j = t > land ? Math.exp(-(t - land) * 8) * Math.sin((t - land) * 40) : 0, tip = cl((t - land) * 5), cloth = o.cloth || '#2b4a8a', trim = o.trim || '#d8e0ea', deep = o.deep || '#1b2f5c';
   const gob = (x, k, spill) => `<g transform="translate(${x} ${TY - Math.abs(j) * k}) rotate(${spill ? tip * 80 : j * k * .2})"><path d="M-22 -100 h44 l-7 52 h-10 v34 h18 v12 h-46 v-12 h18 v-34 h-10z" fill="#e2a93b" stroke="#1b1210" stroke-width="5"/><rect x="-17" y="-94" width="34" height="12" fill="#8f1a16"/></g>`;
   const plate = (x, k) => `<g transform="translate(${x} ${TY - 6 - Math.abs(j) * k})"><ellipse rx="80" ry="15" fill="#eef1f5" stroke="#1b1210" stroke-width="5"/><ellipse rx="50" ry="8" fill="#cfd6df"/></g>`;
@@ -34,7 +41,7 @@ const crowd = (n, y, s, seed = 1, col = '#14141c') => { let o = ''; for (let i =
 
 
 // ---------------- OPENING (6.4 s): boot smashes the steak -> plates explode, wine stains Cassius -> two steps -> OTS "Cassius." / OTS "Darrow."
-const OPEN = 8.74, LAND = 0.55, WINE_HIT = 1.75;
+const OPEN = 18.35, LAND = 0.55, WINE_HIT = 1.75;
 // Seedance v2 clip (our chibi refs): A = razor raise (0-1.65 s of clip), B = reverse OTS + sip (3.7 s-end)
 const SD_T = 2.75, SD_A = 50, SD_B = 130;
 const sdFrame = t => { if (t < SD_T) return null; const k = Math.round((t - SD_T) * 30);
@@ -73,7 +80,7 @@ function opening(t) {
 const ACT_IMPACT = (x, y, u) => { if (u < 0 || u > 1) return ''; let o = ''; for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2, r0 = 40 + 300 * eo(u), r1 = r0 + 130 * (1 - u); o += `<line x1="${f(x + Math.cos(a) * r0)}" y1="${f(y + Math.sin(a) * r0 * .5)}" x2="${f(x + Math.cos(a) * r1)}" y2="${f(y + Math.sin(a) * r1 * .5)}" stroke="#fff6d0" stroke-width="${f(14 * (1 - u))}" stroke-linecap="round"/>`; } return o; };
 
 const BEATS = [
-  { fixed: true, t0f: 0, t1f: OPEN, l1: '', mood: 'gala', dialog: [[3.65, 'CASSIUS.'], [7.8, 'DARROW.']], art: (t) => INTRO.intro(t) },
+  { fixed: true, t0f: 0, t1f: OPEN, l1: '', mood: 'gala', dialog: [[1.6, 'MY NAME, GENTLE LORDS AND LADIES,', 3.3], [4.98, 'IS DARROW AU ANDROMEDUS.', 2.6], [13.52, 'CASSIUS.', 1.3], [15.75, 'ALONE AT LAST,', 1.3], [17.07, 'MY OLD FRIEND.', 1.5]], art: (t) => INTRO.intro(t) },
   // 1. continues from the opening: Darrow on the table, Cassius stained
   { start: 'house bellona wants', pop: 'so he walks', l1: 'HOUSE BELLONA WANTS HIM DEAD.', l2: 'SO HE WALKS ACROSS THEIR TABLE.', mood: 'gala',
     art: (t, p, pt, d) => W(room('gala', t) + RIM(K.cassius(790, TY + 310, 330, { yaw: -18, brow: 'angry', mouth: 'frown', arms: ['table', 'table'] }), 'gala') + OTS.wine(790, TY + 310, 330) + tableG(t, { land: -8 })
@@ -94,7 +101,7 @@ const BEATS = [
         + RIM(K.darrow(320, 1660, 330, { yaw: 18, brow: 'sad', mouth: 'frown', arms: ['hang', 'hang'] }), 'space'), t, d, 1, 1.06, 540, 1120); } },
   // 5. contract for sale
   { start: 'augustus moves', pop: 'darrow is finished', l1: 'AUGUSTUS MOVES TO SELL HIS CONTRACT.', l2: 'DARROW IS FINISHED.', mood: 'mars',
-    art: (t, p, pt, d) => { const tag = `<g transform="translate(330 ${1180 + 8 * Math.sin(t * 2)}) rotate(-8)"><rect x="-130" y="-60" width="260" height="120" rx="14" fill="#f3e6c8" stroke="#1b1210" stroke-width="7"/><circle cx="-100" cy="0" r="12" fill="#1b1210"/><text x="15" y="18" text-anchor="middle" font-family="Anton" font-size="52" fill="#a81f1c">FOR SALE</text></g>`;
+    art: (t, p, pt, d) => { const tag = `<g transform="translate(330 ${1180 + 8 * Math.sin(t * 2)}) rotate(-8)"><rect x="-130" y="-60" width="260" height="120" rx="14" fill="#f3e6c8" stroke="#1b1210" stroke-width="7"/><circle cx="-100" cy="0" r="12" fill="#1b1210"/><text x="15" y="18" text-anchor="middle" font-family="Anton" font-size="58" fill="#a81f1c">FOR SALE</text></g>`;
       return W(room('mars', t, { sunX: 240, sunH: 260, floorY: 1440 }) + RIM(K.augustus(760, 1640, 360, { yaw: 40, arms: ['cross', 'hang'] }), 'mars') + RIM(K.darrow(330, 1660, 300, { yaw: 12, brow: 'sad', mouth: 'frown' }), 'mars') + fade(tag, (t - .5) / .4), t, d, 1.04, 1.0, 540, 1120); } },
   // 6. bomb offer
   { start: 'the rebels offer', pop: 'carry a bomb', l1: 'THE REBELS HAVE ONE LAST MOVE.', l2: 'A BOMB AT THE GALA.', mood: 'mine',

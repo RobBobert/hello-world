@@ -67,3 +67,13 @@ Not verifiable from sources and kept as style only: Darrow's smirk, the sun embl
 - Intro: Bellona family at the table, chairs, plates; talking mouths on "Cassius." / "Darrow."; Cassius's line now plays once (the voice file had a second take in its tail).
 - Wolf strike: Karnus shown normally (no silhouette/outline), hit and falls. Karnus-dies-in-Iron-Rain flag still stands.
 - Ground shadows follow each scene's light (gala windows behind, spotlight/lantern from upper left, sun behind on Mars).
+
+## Pass 2 addendum (v7: audiobook cold open)
+- Intro dialogue now uses the user's clips from the Golden Son audiobook (Ch. 12 "Blood for Blood"): Darrow's challenge
+  ("My name, gentle lords and ladies, is Darrow au Andromedus. My honor has been pissed on, and I demand satisfaction."),
+  "Cassius." (the narrator's word, cut before "says"), and Cassius: "Alone at last, my old friend."
+  Book quote check: a reader's transcription gives "My honor has been pissed upon. And I demand satisfaction." — the
+  recording was transcribed as "pissed on"; caption follows the recording. Unverified which is exact.
+- The challenge happens at the gala in the book, not on the Bellona table — the cold open merges the two moments (dramatization).
+- Copyright: audiobook audio is not committed to the public repo (golden-son/ref/ and vo/dialog.wav are gitignored).
+  Expect a possible Content ID claim on YouTube; see notes to user.
