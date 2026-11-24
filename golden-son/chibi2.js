@@ -134,7 +134,7 @@ const sash = (x, y, s) => `<path d="M${f(x - s * 0.27)} ${f(y - s * 0.94)} L${f(
 const pauldrons = (x, y, s, col, hi) => [-1, 1].map(d => `<path d="M${f(x + d * s * 0.16)} ${f(y - s * 1.5)} q${f(d * s * 0.2)} ${f(-s * 0.1)} ${f(d * s * 0.3)} ${f(s * 0.08)} q${f(-d * s * 0.02)} ${f(s * 0.1)} ${f(-d * s * 0.12)} ${f(s * 0.08)} Z" fill="${col}" stroke="${INK}" stroke-width="${f(s * 0.04)}" stroke-linejoin="round"/><path d="M${f(x + d * s * 0.2)} ${f(y - s * 1.55)} q${f(d * s * 0.1)} ${f(-s * 0.03)} ${f(d * s * 0.18)} ${f(s * 0.02)}" stroke="${hi}" stroke-width="${f(s * 0.03)}" fill="none" stroke-linecap="round" opacity=".9"/>`).join('');
 
 function build(x, y, s, o, kit) {
-  const yaw = o.yaw ?? kit.yaw, k = -yaw * s * 0.0016, top = y - s * 1.55, r = s * 0.42, hx = x, hy = top - r - s * 0.13;
+  const yaw = o.yaw ?? kit.yaw, k = -yaw * s * 0.0016, top = y - s * 1.55, r = s * 0.42, hx = x, hy = top - r + s * 0.02;
   const skin = (kit.armCol && kit.armCol.hand) || '#e9c3a0', gf = (kit.body && kit.body.fill) || '#d9a441', gt = (kit.body && kit.body.trim) || '#f6dc8b';
   const neck = `<rect x="${f(x - s * 0.075)}" y="${f(top - s * 0.2)}" width="${f(s * 0.15)}" height="${f(s * 0.23)}" fill="${o.back ? '#c99a74' : skin}" stroke="${INK}" stroke-width="${f(s * 0.035)}"/>`
     + `<path d="M${f(x - s * 0.19)} ${f(top + s * 0.03)} Q${f(x)} ${f(top - s * 0.09)} ${f(x + s * 0.19)} ${f(top + s * 0.03)} Q${f(x)} ${f(top + s * 0.06)} ${f(x - s * 0.19)} ${f(top + s * 0.03)} Z" fill="${gf}" stroke="${INK}" stroke-width="${f(s * 0.035)}" stroke-linejoin="round"/>`
