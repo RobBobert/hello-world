@@ -14,20 +14,21 @@ BEATS.forEach(b => { if (b.fixed) { b.t0 = b.t0f; return; } b.t0 = find(b.start)
 BEATS[0].t0 = 0; BEATS[1].t0 = OPEN;
 BEATS.forEach((b, i) => { b.t1 = i < BEATS.length - 1 ? BEATS[i + 1].t0 : AUDIO_END + END_CARD; if (b.popAt != null && !b.tp) b.tp = b.t0 + b.popAt; });
 const N = Math.round((AUDIO_END + END_CARD) * FPS);
+if (process.argv[2] === 'dump') { console.log(JSON.stringify(BEATS.map(b => ({ l1: b.l1, t0: +b.t0.toFixed(2), tp: b.tp != null ? +b.tp.toFixed(2) : null })))); process.exit(0); }
 const font = f => `data:font/woff2;base64,${fs.readFileSync(`${B}/fonts/${f}`).toString('base64')}`;
 const AV = `data:image/png;base64,${fs.readFileSync(`${B}/avatar.png`).toString('base64')}`;
 const cl = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v)), ease = u => 1 - Math.pow(1 - cl(u), 3);
 const slide = u => `style="opacity:${cl(u * 1.5).toFixed(3)};transform:translateY(${(28 * (1 - ease(u))).toFixed(1)}px)"`;
 const PAGE = `<!doctype html><style>@font-face{font-family:Anton;src:url(${font('anton.woff2')})}@font-face{font-family:Cinzel;font-weight:700;src:url(${font('cinzel700.woff2')})}
   html,body{margin:0;width:${W}px;height:${H}px;overflow:hidden;background:#000}#w{position:absolute;inset:0}svg{position:absolute;inset:0}
-  .cap{position:absolute;top:270px;left:150px;right:150px;text-align:center;font-family:Anton;line-height:1.08;text-transform:uppercase}
-  .l1,.l2{font-size:84px;letter-spacing:1px;-webkit-text-stroke:2px #120c0a;paint-order:stroke fill;text-shadow:0 5px 0 rgba(0,0,0,.55),0 0 40px rgba(0,0,0,.6)}.l1{color:#f6ead2}.l2 span{display:inline-block}
-  .plate{position:absolute;left:70px;right:70px;top:230px;border-radius:40px;background:radial-gradient(ellipse at center,rgba(8,4,6,.62) 0%,rgba(8,4,6,.45) 60%,rgba(8,4,6,0) 100%)}
-  .sm .l1,.sm .l2{font-size:72px}
-  .outcap{top:400px;left:100px;right:100px}.outcap .l1,.outcap .l2{font-size:100px}.av{position:absolute;left:375px;top:680px;width:330px;height:330px;border-radius:50%;border:12px solid #e2a93b;box-sizing:border-box;background:url(${AV}) center/100% no-repeat}
-  .oh{position:absolute;top:1030px;width:100%;text-align:center;font-family:Cinzel;font-weight:700;font-size:62px;color:#f6ead2}
-  .oq{position:absolute;top:1150px;left:130px;right:130px;line-height:1.12;text-align:center;font-family:Cinzel;font-weight:700;font-size:60px;color:#f6ead2;font-variant:small-caps}
-  .oa{position:absolute;top:1238px;left:130px;right:130px;line-height:1.12;text-align:center;font-family:Cinzel;font-weight:700;font-size:54px;color:#e2a93b;font-variant:small-caps}</style><div id="w"></div>`;
+  .cap{position:absolute;top:300px;left:150px;right:150px;text-align:center;font-family:Anton;line-height:1.08;text-transform:uppercase}
+  .l1,.l2{font-size:88px;letter-spacing:1px;-webkit-text-stroke:2px #120c0a;paint-order:stroke fill;text-shadow:0 5px 0 rgba(0,0,0,.55),0 0 40px rgba(0,0,0,.6)}.l1{color:#f6ead2}.l2 span{display:inline-block}
+  .plate{position:absolute;left:70px;right:70px;top:262px;border-radius:40px;background:radial-gradient(ellipse at center,rgba(8,4,6,.62) 0%,rgba(8,4,6,.45) 60%,rgba(8,4,6,0) 100%)}
+  .sm .l1,.sm .l2{font-size:76px}
+  .outcap{top:400px;left:100px;right:100px}.outcap .l1,.outcap .l2{font-size:100px}.av{position:absolute;left:325px;top:650px;width:430px;height:430px;border-radius:50%;border:12px solid #e2a93b;box-sizing:border-box;background:url(${AV}) center/100% no-repeat}
+  .oh{position:absolute;top:1105px;width:100%;text-align:center;font-family:Cinzel;font-weight:700;font-size:62px;color:#f6ead2}
+  .oq{position:absolute;top:1220px;left:130px;right:130px;line-height:1.12;text-align:center;font-family:Cinzel;font-weight:700;font-size:60px;color:#f6ead2;font-variant:small-caps}
+  .oa{position:absolute;top:1306px;left:130px;right:130px;line-height:1.12;text-align:center;font-family:Cinzel;font-weight:700;font-size:54px;color:#e2a93b;font-variant:small-caps}</style><div id="w"></div>`;
 function frame(fn) {
   const T = fn / FPS, i = Math.max(0, BEATS.findIndex(b => T >= b.t0 && T < b.t1)), b = BEATS[i];
   const p = !b.l2 ? true : (b.tp != null ? T >= b.tp : true), t = T - b.t0, pt = p && b.tp != null ? T - b.tp : (p ? t : -1), dur = b.t1 - b.t0;
@@ -37,7 +38,7 @@ function frame(fn) {
   require('./chibi2.js').setLight(b.outro ? null : (b.mood || 'gala'));
   const rf = b.raw && b.raw(t);
   const svg = rf ? `<img src="data:image/jpeg;base64,${fs.readFileSync(rf).toString('base64')}" style="position:absolute;inset:0;width:${W}px;height:${H}px">` : `<svg class="gsl-frame" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><defs>${MONO}</defs>${L.defs()}${b.art(t, p, pt, dur)}${L.grade(b.mood === 'gala' ? 'gala' : b.mood, b.mood === 'triumph' ? { turn: .5 } : {})}</svg>`;
-  if (i === 0 && t < 1.5) { const fo = cl((1.5 - t) / .25); return svg + `<div class="plate" style="top:250px;height:300px;opacity:${fo.toFixed(3)}"></div><div class="cap" style="top:300px;opacity:${fo.toFixed(3)}"><div class="l1" style="font-size:104px" ${slide(t / .2)}>GOLDEN SON</div><div class="l2" style="color:#f0b63c;font-size:84px"><span ${slide((t - .15) / .2)}>EXPLAINED IN 2 MINS</span></div></div>`; }
+  if (i === 0 && t < 1.5) { const fo = cl((1.5 - t) / .25); return svg + `<div class="plate" style="top:330px;height:300px;opacity:${fo.toFixed(3)}"></div><div class="cap" style="top:380px;opacity:${fo.toFixed(3)}"><div class="l1" style="font-size:104px" ${slide(t / .2)}>GOLDEN SON</div><div class="l2" style="color:#f0b63c;font-size:84px"><span ${slide((t - .15) / .2)}>EXPLAINED IN 2 MINS</span></div></div>`; }
   if (b.dialog) { const dl = b.dialog.filter(([at, , du]) => t >= at && t < at + (du || 1.7)).pop(); return svg + (dl ? `<div class="cap" ><div class="l1" ${slide((t - dl[0]) / .15)}>${dl[1]}</div></div>` : ''); }
   const long = (b.l1 + (b.l2 || '')).length > 44, warm = ['mars', 'mine', 'triumph', 'space'].includes(b.mood);
   const plate = warm ? `<div class="plate" style="height:${long || (b.l1.length > 22 && b.l2) ? 380 : 300}px"></div>` : '';
