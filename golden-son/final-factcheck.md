@@ -59,3 +59,11 @@ Not verifiable from sources and kept as style only: Darrow's smirk, the sun embl
 - Hair: Golds' hair made golden per user (Howlers, Lorn, Augustus, Jackal). Kept true-to-book colors for non-Golds: Harmony (Red), the Red-Darrow hologram (Red), Ragnar (Obsidian, white), guards (Gray). Sevro shown with a gold mohawk — CLAUDE.md notes "dark hair" from earlier; user's call.
 - Darrow's razor holstered in every scene except the intro and the two fight scenes (duel, Iron Rain), where he is using it.
 - Wolf jaws ~50% translucent over the strike. No story claims changed.
+
+## Pass 2 addendum (v6)
+- Peerless scar: crescent on the right cheek for all Golds (sources: Octavia au Lune described with a crescent scar along her right cheek; Peerless Scarred = Institute graduates). Not on Reds/Obsidians/Grays or the masked guards.
+- Sovereign redesigned to the user's reference (black with gold lines, triangle-in-circle mark, slicked pale-gold hair in a bun, scar). Stylized, no crown.
+- Final-scene captors drawn as the Jackal's Boneriders (jackal-skull masks, bone armor). Sources confirm the Boneriders are the Jackal's elite Gold guard; their look and their presence at this exact moment are stylized (caption still says only "TAKEN PRISONER").
+- Intro: Bellona family at the table, chairs, plates; talking mouths on "Cassius." / "Darrow."; Cassius's line now plays once (the voice file had a second take in its tail).
+- Wolf strike: Karnus shown normally (no silhouette/outline), hit and falls. Karnus-dies-in-Iron-Rain flag still stands.
+- Ground shadows follow each scene's light (gala windows behind, spotlight/lantern from upper left, sun behind on Mars).

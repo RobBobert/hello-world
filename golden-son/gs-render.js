@@ -34,6 +34,7 @@ function frame(fn) {
   const l2c = b.l2color === 'gold' ? '#f0b63c' : '#e8372c';
   if (b.outro) return `<div style="position:absolute;inset:0;background:#1c1512"></div><div class="cap outcap"><div class="l1" ${slide(t / .2)}>${b.l1}</div>${T >= b.tp ? `<div class="l2" style="color:#e8372c"><span ${slide((T - b.tp) / .2)}>${b.l2}</span></div>` : ''}</div>
     <div class="av" style="opacity:${ease((t - .2) / .4)}"></div><div class="oh" style="opacity:${ease((t - .4) / .4)}">@AVANZO.TV</div><div class="oq" ${slide((t - 1) / .3)}>${b.q}</div><div class="oa" ${slide((t - 1.3) / .3)}>${b.a}</div>`;
+  require('./chibi2.js').setLight(b.outro ? null : (b.mood || 'gala'));
   const rf = b.raw && b.raw(t);
   const svg = rf ? `<img src="data:image/jpeg;base64,${fs.readFileSync(rf).toString('base64')}" style="position:absolute;inset:0;width:${W}px;height:${H}px">` : `<svg class="gsl-frame" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}"><defs>${MONO}</defs>${L.defs()}${b.art(t, p, pt, dur)}${L.grade(b.mood === 'gala' ? 'gala' : b.mood, b.mood === 'triumph' ? { turn: .5 } : {})}</svg>`;
   if (b.dialog) { const dl = b.dialog.filter(([at]) => t >= at && t < at + 1.7).pop(); return svg + (dl ? `<div class="cap" ><div class="l1" ${slide((t - dl[0]) / .15)}>${dl[1]}</div></div>` : ''); }

@@ -9,6 +9,7 @@ const T = (x, y, t, sz = 44, fill = '#f6ead2', op = 1) => `<text x="${x}" y="${y
 const fade = (svg, u) => `<g opacity="${cl(u).toFixed(3)}">${svg}</g>`;
 const slideIn = (svg, dx, u) => `<g transform="translate(${f(dx * (1 - eo(u)))} 0)" opacity="${cl(u * 2).toFixed(3)}">${svg}</g>`;
 const MONO = `<filter id="mono" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.32 0.34 0.34 0 -0.03  0.32 0.34 0.34 0 -0.03  0.33 0.34 0.38 0 0  0 0 0 1 0"/></filter>
+  <filter id="castsh" x="-50%" y="-50%" width="200%" height="200%"><feColorMatrix type="matrix" values="0 0 0 0 0.04  0 0 0 0 0.03  0 0 0 0 0.07  0 0 0 0.6 0"/><feGaussianBlur stdDeviation="3"/></filter>
   <filter id="sepia" x="0" y="0" width="100%" height="100%"><feColorMatrix type="matrix" values="0.45 0.4 0.15 0 0.05  0.38 0.36 0.13 0 0.03  0.28 0.27 0.1 0 0.01  0 0 0 1 0"/></filter>`;
 const room = (mood, t, o = {}) => mood === 'gala' && !o.color ? `<g filter="url(#mono)">${L.skyOrRoom('gala', t, { floorY: o.floorY || 1470, par: o.par || 0 })}</g>` : L.skyOrRoom(mood, t, { floorY: o.floorY || 1470, ...o });
 const TY = 1560;
@@ -141,7 +142,7 @@ const BEATS = [
     art: (t, p, pt, d) => W(room('mine', t, { floorY: 1450 }) + RIM(K.darrow(380, 1680, 330, { yaw: 14, brow: 'soft', mouth: 'flat' }), 'mine') + RIM(K.mustang(720, 1680, 310, { yaw: -14, mouth: 'flat' }), 'mine'), t, d, 1, 1.07, 540, 1120) },
   // 20. born a Red
   { start: 'and shows her', pop: 'he was born', l1: 'HE SHOWS HER THE TRUTH.', l2: 'HE WAS BORN A RED.', mood: 'mine',
-    art: (t, p, pt, d) => W(room('mine', t, { floorY: 1450 }) + RIM(K.mustang(300, 1680, 310, { yaw: 16, brow: p ? 'sad' : 'soft', mouth: p ? 'frown' : 'flat' }), 'mine') + holo(720, 1640, t, p ? K.red(0, -60, 150, { yaw: -10 }) : K.darrow(0, -60, 150, { yaw: -10 })), t, d, 1, 1.07, 540, 1120) },
+    art: (t, p, pt, d) => W(room('mine', t, { floorY: 1450 }) + RIM(K.mustang(300, 1680, 310, { yaw: 16, brow: p ? 'sad' : 'soft', mouth: p ? 'frown' : 'flat' }), 'mine') + holo(720, 1640, t, p ? K.red(0, -60, 150, { noShadow: true, yaw: -10 }) : K.darrow(0, -60, 150, { noShadow: true, yaw: -10 })), t, d, 1, 1.07, 540, 1120) },
   // 21. she leaves
   { start: 'she leaves', pop: 'without giving', l1: 'SHE LEAVES.', l2: 'NO ANSWER.', mood: 'mine',
     art: (t, p, pt, d) => W(room('mine', t, { floorY: 1450 }) + RIM(K.darrow(560, 1680, 330, { yaw: -4, brow: 'sad', mouth: 'flat' }), 'mine') + fade(RIM(K.mustang(880 + 120 * eo(t / 2), 1680, 300, { yaw: -40 }), 'mine'), 1 - t / 1.6), t, d, 1, 1.05, 560, 1120) },

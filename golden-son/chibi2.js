@@ -145,7 +145,18 @@ const sash = (x, y, s) => `<path d="M${f(x - s * 0.27)} ${f(y - s * 0.94)} L${f(
   <path d="M${f(x - s * 0.12)} ${f(y - s * 0.84)} l${f(-s * 0.06)} ${f(s * 0.36)} l${f(s * 0.1)} ${f(-s * 0.02)} l${f(s * 0.04)} ${f(-s * 0.33)} Z" fill="#8f1a16" stroke="${INK}" stroke-width="${f(s * 0.03)}"/>`;
 const pauldrons = (x, y, s, col, hi) => [-1, 1].map(d => `<path d="M${f(x + d * s * 0.16)} ${f(y - s * 1.5)} q${f(d * s * 0.2)} ${f(-s * 0.1)} ${f(d * s * 0.3)} ${f(s * 0.08)} q${f(-d * s * 0.02)} ${f(s * 0.1)} ${f(-d * s * 0.12)} ${f(s * 0.08)} Z" fill="${col}" stroke="${INK}" stroke-width="${f(s * 0.04)}" stroke-linejoin="round"/><path d="M${f(x + d * s * 0.2)} ${f(y - s * 1.55)} q${f(d * s * 0.1)} ${f(-s * 0.03)} ${f(d * s * 0.18)} ${f(s * 0.02)}" stroke="${hi}" stroke-width="${f(s * 0.03)}" fill="none" stroke-linecap="round" opacity=".9"/>`).join('');
 
+// Cast shadows on the ground, direction set per scene light (setLight). Emitted in <!--SH--> markers so lighting.lit()
+// can lift them out of the character's rim-light filter.
+let LIGHT = null;
+const LIGHTS = { gala: { k: .35, q: .26 }, void: { k: 1.1, q: .3 }, mars: { k: -.7, q: .3 }, mine: { k: 1.0, q: .3 }, triumph: { k: 0, q: .32 }, space: { k: .4, q: .22 } };
+const setLight = mood => { LIGHT = LIGHTS[mood] || null; };
 function build(x, y, s, o, kit) {
+  const g = buildCore(x, y, s, o, kit);
+  if (!LIGHT || o.noShadow) return g;
+  const L2 = o.light || LIGHT;
+  return `<!--SH--><g filter="url(#castsh)" transform="translate(${f(x)} ${f(y)}) matrix(1 0 ${f(-L2.k * L2.q * 100) / 100} ${f(-L2.q * 100) / 100} 0 0) translate(${f(-x)} ${f(-y)})">${g}</g><!--/SH-->` + g;
+}
+function buildCore(x, y, s, o, kit) {
   const yaw = o.yaw ?? kit.yaw, k = -yaw * s * 0.0016, top = y - s * 1.55, r = s * 0.42, hx = x, hy = top - r + s * 0.02;
   const skin = (kit.armCol && kit.armCol.hand) || '#e9c3a0', gf = (kit.body && kit.body.fill) || '#d9a441', gt = (kit.body && kit.body.trim) || '#f6dc8b';
   const neck = `<rect x="${f(x - s * 0.075)}" y="${f(top - s * 0.2)}" width="${f(s * 0.15)}" height="${f(s * 0.23)}" fill="${o.back ? '#c99a74' : skin}" stroke="${INK}" stroke-width="${f(s * 0.035)}"/>`
@@ -167,7 +178,7 @@ function build(x, y, s, o, kit) {
     const bodyB = body2(x, y, s, { ...kit.body, sigil: null, yaw });
     return `<g>${bodyB}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${kit.hipBlade && !arms.some(a => BL.includes(a)) && !o.armed ? kit.hipBlade(x, y, s) : ''}${armSvg(-1)}${armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${neck}${backHead}</g>`;
   }
-  const headSvg = R.head(hx, hy, r, { ...kit.headOpts, ...(kit.hair === 'long' ? { hair: 'none' } : {}), yaw, pitch: o.pitch, brow: o.brow ?? kit.headOpts.brow, mouth: o.mouth ?? kit.headOpts.mouth, blink: o.blink });
+  const headSvg = R.head(hx, hy, r, { ...kit.headOpts, ...(kit.hair === 'long' ? { hair: 'none' } : {}), yaw, pitch: o.pitch, brow: o.brow ?? kit.headOpts.brow, mouth: o.mouth ?? kit.headOpts.mouth, blink: o.blink, scar: o.scar ?? kit.scar ?? true });
   // for long hair: suppress rig's own hair by drawing face only (strip hair groups is not possible), so draw rig head then cover with crown
   const sheathed = kit.hipBlade && !arms.some(a => BL.includes(a)) && !o.armed ? kit.hipBlade(x + k * .5, y, s) : '';
   return `<g>${hairObj ? hairObj.back : ''}${bodySvg}${kit.extra ? kit.extra(x + k * .5, y, s) : ''}${sheathed}${o.noArm === -1 ? `<circle cx="${f(x + k - sx)}" cy="${f(sy + s * 0.02)}" r="${f(s * 0.085)}" fill="#3a3a44" stroke="${INK}" stroke-width="${f(s * 0.04)}"/>` : armSvg(-1)}${o.noArm === 1 ? `<circle cx="${f(x + k + sx)}" cy="${f(sy + s * 0.02)}" r="${f(s * 0.085)}" fill="#3a3a44" stroke="${INK}" stroke-width="${f(s * 0.04)}"/>` : armSvg(1)}${kit.top ? kit.top(x + k * .7, y, s) : ''}${neck}${headSvg}${hairObj ? hairObj.front : ''}</g>`;
@@ -194,4 +205,4 @@ const cassius = (x, y, s, o = {}) => build(x, y, s, o, CASSIUS);
 const ARMP = { thrust: [0.66, 0.06], slashUp: [0.42, -0.6], slashDown: [0.6, 0.52], guard: [0.12, 0.05], hang: [0.22, 0.85] };
 // hand position (world) for a pose, matching build()'s shoulder math
 const handAt = (x, y, s, side, pose, yaw = 0) => { const k = -yaw * s * 0.0016, top = y - s * 1.55, sx = x + k + side * s * 0.33, sy = top + s * 0.1, P = ARMP[pose] || ARMP.hang; return [sx + side * P[0] * s, sy + P[1] * s]; };
-module.exports = { moonBlade, handAt, darrow, cassius, longHair, arm, build, lionFace, sunEmblem };
+module.exports = { setLight, moonBlade, handAt, darrow, cassius, longHair, arm, build, lionFace, sunEmblem };

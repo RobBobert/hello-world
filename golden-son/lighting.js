@@ -148,7 +148,7 @@ function celFilter(P, o) {
 }
 // Full cel lighting on any group: hard coloured shadow on the side away from the key + warm key edge + cool rim edge.
 // opts: turn, depth (px width of the shadow band on the far side; ~30% of the form's width), rim (px), key (px), shadowOpacity
-function lit(svg, mood = 'gala', opts = {}) { const F = celFilter(palette(mood, opts.turn), opts); return `<defs>${F.def}</defs><g filter="url(#${F.id})">${svg}</g>`; }
+function lit(svg, mood = 'gala', opts = {}) { const F = celFilter(palette(mood, opts.turn), opts); let sh = ''; svg = svg.replace(/<!--SH-->([\s\S]*?)<!--\/SH-->/g, (m, g) => { sh += g; return ''; }); return `${sh}<defs>${F.def}</defs><g filter="url(#${F.id})">${svg}</g>`; }
 // Rim + key edge only (for characters that already draw their own shadow shapes).
 function rimLight(svg, mood = 'gala', opts = {}) { return lit(svg, mood, { ...opts, shadow: false }); }
 // Hard shadow only (sets, props).

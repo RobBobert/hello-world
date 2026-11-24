@@ -100,7 +100,11 @@ function head(cx, cy, r, o = {}) {
   else if (m === 'grin') { const a = P(-24, -38), b2 = P(24, -38), top = P(0, -44), bot = P(0, -66), mid = P(0, -50);
     face += `<path d="M${f(a.x)} ${f(a.y)} Q${f(top.x)} ${f(top.y)} ${f(b2.x)} ${f(b2.y)} Q${f(bot.x)} ${f(bot.y)} ${f(a.x)} ${f(a.y)} Z" fill="#fff" stroke="${INK}" stroke-width="${f(r * 0.07)}" stroke-linejoin="round"/>
       <path d="M${f(a.x + (mid.x - a.x) * 0.3)} ${f(mid.y)} L${f(b2.x + (mid.x - b2.x) * 0.3)} ${f(mid.y)}" stroke="${INK}" stroke-width="${f(r * 0.035)}" opacity=".5"/>`; }
+  else if (m === 'open' || m === 'talk') { const t0 = P(0, -38), b0 = P(0, m === 'open' ? -56 : -50), l0 = P(-12, -45), r0 = P(12, -45);
+    face += `<path d="M${f(l0.x)} ${f(l0.y)} Q${f(t0.x)} ${f(t0.y - r * .02)} ${f(r0.x)} ${f(r0.y)} Q${f(b0.x)} ${f(b0.y + r * .04)} ${f(l0.x)} ${f(l0.y)} Z" fill="#5a1414" stroke="${INK}" stroke-width="${f(r * 0.06)}" stroke-linejoin="round"/>`; }
   else face += `<path d="M${f(ml.x)} ${f(ml.y)} Q${f(mc.x)} ${f(mc.y)} ${f(mr.x)} ${f(mr.y)}" stroke="${INK}" stroke-width="${f(r * 0.075)}" fill="none" stroke-linecap="round"/>`;
+  if (o.scar) { const a = P(-48, -20), b = P(-30, -26), c2 = P(-16, -22); // Peerless scar: crescent on the character's right cheek
+    if (b.z > 0.1) face += `<path d="M${f(a.x)} ${f(a.y)} Q${f(b.x)} ${f(b.y + r * .03)} ${f(c2.x)} ${f(c2.y)}" stroke="#b5665a" stroke-width="${f(r * 0.05)}" fill="none" stroke-linecap="round"/><path d="M${f(a.x)} ${f(a.y)} Q${f(b.x)} ${f(b.y + r * .03)} ${f(c2.x)} ${f(c2.y)}" stroke="#f0b5a5" stroke-width="${f(r * 0.018)}" fill="none" stroke-linecap="round" opacity=".8"/>`; }
   if (Math.cos(yaw) < -0.15) face = ''; // looking away: no face
   // scar / extras hook
   const extra = o.extra ? o.extra(P, f) : '';
