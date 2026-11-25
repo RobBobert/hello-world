@@ -137,8 +137,8 @@ const BEATS = [
     art: (t, p, pt, d) => p ? `<g>${room('gala', t, { color: true })}</g><rect width="1080" height="1920" fill="#7a0d0d" opacity=".55"/>` + crowd(16, 1640, 160, 2, '#0a0505') + crowd(10, 1820, 220, 7, '#000') + L.dust(3, t, { count: 50, color: '#ff6a4a', opacity: .5 })
       : W(room('gala', t) + crowd(12, 1480, 110, 4)
         + [[80, 1600, 14], [225, 1615, 10], [1010, 1600, -12]].map(([x, y, yw]) => spearman(x, y, 240, yw)).join('')
-        + RIM(K.aja(755, 1700, 280, { yaw: -10, brow: 'angry', mouth: 'smirk', arms: ['guard', 'hip'] }), 'gala') + ajaBlade(755, 1700, 280, -10)
-        + RIM(K.sovereign(395, 1700, 340, { arms: ['halt', 'halt'], yaw: 4, brow: 'angry', mouth: t > .3 && t < 2.6 ? ['open', 'talk'][Math.floor(t * 6) % 2] : 'flat' }), 'gala'), t, d, 1, 1.06, 540, 1120) },
+        + RIM(K.sovereign(395, 1700, 340, { arms: ['halt', 'halt'], yaw: 4, brow: 'angry', mouth: t > .3 && t < 2.6 ? ['open', 'talk'][Math.floor(t * 6) % 2] : 'flat' }), 'gala')
+        + RIM(K.aja(775, 1700, 280, { yaw: -10, brow: 'angry', mouth: 'smirk', arms: ['guard', 'hip'] }), 'gala') + ajaBlade(775, 1700, 280, -10), t, d, 1, 1.06, 540, 1120) },
   // 11. civil war
   { start: 'just like that', pop: 'civil war', l1: 'JUST LIKE THAT...', l2: 'CIVIL WAR.', mood: 'void',
     art: (t, p, pt, d) => `<rect width="540" height="1920" fill="#5e1012"/><rect x="540" width="540" height="1920" fill="#162a54"/>` + W(banner(110, 560, 320, 820, '#a81f1c', K.cassius ? `<g transform="translate(270 900)">${require('./chibi2.js').lionFace(0, 0, 110, '#b8862a', '#e6bb5c', '#5a3a10')}</g>` : '')
